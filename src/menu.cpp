@@ -1,3 +1,5 @@
+// Copyright (C) 2024  blue_dabdidabdae
+// full notice in main.cpp
 #include "raylib.h"
 #include "headers/menu.h"
 

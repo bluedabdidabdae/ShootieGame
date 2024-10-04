@@ -1,3 +1,5 @@
+// Copyright (C) 2024  blue_dabdidabdae
+// full notice in main.cpp
 #define MAINMENUBUTTONWIDTH 760
 #define MAINMENUBUTTONHEIGT 50
 #define FADEVALUE 0.2
