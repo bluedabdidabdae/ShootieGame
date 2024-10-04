@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
-// #include <ctime> // FOR LINUX
-#include <time.h> // FOR WINDOWS
+#include <ctime> // FOR LINUX
+// #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
 #include "headers/game_engine.h"
