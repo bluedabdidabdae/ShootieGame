@@ -17,13 +17,18 @@ typedef enum behaviour_model{
         STILL
 }Behaviour;
 
+typedef enum projectile_owner_model{
+    ENEMY,
+    PLAYER
+}ProjectileOwner;
+
 typedef struct Enemy_Linked_List{
-    Behaviour behaviour;
     Rectangle enemy;
     Color color;
+    Behaviour behaviour;
     Rectangle healthBar;
     int hitPoint;
-    Enemy_Linked_List *nextEnemy;
+    Enemy_Linked_List *next;
 }EnemyLL;
 
 typedef struct Projectile_linked_List{
@@ -31,7 +36,8 @@ typedef struct Projectile_linked_List{
     Color color;
     float vX;
     float vY;
-    Projectile_linked_List *nextProjectile;
+    ProjectileOwner owner;
+    Projectile_linked_List *next;
 }ProjectileLL;
 
 int GameEngine();
@@ -41,9 +47,10 @@ int SpawnEnemy(EnemyLL **destination, float x, float y);
 void DeleteEnemies(EnemyLL *head);
 void UpdateTrackingEntity(EnemyLL *currentEnemy, Rectangle *player);
 void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player);
-void EnemiesShooting(EnemyLL *currentEnemy, uint frameCounter, ProjectileLL *projectileHead, Rectangle *player);
+void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectangle *player);
 void UpdateProjectiles(ProjectileLL *projectileHead);
 void DeleteProjectiles(ProjectileLL *head);
 void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[]);
 void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorder[]);
 void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop);
+void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player);

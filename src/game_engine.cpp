@@ -24,14 +24,14 @@ int GameEngine()
     EnemyLL *lastEnemy = enemiesHead;
 
     ProjectileLL *projectileHead = (ProjectileLL*)malloc(sizeof(ProjectileLL));
-    projectileHead->nextProjectile = NULL;
+    projectileHead->next = NULL;
 
-    SpawnEnemy(&lastEnemy->nextEnemy, 120, 50);
-    lastEnemy = lastEnemy->nextEnemy;
-    SpawnEnemy(&lastEnemy->nextEnemy, 620, 50);
-    lastEnemy = lastEnemy->nextEnemy;
-    SpawnEnemy(&lastEnemy->nextEnemy, 894, 760);
-    lastEnemy = lastEnemy->nextEnemy;
+    SpawnEnemy(&lastEnemy->next, 120, 50);
+    lastEnemy = lastEnemy->next;
+    SpawnEnemy(&lastEnemy->next, 620, 50);
+    lastEnemy = lastEnemy->next;
+    SpawnEnemy(&lastEnemy->next, 894, 760);
+    lastEnemy = lastEnemy->next;
     
     Camera2D camera = { 0 };
     camera.target = (Vector2){ player.x + 20.0f, player.y + 20.0f };
@@ -61,18 +61,54 @@ int GameEngine()
         else
         {
             UpdatePlayer(&player);
+            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                PlayerShooting(frameCounter, projectileHead, &player);
             UpdateEnemies(enemiesHead, &player);
             SnapEnemies(enemiesHead, mapBorder);
-            EnemiesShooting(enemiesHead, frameCounter, projectileHead, &player);
+            EnemiesShooting(enemiesHead, projectileHead, &player);
             UpdateProjectiles(projectileHead);
             CheckProjectilesBorders(projectileHead, mapBorder);
         }
     }
 }
 
+void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player)
+{
+    float Dx, Dy, tmp;
+    float mouseX;
+    float mouseY;
+    ProjectileLL *aux;
+
+    mouseX = GetMouseX();
+    mouseY = GetMouseY();
+    
+    // aggiungo un proiettile in testa alla lista e lo inizializzo
+    // con le coordinate ed il valore dei vettori per poi aggiornarne
+    // la posizione in "UpdateProjectiles(...)"
+    aux = projectileHead->next;
+    projectileHead->next = (ProjectileLL*)malloc(sizeof(ProjectileLL));
+    projectileHead = projectileHead->next;
+    projectileHead->next = aux;
+
+    projectileHead->projectile = { player->x + player->width / 2,
+                                   player->y + player->height / 2,
+                                   10, 10 };
+    projectileHead->color = YELLOW;
+
+    Dx = projectileHead->projectile.x - mouseX;
+    Dy = projectileHead->projectile.y - mouseY;
+
+    tmp = abs(Dx) + abs(Dy);
+
+    projectileHead->vX = PROJECTILESPEED * (Dx / tmp);
+    projectileHead->vY = PROJECTILESPEED * (Dy / tmp);
+
+    projectileHead->owner = PLAYER;
+}
+
 void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop)
 {
-    prePop->nextProjectile = (*toPop)->nextProjectile;
+    prePop->next = (*toPop)->next;
     free(*toPop);
     *toPop = prePop;
     prePop = NULL;
@@ -82,7 +118,7 @@ void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorde
 {
     ProjectileLL *previousProjectile;
 
-    if(currentProjectile->nextProjectile != NULL)
+    if(currentProjectile->next != NULL)
     {
         do{
             // passo al prossimo proiettile (a differenza della
@@ -91,8 +127,9 @@ void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorde
             // in futuro le faccio uguali, dipende
             // con quale dei due modi mi trovo più comodo)
             previousProjectile = currentProjectile;
-            currentProjectile = currentProjectile->nextProjectile;
+            currentProjectile = currentProjectile->next;
 
+            // deleto i proiettili che impattano coi bordi della mappa
             // LASCIARE TUTTI GLI ELSE, ALTRIMENTI SI SFONDA LA MEMORIA
             // controlli per le collisioni tra il proiettile ed i 4 bordi mappa
             if(currentProjectile->projectile.x < mapBorder[1].x+WALLTHICKNESS)
@@ -109,7 +146,7 @@ void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorde
                 return;
             
             // check se ho finito la lista
-        }while(currentProjectile->nextProjectile != NULL);
+        }while(currentProjectile->next != NULL);
     }
 }
 
@@ -126,30 +163,26 @@ void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[])
         else if(currentEnemy->enemy.y > mapBorder[2].y-currentEnemy->enemy.height)
             currentEnemy->enemy.y = mapBorder[2].y-currentEnemy->enemy.height;
 
-        if(currentEnemy->nextEnemy == NULL)
+        if(currentEnemy->next == NULL)
             break;
-        currentEnemy = currentEnemy->nextEnemy;
+        currentEnemy = currentEnemy->next;
     }
 }
 
 void UpdateProjectiles(ProjectileLL *projectileHead)
 {
-    while(projectileHead->nextProjectile != NULL)
+    while(projectileHead->next != NULL)
     {
         projectileHead->projectile.x -= projectileHead->vX;
         projectileHead->projectile.y -= projectileHead->vY;
-        projectileHead = projectileHead->nextProjectile;
+        projectileHead = projectileHead->next;
     }
 }
 
-void EnemiesShooting(EnemyLL *currentEnemy, uint frameCounter, ProjectileLL *projectileHead, Rectangle *player)
+void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectangle *player)
 {
     float Dx, Dy, tmp;
-
-    // scorro fino a fine linked list (prima o poi lo 
-    // tolgo ed inserisco i proiettili in testa alla lista)
-    while(projectileHead->nextProjectile != NULL)
-        projectileHead = projectileHead->nextProjectile;
+    ProjectileLL *aux;
 
     while(currentEnemy != NULL)
     {
@@ -159,8 +192,11 @@ void EnemiesShooting(EnemyLL *currentEnemy, uint frameCounter, ProjectileLL *pro
             // aggiungo un proiettile in coda alla lista e lo inizializzo
             // con le coordinate ed il valore dei vettori per poi aggiornarne
             // la posizione in "UpdateProjectiles(...)"
-            projectileHead->nextProjectile = (ProjectileLL*)malloc(sizeof(ProjectileLL));
-            projectileHead = projectileHead->nextProjectile;
+            aux = projectileHead->next;
+            projectileHead->next = (ProjectileLL*)malloc(sizeof(ProjectileLL));
+            projectileHead = projectileHead->next;
+            projectileHead->next = aux;
+
             projectileHead->projectile = { currentEnemy->enemy.x+currentEnemy->enemy.width/2,
                                            currentEnemy->enemy.y+currentEnemy->enemy.height/2,
                                            10, 10 };
@@ -174,10 +210,10 @@ void EnemiesShooting(EnemyLL *currentEnemy, uint frameCounter, ProjectileLL *pro
             projectileHead->vX = PROJECTILESPEED * (Dx / tmp);
             projectileHead->vY = PROJECTILESPEED * (Dy / tmp);
 
-            projectileHead->nextProjectile = NULL;
+            projectileHead->owner = ENEMY;
         }
         // passo al prossimo nemico
-        currentEnemy = currentEnemy->nextEnemy;
+        currentEnemy = currentEnemy->next;
     }
 }
 
@@ -228,10 +264,10 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
 
         ignore_stuff:
 
-        if(currentEnemy->nextEnemy == NULL)
+        if(currentEnemy->next == NULL)
             break;
         
-        currentEnemy = currentEnemy->nextEnemy;
+        currentEnemy = currentEnemy->next;
     }
 }
 
@@ -248,20 +284,20 @@ void UpdateTrackingEntity(EnemyLL *currentEnemy, Rectangle *player)
         currentEnemy->enemy.x += ENEMYSPEED * (Dx / tmp);
         currentEnemy->enemy.y += ENEMYSPEED * (Dy / tmp);
 
-        if(currentEnemy->nextEnemy == NULL)
+        if(currentEnemy->next == NULL)
             break;
         
-        currentEnemy = currentEnemy->nextEnemy;
+        currentEnemy = currentEnemy->next;
     }
 }
 
 void DeleteProjectiles(ProjectileLL *head)
 {
     ProjectileLL *tmp;
-    while(head->nextProjectile != NULL)
+    while(head->next != NULL)
     {
         tmp = head;
-        head = head->nextProjectile;
+        head = head->next;
         free(tmp);
     }
     free(head);
@@ -272,9 +308,9 @@ void DeleteEnemies(EnemyLL *head)
     EnemyLL *tmp;
     while(1){
         tmp = head;
-        head = head->nextEnemy;
+        head = head->next;
         free(tmp);
-        if(tmp->nextEnemy == NULL)
+        if(tmp->next == NULL)
             break;
     }
 }
@@ -287,10 +323,10 @@ void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectan
         BeginMode2D(*camera);
             
             // drawing projectiles
-            while(projectileHead->nextProjectile != NULL)
+            while(projectileHead->next != NULL)
             {
                 DrawRectangleRec(projectileHead->projectile, projectileHead->color);
-                projectileHead = projectileHead->nextProjectile;
+                projectileHead = projectileHead->next;
             }
 
             // drawing map borders
@@ -307,9 +343,9 @@ void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectan
                               currentEnemy->healthBar.height,
                               GREEN);
                 DrawRectangleRec(currentEnemy->enemy, currentEnemy->color);
-                if(currentEnemy->nextEnemy == NULL)
+                if(currentEnemy->next == NULL)
                     break;
-                currentEnemy = currentEnemy->nextEnemy;
+                currentEnemy = currentEnemy->next;
             }
             
             // drawing player
@@ -338,7 +374,7 @@ int SpawnEnemy(EnemyLL **destination, float x, float y)
     {
         (*destination)->enemy = { x, y, 40, 40 };
         (*destination)->color = BROWN;
-        (*destination)->nextEnemy = NULL;
+        (*destination)->next = NULL;
         (*destination)->behaviour = BACKING;
         (*destination)->hitPoint = 25;
         (*destination)->healthBar = { x, y-20, 40, 10 };
