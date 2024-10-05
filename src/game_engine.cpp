@@ -222,6 +222,10 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
             break;
         }
         
+        currentEnemy->healthBar.x = currentEnemy->enemy.x;
+        currentEnemy->healthBar.y = currentEnemy->enemy.y-20;
+        
+
         ignore_stuff:
 
         if(currentEnemy->nextEnemy == NULL)
@@ -281,23 +285,32 @@ void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectan
         ClearBackground(BLACK);
 
         BeginMode2D(*camera);
-            for(int i = 0; i < 4; i++)
-                DrawRectangleRec(mapBorder[i], BLUE);
             
-            // drawing enemies from linked list of type *EnemyLL
-            while(1){
-                DrawRectangleRec(currentEnemy->enemy, currentEnemy->color);
-                if(currentEnemy->nextEnemy == NULL)
-                    break;
-                currentEnemy = currentEnemy->nextEnemy;
-            }
-
+            // drawing projectiles
             while(projectileHead->nextProjectile != NULL)
             {
                 DrawRectangleRec(projectileHead->projectile, projectileHead->color);
                 projectileHead = projectileHead->nextProjectile;
             }
 
+            // drawing map borders
+            for(int i = 0; i < 4; i++)
+                DrawRectangleRec(mapBorder[i], BLUE);
+
+            // drawing enemies from linked list of type *EnemyLL
+            while(1){
+
+                DrawRectangleRec(currentEnemy->healthBar, RED);
+                DrawRectangle(currentEnemy->healthBar.x,
+                              currentEnemy->healthBar.y,
+                              currentEnemy->hitPoint,
+                              currentEnemy->healthBar.height,
+                              GREEN);
+                DrawRectangleRec(currentEnemy->enemy, currentEnemy->color);
+                if(currentEnemy->nextEnemy == NULL)
+                    break;
+                currentEnemy = currentEnemy->nextEnemy;
+            }
             
             // drawing player
             DrawRectangleRec(*player, RAYWHITE);
@@ -324,9 +337,11 @@ int SpawnEnemy(EnemyLL **destination, float x, float y)
     if(*destination != NULL)
     {
         (*destination)->enemy = { x, y, 40, 40 };
-        (*destination)->color = RED;
+        (*destination)->color = BROWN;
         (*destination)->nextEnemy = NULL;
         (*destination)->behaviour = BACKING;
+        (*destination)->hitPoint = 25;
+        (*destination)->healthBar = { x, y-20, 40, 10 };
         return 0;
     }
     return -1;

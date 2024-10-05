@@ -21,6 +21,8 @@ typedef struct Enemy_Linked_List{
     Behaviour behaviour;
     Rectangle enemy;
     Color color;
+    Rectangle healthBar;
+    int hitPoint;
     Enemy_Linked_List *nextEnemy;
 }EnemyLL;
 
