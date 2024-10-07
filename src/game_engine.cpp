@@ -72,84 +72,6 @@ int GameEngine()
     }
 }
 
-void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player)
-{
-    float Dx, Dy, tmp;
-    float mouseX;
-    float mouseY;
-    ProjectileLL *aux;
-
-    mouseX = GetMouseX();
-    mouseY = GetMouseY();
-    
-    // aggiungo un proiettile in testa alla lista e lo inizializzo
-    // con le coordinate ed il valore dei vettori per poi aggiornarne
-    // la posizione in "UpdateProjectiles(...)"
-    aux = projectileHead->next;
-    projectileHead->next = (ProjectileLL*)malloc(sizeof(ProjectileLL));
-    projectileHead = projectileHead->next;
-    projectileHead->next = aux;
-
-    projectileHead->projectile = { player->x + player->width / 2,
-                                   player->y + player->height / 2,
-                                   10, 10 };
-    projectileHead->color = YELLOW;
-
-    Dx = projectileHead->projectile.x - mouseX;
-    Dy = projectileHead->projectile.y - mouseY;
-
-    tmp = abs(Dx) + abs(Dy);
-
-    projectileHead->vX = PROJECTILESPEED * (Dx / tmp);
-    projectileHead->vY = PROJECTILESPEED * (Dy / tmp);
-
-    projectileHead->owner = PLAYER;
-}
-
-void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop)
-{
-    prePop->next = (*toPop)->next;
-    free(*toPop);
-    *toPop = prePop;
-    prePop = NULL;
-}
-
-void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorder[])
-{
-    ProjectileLL *previousProjectile;
-
-    if(currentProjectile->next != NULL)
-    {
-        do{
-            // passo al prossimo proiettile (a differenza della
-            // linked list dei nemici questa mantiene il primo 
-            // nodo vuoto ed allocato fino a fine partita,
-            // in futuro le faccio uguali, dipende
-            // con quale dei due modi mi trovo più comodo)
-            previousProjectile = currentProjectile;
-            currentProjectile = currentProjectile->next;
-
-            // deleto i proiettili che impattano coi bordi della mappa
-            // LASCIARE TUTTI GLI ELSE, ALTRIMENTI SI SFONDA LA MEMORIA
-            // controlli per le collisioni tra il proiettile ed i 4 bordi mappa
-            if(currentProjectile->projectile.x < mapBorder[1].x+WALLTHICKNESS)
-                ProjectilePop(previousProjectile, &currentProjectile);
-            else if(currentProjectile->projectile.x > mapBorder[3].x-currentProjectile->projectile.width)
-                ProjectilePop(previousProjectile, &currentProjectile);
-            else if(currentProjectile->projectile.y < mapBorder[0].y+WALLTHICKNESS)
-                ProjectilePop(previousProjectile, &currentProjectile);
-            else if(currentProjectile->projectile.y > mapBorder[2].y-currentProjectile->projectile.height)
-                ProjectilePop(previousProjectile, &currentProjectile);
-
-            // check se ho fatto il pop dell'ultimo elemento della lista
-            if(currentProjectile == NULL)
-                return;
-            
-            // check se ho finito la lista
-        }while(currentProjectile->next != NULL);
-    }
-}
-
 void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[])
 {
     while(1){
@@ -166,16 +88,6 @@ void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[])
         if(currentEnemy->next == NULL)
             break;
         currentEnemy = currentEnemy->next;
-    }
-}
-
-void UpdateProjectiles(ProjectileLL *projectileHead)
-{
-    while(projectileHead->next != NULL)
-    {
-        projectileHead->projectile.x -= projectileHead->vX;
-        projectileHead->projectile.y -= projectileHead->vY;
-        projectileHead = projectileHead->next;
     }
 }
 
@@ -271,38 +183,6 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
     }
 }
 
-void UpdateTrackingEntity(EnemyLL *currentEnemy, Rectangle *player)
-{
-    float Dx, Dy, tmp;
-
-    while(1){
-        Dx = currentEnemy->enemy.x - player->x;
-        Dy = currentEnemy->enemy.y - player->y;
-        
-        tmp = abs(Dx) + abs(Dy);
-
-        currentEnemy->enemy.x += ENEMYSPEED * (Dx / tmp);
-        currentEnemy->enemy.y += ENEMYSPEED * (Dy / tmp);
-
-        if(currentEnemy->next == NULL)
-            break;
-        
-        currentEnemy = currentEnemy->next;
-    }
-}
-
-void DeleteProjectiles(ProjectileLL *head)
-{
-    ProjectileLL *tmp;
-    while(head->next != NULL)
-    {
-        tmp = head;
-        head = head->next;
-        free(tmp);
-    }
-    free(head);
-}
-
 void DeleteEnemies(EnemyLL *head)
 {
     EnemyLL *tmp;
@@ -354,18 +234,6 @@ void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectan
     EndDrawing();
 }
 
-void UpdatePlayer(Rectangle *player)
-{
-    if (IsKeyDown(KEY_W)) player->y -= PLAYERSPEED;
-    if (IsKeyDown(KEY_A)) player->x -= PLAYERSPEED;
-    if (IsKeyDown(KEY_S)) player->y += PLAYERSPEED;
-    if (IsKeyDown(KEY_D)) player->x += PLAYERSPEED;
-    if (player->x < WALLTHICKNESS) player->x = WALLTHICKNESS;
-    if (player->y < WALLTHICKNESS) player->y = WALLTHICKNESS;
-    if (player->x > WIDTH-40) player->x = WIDTH-40;
-    if (player->y > HEIGT-40) player->y = HEIGT-40;
-}
-
 int SpawnEnemy(EnemyLL **destination, float x, float y)
 {
     *destination = (EnemyLL*)malloc(sizeof(EnemyLL));
@@ -381,4 +249,146 @@ int SpawnEnemy(EnemyLL **destination, float x, float y)
         return 0;
     }
     return -1;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// GUCCI FUNCTIONS
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+void UpdateTrackingEntity(EnemyLL *currentEnemy, Rectangle *player)
+{
+    float Dx, Dy, tmp;
+
+    while(1){
+        Dx = currentEnemy->enemy.x - player->x;
+        Dy = currentEnemy->enemy.y - player->y;
+        
+        tmp = abs(Dx) + abs(Dy);
+
+        currentEnemy->enemy.x += ENEMYSPEED * (Dx / tmp);
+        currentEnemy->enemy.y += ENEMYSPEED * (Dy / tmp);
+
+        if(currentEnemy->next == NULL)
+            break;
+        
+        currentEnemy = currentEnemy->next;
+    }
+}
+*/
+
+void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player)
+{
+    float Dx, Dy, tmp;
+    float mouseX;
+    float mouseY;
+    ProjectileLL *aux;
+
+    mouseX = GetMouseX();
+    mouseY = GetMouseY();
+    
+    // aggiungo un proiettile in testa alla lista e lo inizializzo
+    // con le coordinate ed il valore dei vettori per poi aggiornarne
+    // la posizione in "UpdateProjectiles(...)"
+    aux = projectileHead->next;
+    projectileHead->next = (ProjectileLL*)malloc(sizeof(ProjectileLL));
+    projectileHead = projectileHead->next;
+    projectileHead->next = aux;
+
+    projectileHead->projectile = { player->x + player->width / 2,
+                                   player->y + player->height / 2,
+                                   10, 10 };
+    projectileHead->color = YELLOW;
+
+    Dx = projectileHead->projectile.x - 10 // dio cane;
+    Dy = projectileHead->projectile.y - 10 // dio cane;
+
+    tmp = abs(Dx) + abs(Dy);
+
+    projectileHead->vX = PLAYERPROJECTILESPEED * (Dx / tmp);
+    projectileHead->vY = PLAYERPROJECTILESPEED * (Dy / tmp);
+
+    projectileHead->owner = PLAYER;
+}
+
+void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop)
+{
+    prePop->next = (*toPop)->next;
+    free(*toPop);
+    *toPop = prePop;
+    prePop = NULL;
+}
+
+void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorder[])
+{
+    ProjectileLL *previousProjectile;
+
+    if(currentProjectile->next != NULL)
+    {
+        do{
+            // passo al prossimo proiettile (a differenza della
+            // linked list dei nemici questa mantiene il primo 
+            // nodo vuoto ed allocato fino a fine partita,
+            // in futuro le faccio uguali, dipende
+            // con quale dei due modi mi trovo più comodo)
+            previousProjectile = currentProjectile;
+            currentProjectile = currentProjectile->next;
+
+            // deleto i proiettili che impattano coi bordi della mappa
+            // LASCIARE TUTTI GLI ELSE, ALTRIMENTI SI SFONDA LA MEMORIA
+            // controlli per le collisioni tra il proiettile ed i 4 bordi mappa
+            if(currentProjectile->projectile.x < mapBorder[1].x+WALLTHICKNESS)
+                ProjectilePop(previousProjectile, &currentProjectile);
+            else if(currentProjectile->projectile.x > mapBorder[3].x-currentProjectile->projectile.width)
+                ProjectilePop(previousProjectile, &currentProjectile);
+            else if(currentProjectile->projectile.y < mapBorder[0].y+WALLTHICKNESS)
+                ProjectilePop(previousProjectile, &currentProjectile);
+            else if(currentProjectile->projectile.y > mapBorder[2].y-currentProjectile->projectile.height)
+                ProjectilePop(previousProjectile, &currentProjectile);
+
+            // check se ho fatto il pop dell'ultimo elemento della lista
+            if(currentProjectile == NULL)
+                return;
+            
+            // check se ho finito la lista
+        }while(currentProjectile->next != NULL);
+    }
+}
+
+void UpdateProjectiles(ProjectileLL *projectileHead)
+{
+    while(projectileHead->next != NULL)
+    {
+        projectileHead->projectile.x -= projectileHead->vX;
+        projectileHead->projectile.y -= projectileHead->vY;
+        projectileHead = projectileHead->next;
+    }
+}
+
+void DeleteProjectiles(ProjectileLL *head)
+{
+    ProjectileLL *tmp;
+    while(head->next != NULL)
+    {
+        tmp = head;
+        head = head->next;
+        free(tmp);
+    }
+    free(head);
+}
+
+void UpdatePlayer(Rectangle *player)
+{
+    if (IsKeyDown(KEY_W)) player->y -= PLAYERSPEED;
+    if (IsKeyDown(KEY_A)) player->x -= PLAYERSPEED;
+    if (IsKeyDown(KEY_S)) player->y += PLAYERSPEED;
+    if (IsKeyDown(KEY_D)) player->x += PLAYERSPEED;
+    if (player->x < WALLTHICKNESS) player->x = WALLTHICKNESS;
+    if (player->y < WALLTHICKNESS) player->y = WALLTHICKNESS;
+    if (player->x > WIDTH-40) player->x = WIDTH-40;
+    if (player->y > HEIGT-40) player->y = HEIGT-40;
 }

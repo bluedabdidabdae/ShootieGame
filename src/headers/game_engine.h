@@ -8,6 +8,7 @@
 #define ENEMYMINPDISTANCE 400
 #define PLAYERSPEED 5.0f
 #define PROJECTILESPEED 12.0f
+#define PLAYERPROJECTILESPEED 17.0f
 
 typedef unsigned int uint;
 
@@ -45,7 +46,7 @@ void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectan
 void UpdatePlayer(Rectangle *player);
 int SpawnEnemy(EnemyLL **destination, float x, float y);
 void DeleteEnemies(EnemyLL *head);
-void UpdateTrackingEntity(EnemyLL *currentEnemy, Rectangle *player);
+// void UpdateTrackingEntity(EnemyLL *currentEnemy, Rectangle *player);
 void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player);
 void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectangle *player);
 void UpdateProjectiles(ProjectileLL *projectileHead);
