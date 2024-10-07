@@ -44,13 +44,13 @@ typedef struct Projectile_linked_List{
 int GameEngine();
 void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectangle mapBorder[], ProjectileLL *projectileHead);
 void UpdatePlayer(Rectangle *player);
-int SpawnEnemy(EnemyLL **destination, float x, float y);
-void DeleteEnemies(EnemyLL *head);
+int SpawnEnemy(EnemyLL *destination, float x, float y);
+void CompletelyDeleteAllEnemies(EnemyLL *head);
 // void UpdateTrackingEntity(EnemyLL *currentEnemy, Rectangle *player);
 void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player);
 void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectangle *player);
 void UpdateProjectiles(ProjectileLL *projectileHead);
-void DeleteProjectiles(ProjectileLL *head);
+void CompletelyDeleteAllProjectiles(ProjectileLL *head);
 void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[]);
 void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorder[]);
 void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop);

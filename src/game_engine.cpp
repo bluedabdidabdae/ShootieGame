@@ -16,28 +16,27 @@ int GameEngine()
     uint frameCounter = 0;
     Rectangle player = { WIDTH/2-20, HEIGT/2-20, 40, 40 };
 
-    EnemyLL *enemiesHead;
-    if(SpawnEnemy(&enemiesHead, 40, 40) == -1)
-        if(SpawnEnemy(&enemiesHead, 40, 40) == -1)
-            if(SpawnEnemy(&enemiesHead, 40, 40) == -1)
-                return -1;
-    EnemyLL *lastEnemy = enemiesHead;
+    // Init enemies linked list
+    EnemyLL *enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));
+    enemiesHead->next = NULL;
 
+    // Init projectiles linked list
     ProjectileLL *projectileHead = (ProjectileLL*)malloc(sizeof(ProjectileLL));
     projectileHead->next = NULL;
 
-    SpawnEnemy(&lastEnemy->next, 120, 50);
-    lastEnemy = lastEnemy->next;
-    SpawnEnemy(&lastEnemy->next, 620, 50);
-    lastEnemy = lastEnemy->next;
-    SpawnEnemy(&lastEnemy->next, 894, 760);
-    lastEnemy = lastEnemy->next;
+    // Spawning 4 enemies for testing purposes
+    SpawnEnemy(enemiesHead, 40, 40);
+    SpawnEnemy(enemiesHead, 20, 400);
+    SpawnEnemy(enemiesHead, 234, 467);
+    SpawnEnemy(enemiesHead, 345, 340);
     
+    // Setting up camera to 2d mode and centering it to the player
     Camera2D camera = { 0 };
     camera.target = (Vector2){ player.x + 20.0f, player.y + 20.0f };
     camera.offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
     camera.zoom = 0.6f;
 
+    // Temporary map borderes
     Rectangle mapBorder[] = { {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS}, 
                               {0, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS},
                               {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS},
@@ -45,7 +44,7 @@ int GameEngine()
 
     while(1)
     {
-        // Camera target follows player
+        // Updating camera target to the player position
         camera.target = (Vector2){ player.x + 20, player.y + 20 };
 
         frameCounter++;
@@ -54,8 +53,8 @@ int GameEngine()
         if(IsKeyPressed(KEY_M))
         {
             //if(GameMenuHandler() == 3)
-            DeleteEnemies(enemiesHead);
-            DeleteProjectiles(projectileHead);
+            CompletelyDeleteAllEnemies(enemiesHead);
+            CompletelyDeleteAllProjectiles(projectileHead);
             return 0;
         }
         else
@@ -72,9 +71,58 @@ int GameEngine()
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// PSEUDO GUCCI FUNCTIONS
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+
+void UpdateProjectiles(ProjectileLL *projectileHead)
+{
+    while(projectileHead->next != NULL)
+    {
+        projectileHead->projectile.x -= projectileHead->vX;
+        projectileHead->projectile.y -= projectileHead->vY;
+        projectileHead = projectileHead->next;
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// GUCCI FUNCTIONS
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+void UpdateTrackingEntity(EnemyLL *currentEnemy, Rectangle *player)
+{
+    float Dx, Dy, tmp;
+
+    while(1){
+        Dx = currentEnemy->enemy.x - player->x;
+        Dy = currentEnemy->enemy.y - player->y;
+        
+        tmp = abs(Dx) + abs(Dy);
+
+        currentEnemy->enemy.x += ENEMYSPEED * (Dx / tmp);
+        currentEnemy->enemy.y += ENEMYSPEED * (Dy / tmp);
+
+        if(currentEnemy->next == NULL)
+            break;
+        
+        currentEnemy = currentEnemy->next;
+    }
+}
+*/
+
 void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[])
 {
-    while(1){
+    while(currentEnemy->next != NULL){
+        currentEnemy = currentEnemy->next;
         if(currentEnemy->enemy.x < mapBorder[1].x+WALLTHICKNESS)
             currentEnemy->enemy.x = mapBorder[1].x+WALLTHICKNESS;
         else if(currentEnemy->enemy.x > mapBorder[3].x-currentEnemy->enemy.width)
@@ -87,7 +135,6 @@ void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[])
 
         if(currentEnemy->next == NULL)
             break;
-        currentEnemy = currentEnemy->next;
     }
 }
 
@@ -96,8 +143,9 @@ void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectan
     float Dx, Dy, tmp;
     ProjectileLL *aux;
 
-    while(currentEnemy != NULL)
+    while(currentEnemy->next != NULL)
     {
+        currentEnemy = currentEnemy->next;
         // tiro a caso se il nemico spara o no
         if(rand()%1000 < 15)
         {
@@ -124,8 +172,6 @@ void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectan
 
             projectileHead->owner = ENEMY;
         }
-        // passo al prossimo nemico
-        currentEnemy = currentEnemy->next;
     }
 }
 
@@ -133,7 +179,9 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
 {
     float Dx, Dy, tmp;
 
-    while(1){
+    while(currentEnemy->next != NULL){
+
+        currentEnemy = currentEnemy->next;
 
         if(STILL == currentEnemy->behaviour)
         {
@@ -173,26 +221,21 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
         currentEnemy->healthBar.x = currentEnemy->enemy.x;
         currentEnemy->healthBar.y = currentEnemy->enemy.y-20;
         
-
         ignore_stuff:
-
-        if(currentEnemy->next == NULL)
-            break;
-        
-        currentEnemy = currentEnemy->next;
+            continue;
     }
 }
 
-void DeleteEnemies(EnemyLL *head)
+void CompletelyDeleteAllEnemies(EnemyLL *head)
 {
     EnemyLL *tmp;
-    while(1){
+    while(head->next != NULL)
+    {
         tmp = head;
         head = head->next;
         free(tmp);
-        if(tmp->next == NULL)
-            break;
     }
+    free(head);
 }
 
 void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectangle mapBorder[], ProjectileLL *projectileHead)
@@ -214,8 +257,9 @@ void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectan
                 DrawRectangleRec(mapBorder[i], BLUE);
 
             // drawing enemies from linked list of type *EnemyLL
-            while(1){
-
+            while(currentEnemy->next != NULL)
+            {
+                currentEnemy = currentEnemy->next;
                 DrawRectangleRec(currentEnemy->healthBar, RED);
                 DrawRectangle(currentEnemy->healthBar.x,
                               currentEnemy->healthBar.y,
@@ -223,9 +267,6 @@ void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectan
                               currentEnemy->healthBar.height,
                               GREEN);
                 DrawRectangleRec(currentEnemy->enemy, currentEnemy->color);
-                if(currentEnemy->next == NULL)
-                    break;
-                currentEnemy = currentEnemy->next;
             }
             
             // drawing player
@@ -234,52 +275,28 @@ void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectan
     EndDrawing();
 }
 
-int SpawnEnemy(EnemyLL **destination, float x, float y)
+int SpawnEnemy(EnemyLL *head, float x, float y)
 {
-    *destination = (EnemyLL*)malloc(sizeof(EnemyLL));
-    
-    if(*destination != NULL)
+    EnemyLL *aux = head->next;
+    head->next = (EnemyLL*)malloc(sizeof(EnemyLL));
+
+    // if memory is allocated correctly
+    if(head->next != NULL)
     {
-        (*destination)->enemy = { x, y, 40, 40 };
-        (*destination)->color = BROWN;
-        (*destination)->next = NULL;
-        (*destination)->behaviour = BACKING;
-        (*destination)->hitPoint = 25;
-        (*destination)->healthBar = { x, y-20, 40, 10 };
+        head = head->next;
+        head->next = aux;
+        head->enemy = { x, y, 40, 40 };
+        head->color = BROWN;
+        head->behaviour = BACKING;
+        head->hitPoint = 25;
+        head->healthBar = { x, y-20, 40, 10 };
         return 0;
     }
+    // else
+    // bringing the ll back to original state and returning error
+    head->next = aux;
     return -1;
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////
-
-// GUCCI FUNCTIONS
-
-/////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-void UpdateTrackingEntity(EnemyLL *currentEnemy, Rectangle *player)
-{
-    float Dx, Dy, tmp;
-
-    while(1){
-        Dx = currentEnemy->enemy.x - player->x;
-        Dy = currentEnemy->enemy.y - player->y;
-        
-        tmp = abs(Dx) + abs(Dy);
-
-        currentEnemy->enemy.x += ENEMYSPEED * (Dx / tmp);
-        currentEnemy->enemy.y += ENEMYSPEED * (Dy / tmp);
-
-        if(currentEnemy->next == NULL)
-            break;
-        
-        currentEnemy = currentEnemy->next;
-    }
-}
-*/
 
 void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player)
 {
@@ -304,8 +321,8 @@ void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *
                                    10, 10 };
     projectileHead->color = YELLOW;
 
-    Dx = projectileHead->projectile.x - 10 // dio cane;
-    Dy = projectileHead->projectile.y - 10 // dio cane;
+    Dx = projectileHead->projectile.x - 10; // dio cane
+    Dy = projectileHead->projectile.y - 10; // dio cane
 
     tmp = abs(Dx) + abs(Dy);
 
@@ -359,17 +376,7 @@ void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorde
     }
 }
 
-void UpdateProjectiles(ProjectileLL *projectileHead)
-{
-    while(projectileHead->next != NULL)
-    {
-        projectileHead->projectile.x -= projectileHead->vX;
-        projectileHead->projectile.y -= projectileHead->vY;
-        projectileHead = projectileHead->next;
-    }
-}
-
-void DeleteProjectiles(ProjectileLL *head)
+void CompletelyDeleteAllProjectiles(ProjectileLL *head)
 {
     ProjectileLL *tmp;
     while(head->next != NULL)
