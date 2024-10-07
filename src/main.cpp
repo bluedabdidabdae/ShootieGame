@@ -19,7 +19,7 @@
 */
 
 #include "raylib.h"
-
+#include "headers/global_types.h"
 #include "headers/main.h"
 
 int main(int argc, char *argv[])

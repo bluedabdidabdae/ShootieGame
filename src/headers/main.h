@@ -1,5 +1,7 @@
 // Copyright (C) 2024  blue_dabdidabdae
 // full notice in main.cpp
+#ifndef MAIN_H
+#define MAIN_H
 typedef enum StatesModel{
     MENU,
     PLAY,
@@ -15,3 +17,4 @@ typedef enum StatesModel{
 
 void MainMenuHandler(States *gameStatus);
 int GameEngine();
+#endif
