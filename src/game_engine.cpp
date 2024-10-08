@@ -46,7 +46,7 @@ int GameEngine(GameDataS *gameData)
 
     // Temporary map borderes
     gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4);
-    gameData->mapBorder[] = { {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS}, 
+    *gameData->mapBorder = { {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS}, 
                               {0, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS},
                               {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS},
                               {WIDTH, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS} };
