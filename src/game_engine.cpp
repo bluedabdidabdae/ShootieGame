@@ -40,12 +40,12 @@ int GameEngine(GameDataS *gameData)
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
     *gameData->camera = { 0 };
-    (*gameData->camera).target = (Vector2){ *gameData->player.x + 20.0f, *gameData->player.y + 20.0f };
+    (*gameData->camera).target = (Vector2){ *gameData->player->x + 20.0f, *gameData->player->y + 20.0f };
     (*gameData->camera).offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
     (*gameData->camera).zoom = 0.6f;
 
     // Temporary map borderes
-    gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4)
+    gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4);
     gameData->mapBorder[] = { {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS}, 
                               {0, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS},
                               {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS},
