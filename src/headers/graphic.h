@@ -14,7 +14,6 @@
 #define MAINMENUBUTTONY 270
 #define MAINMENUTEXTCOLOR RAYWHITE
 
-
 void *HandleGraphics(void* data);
 void DrawMenu();
 

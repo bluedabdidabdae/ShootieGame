@@ -23,6 +23,8 @@
 #include <pthread.h>
 
 #include "raylib.h"
+#include "headers/projectiles.h"
+#include "headers/enemies.h"
 #include "headers/main.h"
 #include "headers/menu.h"
 #include "headers/graphic.h"
