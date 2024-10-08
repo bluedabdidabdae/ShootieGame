@@ -3,7 +3,5 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-void *HandleGraphics(void* data);
-void DrawMenu();
 
 #endif
