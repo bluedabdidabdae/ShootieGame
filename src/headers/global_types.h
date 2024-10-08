@@ -4,8 +4,8 @@
 #define GLOBAL_TYPES_H
 
 #include "raylib.h"
-#include "enemies.h"
 #include "projectiles.h"
+#include "enemies.h"
 
 //////////////////////////////////////////////////////////
 typedef unsigned int uint;
