@@ -3,6 +3,9 @@
 #ifndef PROJECTILES_H
 #define PROJECTILES_H
 
+#define PROJECTILESPEED 12.0f
+#define PLAYERPROJECTILESPEED 17.0f
+
 //////////////////////////////////////////////////////////
 typedef enum projectile_owner_model{
     ENEMY,

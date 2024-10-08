@@ -2,6 +2,11 @@
 // full notice in main.cpp
 #ifndef ENEMIES_H
 #define ENEMIES_H
+
+#define ENEMYSPEED 3.0f
+#define ENEMYMAXPDISTANCE 500
+#define ENEMYMINPDISTANCE 400
+
 //////////////////////////////////////////////////////////
 typedef enum behaviour_model{
         APPROACHING,
