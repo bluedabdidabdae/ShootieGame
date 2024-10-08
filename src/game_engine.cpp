@@ -4,7 +4,8 @@
 #include <math.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <ctime>
+#include <ctime> // FOR LINUX
+// #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
 #include "headers/global_types.h"
@@ -17,10 +18,7 @@ int GameEngine()
 {
     srand(time(NULL));
 
-    TraceLog(LOG_ERROR, "DECLARING THREAD ID");
-    pthread_t drawingThreadId = { 0 };
-
-    int error;
+    pthread_t drawingThread;
 
     DrawArgsS drawArgs;
 
@@ -53,7 +51,6 @@ int GameEngine()
                               {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS},
                               {WIDTH, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS} };
 
-    TraceLog(LOG_ERROR, "ASSIGNING THREAD DATA");
     drawArgs.camera = &camera;
     drawArgs.currentEnemy = enemiesHead;
     drawArgs.player = &player;
@@ -63,15 +60,13 @@ int GameEngine()
     while(1)
     {
         frameCounter++;
-        error = pthread_create(&drawingThreadId, NULL, DrawGame, &drawArgs); 
-        if (error != 0) TraceLog(LOG_ERROR, "Error creating loading thread");
+        pthread_create(&drawingThread, NULL, DrawGame, &drawArgs); 
         //DrawGame(&camera, enemiesHead, &player, mapBorder, projectileHead);
-        
+
         if(IsKeyPressed(KEY_M))
         {
             //if(GameMenuHandler() == 3)
-            error = pthread_join(drawingThreadId, NULL);
-            if (error != 0) TraceLog(LOG_ERROR, "Error joining loading thread");
+            pthread_join(drawingThread, NULL);
             CompletelyDeleteAllEnemies(enemiesHead);
             CompletelyDeleteAllProjectiles(projectileHead);
             return 0;
@@ -87,33 +82,32 @@ int GameEngine()
             UpdateProjectiles(projectileHead);
             CheckProjectilesBorders(projectileHead, mapBorder);
         }
-        error = pthread_join(drawingThreadId, NULL);
-        if (error != 0) TraceLog(LOG_ERROR, "Error joining loading thread");
+        pthread_join(drawingThread, NULL);
     }
 }
 
 void* DrawGame(void* dataPointer)
 {
     DrawArgsS *data = (DrawArgsS*)dataPointer;
-    TraceLog(LOG_ERROR, "UPDATING CAMERA");
+
     // Updating camera target to the player position
     data->camera->target = (Vector2){ data->player->x + 20, data->player->y + 20 };
 
     BeginDrawing();
         ClearBackground(BLACK);
         BeginMode2D(*data->camera);
-            TraceLog(LOG_ERROR, "DRAWING PROJECTILES");
+            
             // drawing projectiles
-            while(data->projectileHead->next != NULL)
+            while(data->currentEnemy->next != NULL)
             {
-                data->projectileHead = data->projectileHead->next;
                 DrawRectangleRec(data->projectileHead->projectile, data->projectileHead->color);
+                data->projectileHead = data->projectileHead->next;
             }
-            TraceLog(LOG_ERROR, "DRAWING MAP BORDERS");
+
             // drawing map borders
             for(int i = 0; i < 4; i++)
                 DrawRectangleRec(data->mapBorder[i], BLUE);
-            TraceLog(LOG_ERROR, "DRAWING ENEMIES");
+
             // drawing enemies from linked list of type *EnemyLL
             while(data->currentEnemy->next != NULL)
             {
@@ -126,7 +120,7 @@ void* DrawGame(void* dataPointer)
                               GREEN);
                 DrawRectangleRec(data->currentEnemy->enemy, data->currentEnemy->color);
             }
-            TraceLog(LOG_ERROR, "DRAWING PLAYER");
+            
             // drawing player
             DrawRectangleRec(*data->player, RAYWHITE);
         EndMode2D();
