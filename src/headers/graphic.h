@@ -15,6 +15,9 @@
 #define MAINMENUTEXTCOLOR RAYWHITE
 #define WALLTHICKNESS 10
 
+#include "projectiles.h"
+#include "enemies.h"
+
 //////////////////////////////////////////////////////////
 typedef enum to_draw_status{
     MAINMENU,
