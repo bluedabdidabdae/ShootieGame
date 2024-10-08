@@ -1,7 +1,6 @@
 // Copyright (C) 2024  blue_dabdidabdae
 // full notice in main.cpp
 #include "raylib.h"
-#include "headers/global_types.h"
 #include "headers/menu.h"
 
 void MainMenuHandler(States *gameStatus, Vector2 mousePosition)

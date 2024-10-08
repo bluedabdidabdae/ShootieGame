@@ -7,7 +7,6 @@
 // #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
-#include "headers/global_types.h"
 #include "headers/projectiles.h"
 #include "headers/enemies.h"
 

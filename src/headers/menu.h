@@ -2,13 +2,16 @@
 // full notice in main.cpp
 #ifndef MENU_H
 #define MAIN_H
-#define MAINMENUBUTTONWIDTH 760
-#define MAINMENUBUTTONHEIGT 50
-#define FADEVALUE 0.2
-#define MAINMENUBUTTONX 300
-#define MAINMENUBUTTONY 270
-#define MAINMENUTEXTCOLOR RAYWHITE
+
+typedef enum StatesModel{
+    MENU,       // 0
+    PLAY,       // 1
+    SETTINGS,   // 2
+    EXITGAME,   // 3
+    MEMERR      // 4
+} States;
 
 void MainMenuHandler(States *gameStatus, Vector2 mousePosition);
 States CheckCollisions(Vector2* mousePosition);
+
 #endif

@@ -23,8 +23,8 @@
 #include <pthread.h>
 
 #include "raylib.h"
-#include "headers/global_types.h"
 #include "headers/main.h"
+#include "headers/menu.h"
 #include "headers/graphic.h"
 
 int main(int argc, char *argv[])

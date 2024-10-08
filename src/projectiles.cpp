@@ -1,13 +1,11 @@
 // Copyright (C) 2024  blue_dabdidabdae
 // full notice in main.cpp
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 #include <stdbool.h>
-#include <ctime> // FOR LINUX
 // #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
-#include "headers/global_types.h"
 #include "headers/projectiles.h"
 
 void UpdateProjectiles(ProjectileLL *projectileHead)

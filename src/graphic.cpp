@@ -3,9 +3,7 @@
 #include <pthread.h>
 
 #include "raylib.h"
-#include "headers/global_types.h"
 #include "headers/graphic.h"
-#include "headers/menu.h"
 
 void *HandleGraphics(void* data)
 {

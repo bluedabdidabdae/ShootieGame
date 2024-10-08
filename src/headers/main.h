@@ -3,6 +3,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-void MainMenuHandler(States *gameStatus, Vector2 mousePosition);
-int GameEngine();
+void *HandleGraphics(void* data);
+void DrawMenu();
+
 #endif
