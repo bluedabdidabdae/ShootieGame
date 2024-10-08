@@ -2,19 +2,7 @@
 // full notice in main.cpp
 #ifndef MAIN_H
 #define MAIN_H
-typedef enum StatesModel{
-    MENU,
-    PLAY,
-    SETTINGS,
-    EXITGAME,
-    MEMERR
-} States;
 
-#define WIDTH 1335
-#define HEIGT 675
-#define WINDOWNAME "Shootie Shootie Game"
-#define TARGETFPS 60
-
-void MainMenuHandler(States *gameStatus);
+void MainMenuHandler(States *gameStatus, Vector2 mousePosition);
 int GameEngine();
 #endif

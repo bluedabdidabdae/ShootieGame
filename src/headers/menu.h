@@ -9,15 +9,6 @@
 #define MAINMENUBUTTONY 270
 #define MAINMENUTEXTCOLOR RAYWHITE
 
-typedef enum StatesModel{
-    MENU,       // 0
-    PLAY,       // 1
-    SETTINGS,   // 2
-    EXITGAME,   // 3
-    MEMERR      // 4
-} States;
-
-void MainMenuHandler(States *gameStatus);
-void DrawMenu();
-States CheckCollisions();
+void MainMenuHandler(States *gameStatus, Vector2 mousePosition);
+States CheckCollisions(Vector2* mousePosition);
 #endif

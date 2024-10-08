@@ -3,15 +3,7 @@
 #ifndef GAME_ENGINE_H
 #define GAME_ENGINE_H
 
-typedef struct draw_args_model{
-    Camera2D* camera;
-    EnemyLL* currentEnemy;
-    Rectangle* player;
-    Rectangle* mapBorder;
-    ProjectileLL* projectileHead;
-}DrawArgsS;
-
-int GameEngine();
+int GameEngine(DrawArgsS *drawInfo);
 void* DrawGame(void* dataPointer);
 //void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectangle mapBorder[], ProjectileLL *projectileHead);
 

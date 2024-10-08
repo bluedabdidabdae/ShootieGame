@@ -18,32 +18,52 @@
 
 */
 
+#include <ctime>
+#include <stdlib.h>
+#include <pthread.h>
+
 #include "raylib.h"
 #include "headers/global_types.h"
 #include "headers/main.h"
+#include "headers/graphic.h"
 
 int main(int argc, char *argv[])
 {
+    srand(time(NULL));
+
+    pthread_t drawingThreadId = { 0 };
+
+    int mainError;
+
     States gameStatus;
+    GameDataS gameData;
 
-    //SetExitKey(KEY_ESC);
-    InitWindow(WIDTH, HEIGT, WINDOWNAME);
-    SetTargetFPS(TARGETFPS);
+    gameData.toDraw = MAINMENU;
+    gameData.mousePosition = NULL;
+    gameData.camera = NULL;
+    gameData.player = NULL;
+    gameData.mapBorder = NULL;
+    gameData.enemiesHead = NULL;
+    gameData.projectileHead = NULL;
 
-    while(1)
-    {
-        MainMenuHandler(&gameStatus);
+    mainError = pthread_create(&drawingThreadId, NULL, HandleGraphics, &gameData); 
+    if (mainError != 0) TraceLog(LOG_ERROR, "Error creating thread");
+
+    do{
+        MainMenuHandler(&gameStatus, drawInfo.mousePosition);
         switch(gameStatus)
         {
             case MENU: break;
             case PLAY:
-                GameEngine();
+                GameEngine(&drawInfo);
+                gameData.toDraw = MAINMENU;
                 gameStatus = MENU;
             break;
-            case EXITGAME:
-                CloseWindow();
-                return 0;
-            break;
         }
-    }
+    }while(gameStatus != EXITGAME);
+    
+    gameData.toDraw = CLOSEGAME;
+    mainError = pthread_join(drawingThreadId, NULL);
+    if (mainError != 0) TraceLog(LOG_ERROR, "Error merging threads");
+    return 0;
 }
