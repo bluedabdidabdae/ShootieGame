@@ -7,15 +7,15 @@
 
 void *HandleGraphics(void* data)
 {
-    GameDataS *gameData = (GameDataS*)data;
+    GameDataS gameData = *(GameDataS*)data;
 
     InitWindow(WIDTH, HEIGT, WINDOWNAME);
     SetTargetFPS(TARGETFPS);
 
-    while(gameData->toDraw != CLOSEGAME)
+    while(*gameData.toDraw != CLOSEGAME)
     {
-        gameData->mousePosition = GetMousePosition();
-        switch(gameData->toDraw)
+        *gameData.mousePosition = GetMousePosition();
+        switch(*gameData.toDraw)
         {
             case MAINMENU:
                 DrawMenu();
