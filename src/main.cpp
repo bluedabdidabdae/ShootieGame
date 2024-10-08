@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     mainError = pthread_create(&drawingThreadId, NULL, HandleGraphics, &gameData); 
     if (mainError != 0) TraceLog(LOG_ERROR, "Error creating thread");
 
-    do{
+    while(gameStatus != EXITGAME){
         if(gameData.mousePosition != NULL)
             MainMenuHandler(&gameStatus, gameData.mousePosition);
         switch(gameStatus)
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
                 gameStatus = MENU;
             break;
         }
-    }while(gameStatus != EXITGAME);
+    }
     
     *gameData.toDraw = CLOSEGAME;
     mainError = pthread_join(drawingThreadId, NULL);

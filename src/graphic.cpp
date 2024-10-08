@@ -1,5 +1,6 @@
 // Copyright (C) 2024  blue_dabdidabdae
 // full notice in main.cpp
+#include <stdlib.h>
 #include <pthread.h>
 
 #include "raylib.h"
@@ -10,6 +11,8 @@
 void *HandleGraphics(void* data)
 {
     GameDataS *gameData = (GameDataS*)data;
+
+    gameData->mousePosition = (Vector2*)malloc(sizeof(Vector2));
 
     InitWindow(WIDTH, HEIGT, WINDOWNAME);
     SetTargetFPS(TARGETFPS);
