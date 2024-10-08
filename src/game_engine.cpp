@@ -7,6 +7,11 @@
 #include <ctime>
 
 #include "raylib.h"
+#include "headers/projectiles.h"
+#include "headers/enemies.h"
+#include "headers/player.h"
+#include "headers/graphic.h"
+#include "headers/game_engine.h"
 
 int GameEngine(GameDataS *gameData)
 {

@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         {
             case MENU: break;
             case PLAY:
-                GameEngine(&drawInfo);
+                GameEngine(&gameData);
                 *gameData.toDraw = MAINMENU;
                 gameStatus = MENU;
             break;

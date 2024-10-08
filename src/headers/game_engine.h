@@ -3,6 +3,6 @@
 #ifndef GAME_ENGINE_H
 #define GAME_ENGINE_H
 
-
+int GameEngine(GameDataS *gameData);
 
 #endif
