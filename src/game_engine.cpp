@@ -40,13 +40,13 @@ int GameEngine(GameDataS *gameData)
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
     *gameData->camera = { 0 };
-    *gameData->camera->target = (Vector2){ player.x + 20.0f, player.y + 20.0f };
-    *gameData->camera->offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
-    *gameData->camera->zoom = 0.6f;
+    (*gameData->camera)->target = (Vector2){ player.x + 20.0f, player.y + 20.0f };
+    (*gameData->camera)->offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
+    (*gameData->camera)->zoom = 0.6f;
 
     // Temporary map borderes
     gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4)
-    *gameData->mapBorder[] = { {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS}, 
+    *gameData->mapBorder = { {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS}, 
                               {0, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS},
                               {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS},
                               {WIDTH, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS} };
@@ -60,10 +60,10 @@ int GameEngine(GameDataS *gameData)
         {
             //if(GameMenuHandler() == 3)
             // delete all enemies
-            CompletelyDeleteAllEnemies(*gameData->enemiesHead);
+            CompletelyDeleteAllEnemies(gameData->enemiesHead);
             gameData->enemiesHead = NULL;
             // delete all projectiles
-            CompletelyDeleteAllProjectiles(*gameData->projectileHead);
+            CompletelyDeleteAllProjectiles(gameData->projectileHead);
             gameData->projectileHead = NULL;
             // delete player
             free(gameData->player);
@@ -94,7 +94,7 @@ int GameEngine(GameDataS *gameData)
 
 void* DrawGame(void* dataPointer)
 {
-    DrawArgsS *data = (DrawArgsS*)dataPointer;
+    GameDataS *data = (GameDataS*)dataPointer;
     // Updating camera target to the player position
     data->camera->target = (Vector2){ data->player->x + 20, data->player->y + 20 };
 
