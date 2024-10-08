@@ -3,12 +3,12 @@
 #include "raylib.h"
 #include "headers/menu.h"
 
-void MainMenuHandler(States *gameStatus, Vector2 mousePosition)
+void MainMenuHandler(States *gameStatus, Vector2 *mousePosition)
 {
     while(*gameStatus == MENU){
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && mousePosition != NULL)
         {
-            *gameStatus = CheckCollisions(&mousePosition);
+            *gameStatus = CheckCollisions(mousePosition);
             return;
         }
     }

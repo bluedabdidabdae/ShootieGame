@@ -26,7 +26,7 @@ typedef struct game_data_model{
     Vector2 *mousePosition;
     Camera2D *camera;
     Rectangle *player;
-    Rectangle mapBorder[4];
+    Rectangle *mapBorder;
     EnemyLL *enemiesHead;
     ProjectileLL *projectileHead;
 }GameDataS;

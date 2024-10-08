@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     if (mainError != 0) TraceLog(LOG_ERROR, "Error creating thread");
 
     do{
-        MainMenuHandler(&gameStatus, drawInfo.mousePosition);
+        MainMenuHandler(&gameStatus, gameData.mousePosition);
         switch(gameStatus)
         {
             case MENU: break;

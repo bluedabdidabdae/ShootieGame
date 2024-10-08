@@ -11,7 +11,7 @@ typedef enum StatesModel{
     MEMERR      // 4
 } States;
 
-void MainMenuHandler(States *gameStatus, Vector2 mousePosition);
+void MainMenuHandler(States *gameStatus, Vector2 *mousePosition);
 States CheckCollisions(Vector2* mousePosition);
 
 #endif
