@@ -9,7 +9,7 @@
 
 void *HandleGraphics(void* data)
 {
-    GameDataS gameData = *(GameDataS*)data;
+    GameDataS *gameData = (GameDataS*)data;
 
     InitWindow(WIDTH, HEIGT, WINDOWNAME);
     SetTargetFPS(TARGETFPS);

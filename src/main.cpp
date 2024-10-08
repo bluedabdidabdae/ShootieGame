@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     States gameStatus;
     GameDataS gameData;
 
-    *gameData.toDraw = MAINMENU;
+    gameData->toDraw = MAINMENU;
     gameData.mousePosition = NULL;
     gameData.camera = NULL;
     gameData.player = NULL;
