@@ -44,11 +44,11 @@ void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorde
             // deleto i proiettili che impattano coi bordi della mappa
             // LASCIARE TUTTI GLI ELSE, ALTRIMENTI SI SFONDA LA MEMORIA
             // controlli per le collisioni tra il proiettile ed i 4 bordi mappa
-            if(currentProjectile->projectile.x < mapBorder[1].x+WALLTHICKNESS)
+            if(currentProjectile->projectile.x < mapBorder[1].x+mapBorder[1].width)
                 ProjectilePop(previousProjectile, &currentProjectile);
             else if(currentProjectile->projectile.x > mapBorder[3].x-currentProjectile->projectile.width)
                 ProjectilePop(previousProjectile, &currentProjectile);
-            else if(currentProjectile->projectile.y < mapBorder[0].y+WALLTHICKNESS)
+            else if(currentProjectile->projectile.y < mapBorder[0].y+mapBorder[0].height)
                 ProjectilePop(previousProjectile, &currentProjectile);
             else if(currentProjectile->projectile.y > mapBorder[2].y-currentProjectile->projectile.height)
                 ProjectilePop(previousProjectile, &currentProjectile);

@@ -4,6 +4,7 @@
 
 #include "raylib.h"
 #include "headers/menu.h"
+#include "headers/graphic.h"
 
 void MainMenuHandler(States *gameStatus, Vector2 *mousePosition)
 {
