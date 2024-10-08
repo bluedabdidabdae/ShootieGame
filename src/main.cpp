@@ -28,6 +28,7 @@
 #include "headers/main.h"
 #include "headers/menu.h"
 #include "headers/graphic.h"
+#include "headers/game_engine.h"
 
 int main(int argc, char *argv[])
 {
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
     States gameStatus;
     GameDataS gameData;
 
-    gameData.toDraw = MAINMENU;
+    *gameData.toDraw = MAINMENU;
     gameData.mousePosition = NULL;
     gameData.camera = NULL;
     gameData.player = NULL;
@@ -58,13 +59,13 @@ int main(int argc, char *argv[])
             case MENU: break;
             case PLAY:
                 GameEngine(&drawInfo);
-                gameData.toDraw = MAINMENU;
+                *gameData.toDraw = MAINMENU;
                 gameStatus = MENU;
             break;
         }
     }while(gameStatus != EXITGAME);
     
-    gameData.toDraw = CLOSEGAME;
+    *gameData.toDraw = CLOSEGAME;
     mainError = pthread_join(drawingThreadId, NULL);
     if (mainError != 0) TraceLog(LOG_ERROR, "Error merging threads");
     return 0;

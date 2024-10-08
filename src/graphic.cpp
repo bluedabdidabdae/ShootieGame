@@ -3,6 +3,8 @@
 #include <pthread.h>
 
 #include "raylib.h"
+#include "headers/projectiles.h"
+#include "headers/enemies.h"
 #include "headers/graphic.h"
 
 void *HandleGraphics(void* data)
