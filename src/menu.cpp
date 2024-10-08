@@ -8,12 +8,10 @@
 
 void MainMenuHandler(States *gameStatus, Vector2 *mousePosition)
 {
-    while(*gameStatus == MENU){
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && mousePosition != NULL)
-        {
-            *gameStatus = CheckCollisions(mousePosition);
-            return;
-        }
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        *gameStatus = CheckCollisions(mousePosition);
+        return;
     }
 }
 

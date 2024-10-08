@@ -38,10 +38,11 @@ int main(int argc, char *argv[])
 
     int mainError;
 
-    States gameStatus;
+    States gameStatus = MENU;
     GameDataS gameData;
 
-    *(gameData.toDraw) = MAINMENU;
+    gameData.toDraw = (ToDraw*)malloc(sizeof(ToDraw));
+    *gameData.toDraw = MAINMENU;
     gameData.mousePosition = NULL;
     gameData.camera = NULL;
     gameData.player = NULL;
@@ -53,7 +54,8 @@ int main(int argc, char *argv[])
     if (mainError != 0) TraceLog(LOG_ERROR, "Error creating thread");
 
     do{
-        MainMenuHandler(&gameStatus, gameData.mousePosition);
+        if(gameData.mousePosition != NULL)
+            MainMenuHandler(&gameStatus, gameData.mousePosition);
         switch(gameStatus)
         {
             case MENU: break;
