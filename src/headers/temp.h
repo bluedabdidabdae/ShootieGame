@@ -14,6 +14,7 @@
 #define PLAYERSPEED 5.0f
 #define PROJECTILESPEED 12.0f
 #define PLAYERPROJECTILESPEED 17.0f
+#define WALLTHICKNESS 10
 //////////////////////////////////////////////////////////
 typedef enum behaviour_model{
         APPROACHING,

@@ -13,6 +13,7 @@
 #define MAINMENUBUTTONX 300
 #define MAINMENUBUTTONY 270
 #define MAINMENUTEXTCOLOR RAYWHITE
+#define WALLTHICKNESS 10
 
 //////////////////////////////////////////////////////////
 typedef enum to_draw_status{

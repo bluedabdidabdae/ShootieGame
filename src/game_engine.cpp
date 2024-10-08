@@ -18,7 +18,10 @@ int GameEngine(GameDataS *gameData)
     int error;
 
     uint frameCounter = 0;
-    gameData->player = { WIDTH/2-20, HEIGT/2-20, 40, 40 };
+
+    // Init player
+    gameData->player = (Rectangle*)malloc(sizeof(Rectangle));
+    *gameData->player = { WIDTH/2-20, HEIGT/2-20, 40, 40 };
 
     // Init enemies linked list
     gameData->enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));
@@ -35,13 +38,15 @@ int GameEngine(GameDataS *gameData)
     SpawnEnemy(gameData->enemiesHead, 345, 340);
     
     // Setting up camera to 2d mode and centering it to the player
-    gameData->camera = { 0 };
-    gameData->camera->target = (Vector2){ player.x + 20.0f, player.y + 20.0f };
-    gameData->camera->offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
-    gameData->camera->zoom = 0.6f;
+    gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
+    *gameData->camera = { 0 };
+    *gameData->camera->target = (Vector2){ player.x + 20.0f, player.y + 20.0f };
+    *gameData->camera->offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
+    *gameData->camera->zoom = 0.6f;
 
     // Temporary map borderes
-    gameData->mapBorder[] = { {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS}, 
+    gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4)
+    *gameData->mapBorder[] = { {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS}, 
                               {0, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS},
                               {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS},
                               {WIDTH, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS} };
@@ -54,13 +59,27 @@ int GameEngine(GameDataS *gameData)
         if(IsKeyPressed(KEY_M))
         {
             //if(GameMenuHandler() == 3)
-            CompletelyDeleteAllEnemies(gameData->enemiesHead);
-            CompletelyDeleteAllProjectiles(gameData->enemiesHead);
+            // delete all enemies
+            CompletelyDeleteAllEnemies(*gameData->enemiesHead);
+            gameData->enemiesHead = NULL;
+            // delete all projectiles
+            CompletelyDeleteAllProjectiles(*gameData->projectileHead);
+            gameData->projectileHead = NULL;
+            // delete player
+            free(gameData->player);
+            gameData->player = NULL;
+            // delete camera
+            free(gameData->camera);
+            gameData->camera = NULL;
+            // delete map border
+            free(gameData->mapBorder);
+            gameData->mapBorder = NULL;
             return 0;
         }
         else
         {
-            UpdatePlayer(&player);
+            UpdatePlayer(gameData->player);
+            /*
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
                 PlayerShooting(frameCounter, gameData->enemiesHead, &gameData->player);
             UpdateEnemies(gameData->enemiesHead, &gameData->player);
@@ -68,6 +87,7 @@ int GameEngine(GameDataS *gameData)
             EnemiesShooting(gameData->enemiesHead, gameData->projectileHead, &gameData->player);
             UpdateProjectiles(gameData->projectileHead);
             CheckProjectilesBorders(gameData->projectileHead, gameData->mapBorder);
+            */
         }
     }
 }
