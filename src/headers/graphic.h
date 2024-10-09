@@ -27,6 +27,7 @@ typedef enum to_draw_status{
 
 typedef struct game_data_model{
     ToDraw *toDraw;
+    uint frameCounter;
     Vector2 *mousePosition;
     Camera2D *camera;
     Rectangle *player;
@@ -38,5 +39,6 @@ typedef struct game_data_model{
 
 void *HandleGraphics(void* data);
 void DrawMenu();
+void DrawGame(void* data);
 
 #endif

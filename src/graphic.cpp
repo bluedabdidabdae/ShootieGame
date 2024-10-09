@@ -8,6 +8,9 @@
 #include "headers/enemies.h"
 #include "headers/graphic.h"
 
+extern pthread_mutex_t enemiesListLock;
+extern pthread_mutex_t projectileListLock;
+
 void *HandleGraphics(void* data)
 {
     GameDataS *gameData = (GameDataS*)data;
@@ -25,7 +28,13 @@ void *HandleGraphics(void* data)
             case MAINMENU:
                 DrawMenu();
             break;
+            case GAME:
+                DrawGame(gameData);
+            break;
         }
+        gameData->frameCounter += 1;
+        if(gameData->frameCounter >= 60)
+            gameData->frameCounter = 0;
     }
 
     CloseWindow();
@@ -44,5 +53,52 @@ void DrawMenu()
 
         DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
         DrawText(TextFormat("Exit"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
+    EndDrawing();
+}
+
+void DrawGame(void* data)
+{
+    GameDataS *gameData = (GameDataS*)data;
+    pthread_mutex_lock(&enemiesListLock);
+    EnemyLL *enemiesHead = gameData->enemiesHead;
+    pthread_mutex_unlock(&enemiesListLock);
+    pthread_mutex_lock(&projectileListLock);
+    ProjectileLL *projectileHead = gameData->projectileHead;
+    pthread_mutex_unlock(&projectileListLock);
+    // Updating camera target to the player position
+    
+    
+        ClearBackground(BLACK);
+        BeginMode2D(*gameData->camera);
+            // drawing projectiles
+            pthread_mutex_lock(&projectileListLock);
+            while(projectileHead->next != NULL)
+            {
+                projectileHead = projectileHead->next;
+                DrawRectangleRec(projectileHead->projectile, projectileHead->color);
+            }
+            pthread_mutex_unlock(&projectileListLock);
+            /*
+            // drawing map borders
+            for(int i = 0; i < 4; i++)
+                DrawRectangleRec(gameData->mapBorder[i], BLUE);
+            */
+            // drawing enemies from linked list of type *EnemyLL
+            pthread_mutex_lock(&enemiesListLock);
+            while(enemiesHead->next != NULL)
+            {
+                enemiesHead = enemiesHead->next;
+                DrawRectangleRec(enemiesHead->healthBar, RED);
+                DrawRectangle(enemiesHead->healthBar.x,
+                              enemiesHead->healthBar.y,
+                              enemiesHead->hitPoint,
+                              enemiesHead->healthBar.height,
+                              GREEN);
+                DrawRectangleRec(enemiesHead->enemy, enemiesHead->color);
+            }
+            pthread_mutex_unlock(&enemiesListLock);
+            // drawing player
+            DrawRectangleRec(*gameData->player, RAYWHITE);
+        EndMode2D();
     EndDrawing();
 }

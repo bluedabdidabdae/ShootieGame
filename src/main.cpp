@@ -30,10 +30,15 @@
 #include "headers/graphic.h"
 #include "headers/game_engine.h"
 
+pthread_mutex_t enemiesListLock;
+pthread_mutex_t projectileListLock;
+
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
 
+    pthread_mutex_init(&enemiesListLock, NULL);
+    pthread_mutex_init(&projectileListLock, NULL);
     pthread_t drawingThreadId = { 0 };
 
     int mainError;
@@ -43,6 +48,7 @@ int main(int argc, char *argv[])
 
     gameData.toDraw = (ToDraw*)malloc(sizeof(ToDraw));
     *gameData.toDraw = MAINMENU;
+    gameData.frameCounter = 0;
     gameData.mousePosition = NULL;
     gameData.camera = NULL;
     gameData.player = NULL;

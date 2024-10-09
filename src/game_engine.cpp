@@ -13,19 +13,24 @@
 #include "headers/graphic.h"
 #include "headers/game_engine.h"
 
+extern pthread_mutex_t enemiesListLock;
+extern pthread_mutex_t projectileListLock;
+
 int GameEngine(GameDataS *gameData)
 {
     int error;
 
-    uint frameCounter = 0;
+    uint lastFrameId;
 
     // Init player
     gameData->player = (Rectangle*)malloc(sizeof(Rectangle));
     *gameData->player = { WIDTH/2-20, HEIGT/2-20, 40, 40 };
-
+    
+    pthread_mutex_lock(&enemiesListLock);
     // Init enemies linked list
     gameData->enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));
     gameData->enemiesHead->next = NULL;
+    pthread_mutex_unlock(&enemiesListLock);
 
     // Init projectiles linked list
     gameData->projectileHead = (ProjectileLL*)malloc(sizeof(ProjectileLL));
@@ -51,9 +56,15 @@ int GameEngine(GameDataS *gameData)
                               {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS},
                               {WIDTH, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS} };
 */
+    *gameData->toDraw = GAME;
     while(1)
     {
-        frameCounter++;
+        // GAME STALLS HERE
+        while(gameData->frameCounter <= lastFrameId && !IsKeyPressed(KEY_M))
+            ;
+
+        TraceLog(LOG_ERROR, "game update");
+        lastFrameId = gameData->frameCounter;
         //DrawGame(&camera, enemiesHead, &player, mapBorder, projectileHead);
         
         if(IsKeyPressed(KEY_M))
@@ -71,62 +82,31 @@ int GameEngine(GameDataS *gameData)
             // delete camera
             free(gameData->camera);
             gameData->camera = NULL;
+            /*
             // delete map border
             free(gameData->mapBorder);
             gameData->mapBorder = NULL;
+            */
             return 0;
         }
         else
         {
             UpdatePlayer(gameData->player);
+            gameData->camera->target = (Vector2){ gameData->player->x + 20, gameData->player->y + 20 };
             /*
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
                 PlayerShooting(frameCounter, gameData->enemiesHead, &gameData->player);
+
+            pthread_mutex_lock(&enemiesListLock);
             UpdateEnemies(gameData->enemiesHead, &gameData->player);
             SnapEnemies(gameData->enemiesHead, gameData->mapBorder);
+            pthread_mutex_lock(&proejctileListLock);
             EnemiesShooting(gameData->enemiesHead, gameData->projectileHead, &gameData->player);
+            pthread_mutex_unlock(&enemiesListLock);
             UpdateProjectiles(gameData->projectileHead);
             CheckProjectilesBorders(gameData->projectileHead, gameData->mapBorder);
+            pthread_mutex_unlock(&proejctileListLock);
             */
         }
     }
 }
-/*
-void* DrawGame(void* dataPointer)
-{
-    GameDataS *data = (GameDataS*)dataPointer;
-    // Updating camera target to the player position
-    data->camera->target = (Vector2){ data->player->x + 20, data->player->y + 20 };
-
-    
-        ClearBackground(BLACK);
-        BeginMode2D(*data->camera);
-            // drawing projectiles
-            while(data->projectileHead->next != NULL)
-            {
-                data->projectileHead = data->projectileHead->next;
-                DrawRectangleRec(data->projectileHead->projectile, data->projectileHead->color);
-            }
-            // drawing map borders
-            for(int i = 0; i < 4; i++)
-                DrawRectangleRec(data->mapBorder[i], BLUE);
-            // drawing enemies from linked list of type *EnemyLL
-            while(data->currentEnemy->next != NULL)
-            {
-                data->currentEnemy = data->currentEnemy->next;
-                DrawRectangleRec(data->currentEnemy->healthBar, RED);
-                DrawRectangle(data->currentEnemy->healthBar.x,
-                              data->currentEnemy->healthBar.y,
-                              data->currentEnemy->hitPoint,
-                              data->currentEnemy->healthBar.height,
-                              GREEN);
-                DrawRectangleRec(data->currentEnemy->enemy, data->currentEnemy->color);
-            }
-            // drawing player
-            DrawRectangleRec(*data->player, RAYWHITE);
-        EndMode2D();
-    EndDrawing();
-
-    pthread_exit(NULL);
-}
-*/
