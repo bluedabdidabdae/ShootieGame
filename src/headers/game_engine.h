@@ -3,7 +3,6 @@
 #ifndef GAME_ENGINE_H
 #define GAME_ENGINE_H
 
-int GameEngine();
-void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectangle mapBorder[], ProjectileLL *projectileHead);
+int GameEngine(GameDataS *gameData);
 
 #endif

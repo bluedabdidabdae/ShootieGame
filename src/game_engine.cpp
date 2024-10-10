@@ -3,111 +3,114 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
-#include <ctime> // FOR LINUX
-// #include <time.h> // FOR WINDOWS
+#include <pthread.h>
+#include <ctime>
 
 #include "raylib.h"
-#include "headers/global_types.h"
 #include "headers/projectiles.h"
-#include "headers/player.h"
 #include "headers/enemies.h"
+#include "headers/player.h"
+#include "headers/graphic.h"
 #include "headers/game_engine.h"
 
-int GameEngine()
+extern pthread_mutex_t enemiesListLock;
+extern pthread_mutex_t projectileListLock;
+extern pthread_mutex_t playerLock;
+extern pthread_mutex_t gameUpdateLock;
+extern pthread_mutex_t cameraLock;
+
+int GameEngine(GameDataS *gameData)
 {
-    srand(time(NULL));
+    int error;
 
-    uint frameCounter = 0;
-    Rectangle player = { WIDTH/2-20, HEIGT/2-20, 40, 40 };
+    uint lastFrameId;
 
+    // Init player
+    gameData->player = (Rectangle*)malloc(sizeof(Rectangle));
+    *gameData->player = { WIDTH/2-20, HEIGT/2-20, 40, 40 };
+    
+    pthread_mutex_lock(&enemiesListLock);
     // Init enemies linked list
-    EnemyLL *enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));
-    enemiesHead->next = NULL;
+    gameData->enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));
+    gameData->enemiesHead->next = NULL;
+    pthread_mutex_unlock(&enemiesListLock);
 
     // Init projectiles linked list
-    ProjectileLL *projectileHead = (ProjectileLL*)malloc(sizeof(ProjectileLL));
-    projectileHead->next = NULL;
+    gameData->projectileHead = (ProjectileLL*)malloc(sizeof(ProjectileLL));
+    gameData->projectileHead->next = NULL;
 
     // Spawning 4 enemies for testing purposes
-    SpawnEnemy(enemiesHead, 40, 40);
-    SpawnEnemy(enemiesHead, 20, 400);
-    SpawnEnemy(enemiesHead, 234, 467);
-    SpawnEnemy(enemiesHead, 345, 340);
+    SpawnEnemy(gameData->enemiesHead, 40, 40);
+    SpawnEnemy(gameData->enemiesHead, 20, 400);
+    SpawnEnemy(gameData->enemiesHead, 234, 467);
+    SpawnEnemy(gameData->enemiesHead, 345, 340);
     
     // Setting up camera to 2d mode and centering it to the player
-    Camera2D camera = { 0 };
-    camera.target = (Vector2){ player.x + 20.0f, player.y + 20.0f };
-    camera.offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
-    camera.zoom = 0.6f;
+    gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
+    *gameData->camera = { 0 };
+    (*gameData->camera).target = (Vector2){ (*gameData->player).x + 20.0f, (*gameData->player).y + 20.0f };
+    (*gameData->camera).offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
+    (*gameData->camera).zoom = 0.6f;
 
     // Temporary map borderes
-    Rectangle mapBorder[] = { {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS}, 
-                              {0, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS},
-                              {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS},
-                              {WIDTH, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS} };
+    gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4);
+    gameData->mapBorder[0] = {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS};
+    gameData->mapBorder[1] = {0, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS};
+    gameData->mapBorder[2] = {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS};
+    gameData->mapBorder[3] = {WIDTH, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS};
 
+    pthread_mutex_lock(&gameUpdateLock);
+    *gameData->toDraw = GAME;
     while(1)
     {
-        // Updating camera target to the player position
-        camera.target = (Vector2){ player.x + 20, player.y + 20 };
-
-        frameCounter++;
-        DrawGame(&camera, enemiesHead, &player, mapBorder, projectileHead);
-
+        pthread_mutex_lock(&gameUpdateLock);
+        lastFrameId = gameData->frameCounter;
+        //DrawGame(&camera, enemiesHead, &player, mapBorder, projectileHead);
+        
         if(IsKeyPressed(KEY_M))
         {
             //if(GameMenuHandler() == 3)
-            CompletelyDeleteAllEnemies(enemiesHead);
-            CompletelyDeleteAllProjectiles(projectileHead);
+            *gameData->toDraw = MAINMENU;
+            pthread_mutex_lock(&gameUpdateLock);
+            // delete all enemies
+            CompletelyDeleteAllEnemies(gameData->enemiesHead);
+            gameData->enemiesHead = NULL;
+            // delete all projectiles
+            CompletelyDeleteAllProjectiles(gameData->projectileHead);
+            gameData->projectileHead = NULL;
+            // delete player
+            free(gameData->player);
+            gameData->player = NULL;
+            // delete camera
+            free(gameData->camera);
+            gameData->camera = NULL;
+            // delete map border
+            free(gameData->mapBorder);
+            gameData->mapBorder = NULL;
             return 0;
         }
         else
         {
-            UpdatePlayer(&player);
+            pthread_mutex_lock(&cameraLock);
+            pthread_mutex_lock(&playerLock);
+            UpdatePlayer(gameData->player);
+            gameData->camera->target = (Vector2){ gameData->player->x + 20, gameData->player->y + 20 };
+            pthread_mutex_unlock(&cameraLock);
+            
+            pthread_mutex_lock(&projectileListLock);
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-                PlayerShooting(frameCounter, projectileHead, &player);
-            UpdateEnemies(enemiesHead, &player);
-            SnapEnemies(enemiesHead, mapBorder);
-            EnemiesShooting(enemiesHead, projectileHead, &player);
-            UpdateProjectiles(projectileHead);
-            CheckProjectilesBorders(projectileHead, mapBorder);
+                PlayerShooting(gameData->frameCounter, gameData->projectileHead, gameData->player);
+
+            pthread_mutex_lock(&enemiesListLock);
+            UpdateEnemies(gameData->enemiesHead, gameData->player);
+            SnapEnemies(gameData->enemiesHead, gameData->mapBorder);
+            EnemiesShooting(gameData->enemiesHead, gameData->projectileHead, gameData->player);
+            pthread_mutex_unlock(&enemiesListLock);
+            pthread_mutex_unlock(&playerLock);
+            UpdateProjectiles(gameData->projectileHead);
+            CheckProjectilesBorders(gameData->projectileHead, gameData->mapBorder);
+            pthread_mutex_unlock(&projectileListLock);
+            
         }
     }
-}
-
-void DrawGame(Camera2D *camera, EnemyLL *currentEnemy, Rectangle *player, Rectangle mapBorder[], ProjectileLL *projectileHead)
-{
-    BeginDrawing();
-        ClearBackground(BLACK);
-
-        BeginMode2D(*camera);
-            
-            // drawing projectiles
-            while(projectileHead->next != NULL)
-            {
-                DrawRectangleRec(projectileHead->projectile, projectileHead->color);
-                projectileHead = projectileHead->next;
-            }
-
-            // drawing map borders
-            for(int i = 0; i < 4; i++)
-                DrawRectangleRec(mapBorder[i], BLUE);
-
-            // drawing enemies from linked list of type *EnemyLL
-            while(currentEnemy->next != NULL)
-            {
-                currentEnemy = currentEnemy->next;
-                DrawRectangleRec(currentEnemy->healthBar, RED);
-                DrawRectangle(currentEnemy->healthBar.x,
-                              currentEnemy->healthBar.y,
-                              currentEnemy->hitPoint,
-                              currentEnemy->healthBar.height,
-                              GREEN);
-                DrawRectangleRec(currentEnemy->enemy, currentEnemy->color);
-            }
-            
-            // drawing player
-            DrawRectangleRec(*player, RAYWHITE);
-        EndMode2D();
-    EndDrawing();
 }

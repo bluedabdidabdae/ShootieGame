@@ -1,22 +1,21 @@
 // Copyright (C) 2024  blue_dabdidabdae
 // full notice in main.cpp
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 #include <stdbool.h>
-#include <ctime> // FOR LINUX
 // #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
-#include "headers/global_types.h"
 #include "headers/projectiles.h"
 
 void UpdateProjectiles(ProjectileLL *projectileHead)
 {
-    while(projectileHead->next != NULL)
+    ProjectileLL *currentProjectile = projectileHead;
+    while(currentProjectile->next != NULL)
     {
-        projectileHead = projectileHead->next;
-        projectileHead->projectile.x -= projectileHead->vX;
-        projectileHead->projectile.y -= projectileHead->vY;
+        currentProjectile = currentProjectile->next;
+        currentProjectile->projectile.x -= currentProjectile->vX;
+        currentProjectile->projectile.y -= currentProjectile->vY;
     }
 }
 
@@ -28,8 +27,9 @@ void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop)
     prePop = NULL;
 }
 
-void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorder[])
+void CheckProjectilesBorders(ProjectileLL *projectileHead, Rectangle mapBorder[])
 {
+    ProjectileLL *currentProjectile = currentProjectile;
     ProjectileLL *previousProjectile;
 
     if(currentProjectile->next != NULL)
@@ -46,11 +46,11 @@ void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorde
             // deleto i proiettili che impattano coi bordi della mappa
             // LASCIARE TUTTI GLI ELSE, ALTRIMENTI SI SFONDA LA MEMORIA
             // controlli per le collisioni tra il proiettile ed i 4 bordi mappa
-            if(currentProjectile->projectile.x < mapBorder[1].x+WALLTHICKNESS)
+            if(currentProjectile->projectile.x < mapBorder[1].x+mapBorder[1].width)
                 ProjectilePop(previousProjectile, &currentProjectile);
             else if(currentProjectile->projectile.x > mapBorder[3].x-currentProjectile->projectile.width)
                 ProjectilePop(previousProjectile, &currentProjectile);
-            else if(currentProjectile->projectile.y < mapBorder[0].y+WALLTHICKNESS)
+            else if(currentProjectile->projectile.y < mapBorder[0].y+mapBorder[0].height)
                 ProjectilePop(previousProjectile, &currentProjectile);
             else if(currentProjectile->projectile.y > mapBorder[2].y-currentProjectile->projectile.height)
                 ProjectilePop(previousProjectile, &currentProjectile);

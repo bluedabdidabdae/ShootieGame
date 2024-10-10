@@ -6,11 +6,12 @@
 #define PROJECTILESPEED 12.0f
 #define PLAYERPROJECTILESPEED 17.0f
 
+//////////////////////////////////////////////////////////
 typedef enum projectile_owner_model{
     ENEMY,
     PLAYER
 }ProjectileOwner;
-
+//////////////////////////////////////////////////////////
 typedef struct Projectile_linked_List{
     Rectangle projectile;
     Color color;
@@ -19,10 +20,11 @@ typedef struct Projectile_linked_List{
     ProjectileOwner owner;
     Projectile_linked_List *next;
 }ProjectileLL;
+//////////////////////////////////////////////////////////
 
 void UpdateProjectiles(ProjectileLL *projectileHead);
-void CompletelyDeleteAllProjectiles(ProjectileLL *head);
-void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorder[]);
 void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop);
+void CheckProjectilesBorders(ProjectileLL *projectileHead, Rectangle mapBorder[]);
+void CompletelyDeleteAllProjectiles(ProjectileLL *head);
 
 #endif

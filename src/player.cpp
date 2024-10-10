@@ -7,9 +7,17 @@
 // #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
-#include "headers/global_types.h"
 #include "headers/projectiles.h"
 #include "headers/player.h"
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+// GIGANTESCO TACONE, DA TOGLIERE QUANDO I BORDI MAPPA
+// SARANNO UNA LINKED LIST
+#include "headers/enemies.h"
+#include "headers/graphic.h"
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player)
 {
