@@ -42,13 +42,10 @@ void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[])
         else if(currentEnemy->enemy.x > mapBorder[3].x-currentEnemy->enemy.width)
             currentEnemy->enemy.x = mapBorder[3].x-currentEnemy->enemy.width;
         
-        if(currentEnemy->enemy.y < mapBorder[0].y+mapBorder[0].width)
-            currentEnemy->enemy.y = mapBorder[0].y+mapBorder[0].width;
+        if(currentEnemy->enemy.y < mapBorder[0].y+mapBorder[0].height)
+            currentEnemy->enemy.y = mapBorder[0].y+mapBorder[0].height;
         else if(currentEnemy->enemy.y > mapBorder[2].y-currentEnemy->enemy.height)
             currentEnemy->enemy.y = mapBorder[2].y-currentEnemy->enemy.height;
-
-        if(currentEnemy->next == NULL)
-            break;
     }
 }
 

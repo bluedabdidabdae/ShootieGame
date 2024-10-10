@@ -15,6 +15,9 @@
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;
+extern pthread_mutex_t playerLock;
+extern pthread_mutex_t gameUpdateLock;
+extern pthread_mutex_t cameraLock;
 
 int GameEngine(GameDataS *gameData)
 {
@@ -48,22 +51,19 @@ int GameEngine(GameDataS *gameData)
     (*gameData->camera).target = (Vector2){ (*gameData->player).x + 20.0f, (*gameData->player).y + 20.0f };
     (*gameData->camera).offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
     (*gameData->camera).zoom = 0.6f;
-/*
+
     // Temporary map borderes
     gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4);
-    *gameData->mapBorder = { {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS}, 
-                              {0, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS},
-                              {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS},
-                              {WIDTH, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS} };
-*/
+    gameData->mapBorder[0] = {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS};
+    gameData->mapBorder[1] = {0, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS};
+    gameData->mapBorder[2] = {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS};
+    gameData->mapBorder[3] = {WIDTH, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS};
+
+    pthread_mutex_lock(&gameUpdateLock);
     *gameData->toDraw = GAME;
     while(1)
     {
-        // GAME STALLS HERE
-        while(gameData->frameCounter <= lastFrameId && !IsKeyPressed(KEY_M))
-            ;
-
-        TraceLog(LOG_ERROR, "game update");
+        pthread_mutex_lock(&gameUpdateLock);
         lastFrameId = gameData->frameCounter;
         //DrawGame(&camera, enemiesHead, &player, mapBorder, projectileHead);
         
@@ -91,22 +91,26 @@ int GameEngine(GameDataS *gameData)
         }
         else
         {
+            pthread_mutex_lock(&cameraLock);
+            pthread_mutex_lock(&playerLock);
             UpdatePlayer(gameData->player);
             gameData->camera->target = (Vector2){ gameData->player->x + 20, gameData->player->y + 20 };
-            /*
+            pthread_mutex_unlock(&cameraLock);
+            
+            pthread_mutex_lock(&projectileListLock);
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-                PlayerShooting(frameCounter, gameData->enemiesHead, &gameData->player);
+                PlayerShooting(gameData->frameCounter, gameData->projectileHead, gameData->player);
 
             pthread_mutex_lock(&enemiesListLock);
-            UpdateEnemies(gameData->enemiesHead, &gameData->player);
+            UpdateEnemies(gameData->enemiesHead, gameData->player);
             SnapEnemies(gameData->enemiesHead, gameData->mapBorder);
-            pthread_mutex_lock(&proejctileListLock);
-            EnemiesShooting(gameData->enemiesHead, gameData->projectileHead, &gameData->player);
+            EnemiesShooting(gameData->enemiesHead, gameData->projectileHead, gameData->player);
             pthread_mutex_unlock(&enemiesListLock);
+            pthread_mutex_unlock(&playerLock);
             UpdateProjectiles(gameData->projectileHead);
             CheckProjectilesBorders(gameData->projectileHead, gameData->mapBorder);
-            pthread_mutex_unlock(&proejctileListLock);
-            */
+            pthread_mutex_unlock(&projectileListLock);
+            
         }
     }
 }

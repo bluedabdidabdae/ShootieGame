@@ -10,6 +10,9 @@
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;
+extern pthread_mutex_t playerLock;
+extern pthread_mutex_t gameUpdateLock;
+extern pthread_mutex_t cameraLock;
 
 void *HandleGraphics(void* data)
 {
@@ -29,6 +32,8 @@ void *HandleGraphics(void* data)
                 DrawMenu();
             break;
             case GAME:
+                //sending clear to update to game engine
+                pthread_mutex_unlock(&gameUpdateLock);
                 DrawGame(gameData);
             break;
         }
@@ -69,7 +74,13 @@ void DrawGame(void* data)
     
     
         ClearBackground(BLACK);
+        pthread_mutex_lock(&cameraLock);
         BeginMode2D(*gameData->camera);
+            // drawing player
+            pthread_mutex_lock(&playerLock);
+            DrawRectangleRec(*gameData->player, RAYWHITE);
+            pthread_mutex_unlock(&playerLock);
+            pthread_mutex_unlock(&cameraLock);
             // drawing projectiles
             pthread_mutex_lock(&projectileListLock);
             while(projectileHead->next != NULL)
@@ -78,11 +89,10 @@ void DrawGame(void* data)
                 DrawRectangleRec(projectileHead->projectile, projectileHead->color);
             }
             pthread_mutex_unlock(&projectileListLock);
-            /*
             // drawing map borders
             for(int i = 0; i < 4; i++)
                 DrawRectangleRec(gameData->mapBorder[i], BLUE);
-            */
+            
             // drawing enemies from linked list of type *EnemyLL
             pthread_mutex_lock(&enemiesListLock);
             while(enemiesHead->next != NULL)
@@ -97,8 +107,6 @@ void DrawGame(void* data)
                 DrawRectangleRec(enemiesHead->enemy, enemiesHead->color);
             }
             pthread_mutex_unlock(&enemiesListLock);
-            // drawing player
-            DrawRectangleRec(*gameData->player, RAYWHITE);
         EndMode2D();
     EndDrawing();
 }

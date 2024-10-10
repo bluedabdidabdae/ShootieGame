@@ -32,6 +32,9 @@
 
 pthread_mutex_t enemiesListLock;
 pthread_mutex_t projectileListLock;
+pthread_mutex_t playerLock;
+pthread_mutex_t gameUpdateLock;
+pthread_mutex_t cameraLock;
 
 int main(int argc, char *argv[])
 {
@@ -39,6 +42,9 @@ int main(int argc, char *argv[])
 
     pthread_mutex_init(&enemiesListLock, NULL);
     pthread_mutex_init(&projectileListLock, NULL);
+    pthread_mutex_init(&gameUpdateLock, NULL);
+    pthread_mutex_init(&playerLock, NULL);
+    pthread_mutex_init(&cameraLock, NULL);
     pthread_t drawingThreadId = { 0 };
 
     int mainError;

@@ -10,11 +10,12 @@
 
 void UpdateProjectiles(ProjectileLL *projectileHead)
 {
-    while(projectileHead->next != NULL)
+    ProjectileLL *currentProjectile = projectileHead;
+    while(currentProjectile->next != NULL)
     {
-        projectileHead = projectileHead->next;
-        projectileHead->projectile.x -= projectileHead->vX;
-        projectileHead->projectile.y -= projectileHead->vY;
+        currentProjectile = currentProjectile->next;
+        currentProjectile->projectile.x -= currentProjectile->vX;
+        currentProjectile->projectile.y -= currentProjectile->vY;
     }
 }
 
@@ -26,8 +27,9 @@ void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop)
     prePop = NULL;
 }
 
-void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorder[])
+void CheckProjectilesBorders(ProjectileLL *projectileHead, Rectangle mapBorder[])
 {
+    ProjectileLL *currentProjectile = currentProjectile;
     ProjectileLL *previousProjectile;
 
     if(currentProjectile->next != NULL)

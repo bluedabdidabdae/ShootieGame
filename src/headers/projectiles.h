@@ -24,7 +24,7 @@ typedef struct Projectile_linked_List{
 
 void UpdateProjectiles(ProjectileLL *projectileHead);
 void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop);
-void CheckProjectilesBorders(ProjectileLL *currentProjectile, Rectangle mapBorder[]);
+void CheckProjectilesBorders(ProjectileLL *projectileHead, Rectangle mapBorder[]);
 void CompletelyDeleteAllProjectiles(ProjectileLL *head);
 
 #endif
