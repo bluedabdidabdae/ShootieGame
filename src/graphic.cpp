@@ -23,12 +23,18 @@ void *HandleGraphics(void* data)
     InitWindow(WIDTH, HEIGT, WINDOWNAME);
     SetTargetFPS(TARGETFPS);
 
+    *gameData->mousePosition = GetMousePosition();
+    // sending clear to update to main after
+    // registering mouse pos for the first time
+    pthread_mutex_unlock(&gameUpdateLock);
+
     while(*gameData->toDraw != CLOSEGAME)
     {
         *gameData->mousePosition = GetMousePosition();
         switch(*gameData->toDraw)
         {
             case MAINMENU:
+                pthread_mutex_unlock(&gameUpdateLock);
                 DrawMenu();
             break;
             case GAME:

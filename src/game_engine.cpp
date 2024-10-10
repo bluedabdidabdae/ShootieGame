@@ -70,6 +70,8 @@ int GameEngine(GameDataS *gameData)
         if(IsKeyPressed(KEY_M))
         {
             //if(GameMenuHandler() == 3)
+            *gameData->toDraw = MAINMENU;
+            pthread_mutex_lock(&gameUpdateLock);
             // delete all enemies
             CompletelyDeleteAllEnemies(gameData->enemiesHead);
             gameData->enemiesHead = NULL;
@@ -82,11 +84,9 @@ int GameEngine(GameDataS *gameData)
             // delete camera
             free(gameData->camera);
             gameData->camera = NULL;
-            /*
             // delete map border
             free(gameData->mapBorder);
             gameData->mapBorder = NULL;
-            */
             return 0;
         }
         else

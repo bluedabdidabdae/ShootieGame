@@ -62,18 +62,22 @@ int main(int argc, char *argv[])
     gameData.enemiesHead = NULL;
     gameData.projectileHead = NULL;
 
+
     mainError = pthread_create(&drawingThreadId, NULL, HandleGraphics, &gameData); 
     if (mainError != 0) TraceLog(LOG_ERROR, "Error creating thread");
+    // waiting for the mouse pos to be updated
+    // for the first time
+    pthread_mutex_lock(&gameUpdateLock);
 
     while(gameStatus != EXITGAME){
-        if(gameData.mousePosition != NULL)
-            MainMenuHandler(&gameStatus, gameData.mousePosition);
         switch(gameStatus)
         {
-            case MENU: break;
+            case MENU:
+                pthread_mutex_lock(&gameUpdateLock);
+                MainMenuHandler(&gameStatus, gameData.mousePosition);
+            break;
             case PLAY:
                 GameEngine(&gameData);
-                *gameData.toDraw = MAINMENU;
                 gameStatus = MENU;
             break;
         }
