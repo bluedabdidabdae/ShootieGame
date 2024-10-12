@@ -25,7 +25,7 @@ int GameEngine(GameDataS *gameData)
 
     uint lastFrameId;
 
-    gameData->score = 0;
+    gameData->score = 104;
 
     // Init player
     gameData->player = (PlayerS*)malloc(sizeof(PlayerS));
