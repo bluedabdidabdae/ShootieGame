@@ -4,7 +4,7 @@
 #define PROJECTILES_H
 
 #define PROJECTILESPEED 12.0f
-#define PLAYERPROJECTILESPEED 17.0f
+#define PLAYERPROJECTILESPEED 25.0f
 
 //////////////////////////////////////////////////////////
 typedef enum projectile_owner_model{

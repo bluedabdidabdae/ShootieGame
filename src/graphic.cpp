@@ -39,6 +39,8 @@ void *HandleGraphics(void* data)
             break;
             case GAME:
                 //sending clear to update to game engine
+                gameData->mousePosition->x += gameData->camera->target.x - (WIDTH / 2);
+                gameData->mousePosition->y += gameData->camera->target.y - (HEIGT / 2);
                 pthread_mutex_unlock(&gameUpdateLock);
                 DrawGame(gameData);
             break;

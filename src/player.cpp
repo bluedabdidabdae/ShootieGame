@@ -19,15 +19,15 @@
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 
-void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player)
+void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player, Vector2 *mousePosition)
 {
     float Dx, Dy, tmp;
     float mouseX;
     float mouseY;
     ProjectileLL *aux;
 
-    mouseX = GetMouseX();
-    mouseY = GetMouseY();
+    mouseX = mousePosition->x;
+    mouseY = mousePosition->y;
     
     // aggiungo un proiettile in testa alla lista e lo inizializzo
     // con le coordinate ed il valore dei vettori per poi aggiornarne
@@ -42,8 +42,8 @@ void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *
                                    10, 10 };
     projectileHead->color = YELLOW;
 
-    Dx = projectileHead->projectile.x - 10; // dio cane
-    Dy = projectileHead->projectile.y - 10; // dio cane
+    Dx = projectileHead->projectile.x - mouseX; // dio cane
+    Dy = projectileHead->projectile.y - mouseY; // dio cane
 
     tmp = abs(Dx) + abs(Dy);
 

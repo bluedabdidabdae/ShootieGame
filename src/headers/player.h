@@ -4,9 +4,10 @@
 #define PLAYER_H
 
 #define PLAYERSPEED 5.0f
-#define PLAYERPROJECTILESPEED 17.0f
 
-void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player);
+#include "graphic.h"
+
+void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player, Vector2 *mousePosition);
 void UpdatePlayer(Rectangle *player);
 
 #endif

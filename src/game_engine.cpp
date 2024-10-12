@@ -99,7 +99,7 @@ int GameEngine(GameDataS *gameData)
             
             pthread_mutex_lock(&projectileListLock);
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-                PlayerShooting(gameData->frameCounter, gameData->projectileHead, gameData->player);
+                PlayerShooting(gameData->frameCounter, gameData->projectileHead, gameData->player, gameData->mousePosition);
 
             pthread_mutex_lock(&enemiesListLock);
             UpdateEnemies(gameData->enemiesHead, gameData->player);
