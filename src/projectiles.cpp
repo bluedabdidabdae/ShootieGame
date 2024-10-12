@@ -6,7 +6,47 @@
 // #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
+#include "headers/global_types.h"
+#include "headers/utility.h"
 #include "headers/projectiles.h"
+
+// local functions
+void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop);
+
+void CheckProjEntityDamage(GameDataS *gameData)
+{
+    ProjectileLL *currentProjectile = gameData->projectileHead;
+    ProjectileLL *previousProjectile;
+    EnemyLL *currentEnemy;
+
+    while(currentProjectile->next != NULL)
+    {
+        previousProjectile = currentProjectile;
+        currentProjectile = currentProjectile->next;
+        switch(currentProjectile->owner)
+        {
+            case ENEMY:
+                if(CheckHitboxRec(currentProjectile->projectile, (*gameData->player).player))
+                {
+                    (*gameData->player).lives -= 50;
+                    ProjectilePop(previousProjectile, &currentProjectile);
+                }
+            break;
+            case PLAYER:
+                currentEnemy = gameData->enemiesHead;
+                while(currentEnemy->next != NULL)
+                {
+                    currentEnemy = currentEnemy->next;
+                    if(CheckHitboxRec(currentProjectile->projectile, currentEnemy->enemy))
+                    {
+                        currentEnemy->hitPoint -= 10;
+                        ProjectilePop(previousProjectile, &currentProjectile);
+                    }
+                }
+            break;
+        }
+    }
+}
 
 void UpdateProjectiles(ProjectileLL *projectileHead)
 {

@@ -23,12 +23,9 @@
 #include <pthread.h>
 
 #include "raylib.h"
-#include "headers/projectiles.h"
-#include "headers/enemies.h"
-#include "headers/main.h"
 #include "headers/menu.h"
 #include "headers/graphic.h"
-#include "headers/game_engine.h"
+#include "headers/game.h"
 
 pthread_mutex_t enemiesListLock;
 pthread_mutex_t projectileListLock;
@@ -54,6 +51,11 @@ int main(int argc, char *argv[])
 
     gameData.toDraw = (ToDraw*)malloc(sizeof(ToDraw));
     *gameData.toDraw = MAINMENU;
+    
+    gameData.gameSkin = (GameSkinS*)malloc(sizeof(GameSkinS));
+    (*gameData.gameSkin).primaryColor = WHITE;
+    (*gameData.gameSkin).secondaryColor = BLUE;
+    
     gameData.frameCounter = 0;
     gameData.mousePosition = NULL;
     gameData.camera = NULL;
@@ -61,7 +63,6 @@ int main(int argc, char *argv[])
     gameData.mapBorder = NULL;
     gameData.enemiesHead = NULL;
     gameData.projectileHead = NULL;
-
 
     mainError = pthread_create(&drawingThreadId, NULL, HandleGraphics, &gameData); 
     if (mainError != 0) TraceLog(LOG_ERROR, "Error creating thread");
@@ -77,7 +78,7 @@ int main(int argc, char *argv[])
                 MainMenuHandler(&gameStatus, gameData.mousePosition);
             break;
             case PLAY:
-                GameEngine(&gameData);
+                GameHandler(&gameData);
                 gameStatus = MENU;
             break;
         }

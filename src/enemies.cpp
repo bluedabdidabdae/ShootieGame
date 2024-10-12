@@ -10,6 +10,21 @@
 #include "headers/projectiles.h"
 #include "headers/enemies.h"
 
+#define ENEMYSPEED 3.0f
+#define ENEMYMAXPDISTANCE 500
+#define ENEMYMINPDISTANCE 400
+
+// local functions
+void EnemyPop(EnemyLL *prePop, EnemyLL **toPop);
+
+void EnemyPop(EnemyLL *prePop, EnemyLL **toPop)
+{
+    prePop->next = (*toPop)->next;
+    free(*toPop);
+    *toPop = prePop;
+    prePop = NULL;
+}
+
 int SpawnEnemy(EnemyLL *head, float x, float y)
 {
     EnemyLL *aux = head->next;
@@ -89,11 +104,18 @@ void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectan
 void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
 {
     float Dx, Dy, tmp;
+    EnemyLL *previousEnemy;
 
     while(currentEnemy->next != NULL){
 
+        previousEnemy = currentEnemy;
         currentEnemy = currentEnemy->next;
 
+        if(currentEnemy->hitPoint <= 0)
+        {
+            EnemyPop(previousEnemy, &currentEnemy);
+            goto ignore_stuff;
+        }
         if(STILL == currentEnemy->behaviour)
         {
             if(rand()%1000 < 980)

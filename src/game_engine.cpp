@@ -10,8 +10,7 @@
 #include "headers/projectiles.h"
 #include "headers/enemies.h"
 #include "headers/player.h"
-#include "headers/graphic.h"
-#include "headers/game_engine.h"
+#include "headers/game.h"
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;
@@ -19,21 +18,22 @@ extern pthread_mutex_t playerLock;
 extern pthread_mutex_t gameUpdateLock;
 extern pthread_mutex_t cameraLock;
 
-int GameEngine(GameDataS *gameData)
+int GameHandler(GameDataS *gameData)
 {
     int error;
 
     uint lastFrameId;
 
+    gameData->score = 104;
+
     // Init player
-    gameData->player = (Rectangle*)malloc(sizeof(Rectangle));
-    *gameData->player = { WIDTH/2-20, HEIGT/2-20, 40, 40 };
-    
-    pthread_mutex_lock(&enemiesListLock);
+    gameData->player = (PlayerS*)malloc(sizeof(PlayerS));
+    (*gameData->player).player = { WIDTH/2-20, HEIGT/2-20, 40, 40 };
+    (*gameData->player).lives = 500;
+
     // Init enemies linked list
     gameData->enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));
     gameData->enemiesHead->next = NULL;
-    pthread_mutex_unlock(&enemiesListLock);
 
     // Init projectiles linked list
     gameData->projectileHead = (ProjectileLL*)malloc(sizeof(ProjectileLL));
@@ -48,7 +48,7 @@ int GameEngine(GameDataS *gameData)
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
     *gameData->camera = { 0 };
-    (*gameData->camera).target = (Vector2){ (*gameData->player).x + 20.0f, (*gameData->player).y + 20.0f };
+    (*gameData->camera).target = (Vector2){ (*gameData->player).player.x + 20.0f, (*gameData->player).player.y + 20.0f };
     (*gameData->camera).offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
     (*gameData->camera).zoom = 0.6f;
 
@@ -67,7 +67,7 @@ int GameEngine(GameDataS *gameData)
         lastFrameId = gameData->frameCounter;
         //DrawGame(&camera, enemiesHead, &player, mapBorder, projectileHead);
         
-        if(IsKeyPressed(KEY_M))
+        if(IsKeyPressed(KEY_M) || (*gameData->player).lives <= 0)
         {
             //if(GameMenuHandler() == 3)
             *gameData->toDraw = MAINMENU;
@@ -80,7 +80,7 @@ int GameEngine(GameDataS *gameData)
             gameData->projectileHead = NULL;
             // delete player
             free(gameData->player);
-            gameData->player = NULL;
+            gameData->player= NULL;
             // delete camera
             free(gameData->camera);
             gameData->camera = NULL;
@@ -93,24 +93,31 @@ int GameEngine(GameDataS *gameData)
         {
             pthread_mutex_lock(&cameraLock);
             pthread_mutex_lock(&playerLock);
-            UpdatePlayer(gameData->player);
-            gameData->camera->target = (Vector2){ gameData->player->x + 20, gameData->player->y + 20 };
+
+            UpdatePlayer(&(*gameData->player).player);
+            gameData->camera->target = (Vector2){ (*gameData->player).player.x + 20, (*gameData->player).player.y + 20 };
+            
             pthread_mutex_unlock(&cameraLock);
             
             pthread_mutex_lock(&projectileListLock);
+            
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-                PlayerShooting(gameData->frameCounter, gameData->projectileHead, gameData->player);
+                PlayerShooting(gameData->frameCounter, gameData->projectileHead, &(*gameData->player).player, gameData->mousePosition);
 
             pthread_mutex_lock(&enemiesListLock);
-            UpdateEnemies(gameData->enemiesHead, gameData->player);
+
+            UpdateEnemies(gameData->enemiesHead, &(*gameData->player).player);
             SnapEnemies(gameData->enemiesHead, gameData->mapBorder);
-            EnemiesShooting(gameData->enemiesHead, gameData->projectileHead, gameData->player);
-            pthread_mutex_unlock(&enemiesListLock);
-            pthread_mutex_unlock(&playerLock);
+            EnemiesShooting(gameData->enemiesHead, gameData->projectileHead, &(*gameData->player).player);
+            
             UpdateProjectiles(gameData->projectileHead);
             CheckProjectilesBorders(gameData->projectileHead, gameData->mapBorder);
+
+            CheckProjEntityDamage(gameData);
+
             pthread_mutex_unlock(&projectileListLock);
-            
+            pthread_mutex_unlock(&playerLock);
+            pthread_mutex_unlock(&enemiesListLock);
         }
     }
 }

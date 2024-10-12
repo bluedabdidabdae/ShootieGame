@@ -4,15 +4,30 @@
 #include <pthread.h>
 
 #include "raylib.h"
-#include "headers/projectiles.h"
-#include "headers/enemies.h"
+#include "headers/global_types.h"
 #include "headers/graphic.h"
+
+#define WINDOWNAME "Shootie Shootie Game"
+#define WIDTH 1335
+#define HEIGT 675
+#define TARGETFPS 60
+#define MAINMENUBUTTONWIDTH 760
+#define MAINMENUBUTTONHEIGT 50
+#define FADEVALUE 0.2
+#define MAINMENUBUTTONX 300
+#define MAINMENUBUTTONY 270
+#define MAINMENUTEXTCOLOR RAYWHITE
+#define WALLTHICKNESS 10
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;
 extern pthread_mutex_t playerLock;
 extern pthread_mutex_t gameUpdateLock;
 extern pthread_mutex_t cameraLock;
+
+// local functions
+void DrawMenu();
+void DrawGame(void* data);
 
 void *HandleGraphics(void* data)
 {
@@ -39,6 +54,8 @@ void *HandleGraphics(void* data)
             break;
             case GAME:
                 //sending clear to update to game engine
+                gameData->mousePosition->x += gameData->camera->target.x - (WIDTH / 2);
+                gameData->mousePosition->y += gameData->camera->target.y - (HEIGT / 2);
                 pthread_mutex_unlock(&gameUpdateLock);
                 DrawGame(gameData);
             break;
@@ -84,7 +101,9 @@ void DrawGame(void* data)
         BeginMode2D(*gameData->camera);
             // drawing player
             pthread_mutex_lock(&playerLock);
-            DrawRectangleRec(*gameData->player, RAYWHITE);
+            
+            DrawRectangleRec((*gameData->player).player, (*gameData->gameSkin).primaryColor);
+
             pthread_mutex_unlock(&playerLock);
             pthread_mutex_unlock(&cameraLock);
             // drawing projectiles
@@ -97,14 +116,14 @@ void DrawGame(void* data)
             pthread_mutex_unlock(&projectileListLock);
             // drawing map borders
             for(int i = 0; i < 4; i++)
-                DrawRectangleRec(gameData->mapBorder[i], BLUE);
+                DrawRectangleRec(gameData->mapBorder[i], (*gameData->gameSkin).secondaryColor);
             
             // drawing enemies from linked list of type *EnemyLL
             pthread_mutex_lock(&enemiesListLock);
             while(enemiesHead->next != NULL)
             {
                 enemiesHead = enemiesHead->next;
-                DrawRectangleRec(enemiesHead->healthBar, RED);
+                //DrawRectangleRec(enemiesHead->healthBar, RED);
                 DrawRectangle(enemiesHead->healthBar.x,
                               enemiesHead->healthBar.y,
                               enemiesHead->hitPoint,
@@ -114,5 +133,9 @@ void DrawGame(void* data)
             }
             pthread_mutex_unlock(&enemiesListLock);
         EndMode2D();
+        pthread_mutex_lock(&playerLock);
+        DrawText(TextFormat("SCORE: %u", gameData->score), 30, 30, 40, WHITE);
+        DrawRectangle(30, 80, (*gameData->player).lives, 15, GREEN);
+        pthread_mutex_unlock(&playerLock);
     EndDrawing();
 }
