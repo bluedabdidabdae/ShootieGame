@@ -3,7 +3,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#define PLAYERSPEED 5.0f
+#define PLAYERSPEED 3.0f
 
 #include "graphic.h"
 

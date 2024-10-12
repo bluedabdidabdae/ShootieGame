@@ -106,7 +106,7 @@ void DrawGame(void* data)
             while(enemiesHead->next != NULL)
             {
                 enemiesHead = enemiesHead->next;
-                DrawRectangleRec(enemiesHead->healthBar, RED);
+                //DrawRectangleRec(enemiesHead->healthBar, RED);
                 DrawRectangle(enemiesHead->healthBar.x,
                               enemiesHead->healthBar.y,
                               enemiesHead->hitPoint,
