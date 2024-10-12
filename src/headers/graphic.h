@@ -15,10 +15,47 @@
 #define MAINMENUTEXTCOLOR RAYWHITE
 #define WALLTHICKNESS 10
 
-#include "projectiles.h"
-#include "enemies.h"
+#include "raylib.h"
 
 //////////////////////////////////////////////////////////
+typedef enum behaviour_model{
+        APPROACHING,
+        BACKING,
+        STILL
+}Behaviour;
+typedef struct Enemy_Linked_List{
+    Rectangle enemy;
+    Color color;
+    Behaviour behaviour;
+    Rectangle healthBar;
+    int hitPoint;
+    Enemy_Linked_List *next;
+}EnemyLL;
+//////////////////////////////////////////////////////////
+typedef enum projectile_owner_model{
+    ENEMY,
+    PLAYER
+}ProjectileOwner;
+//////////////////////////////////////////////////////////
+typedef struct Projectile_linked_List{
+    Rectangle projectile;
+    Color color;
+    float vX;
+    float vY;
+    ProjectileOwner owner;
+    Projectile_linked_List *next;
+}ProjectileLL;
+//////////////////////////////////////////////////////////
+typedef struct player_model{
+    Rectangle player;
+    int lives;
+}PlayerS;
+
+typedef struct game_skin_model{
+    Color primaryColor;
+    Color secondaryColor;
+}GameSkinS;
+
 typedef enum to_draw_status{
     MAINMENU,
     GAME,
@@ -27,13 +64,15 @@ typedef enum to_draw_status{
 
 typedef struct game_data_model{
     ToDraw *toDraw;
+    GameSkinS *gameSkin;
     uint frameCounter;
     Vector2 *mousePosition;
     Camera2D *camera;
-    Rectangle *player;
+    PlayerS *player;
     Rectangle *mapBorder;
     EnemyLL *enemiesHead;
     ProjectileLL *projectileHead;
+    uint score;
 }GameDataS;
 //////////////////////////////////////////////////////////
 

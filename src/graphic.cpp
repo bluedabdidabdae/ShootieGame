@@ -86,7 +86,9 @@ void DrawGame(void* data)
         BeginMode2D(*gameData->camera);
             // drawing player
             pthread_mutex_lock(&playerLock);
-            DrawRectangleRec(*gameData->player, RAYWHITE);
+            
+            DrawRectangleRec((*gameData->player).player, (*gameData->gameSkin).primaryColor);
+
             pthread_mutex_unlock(&playerLock);
             pthread_mutex_unlock(&cameraLock);
             // drawing projectiles
@@ -99,7 +101,7 @@ void DrawGame(void* data)
             pthread_mutex_unlock(&projectileListLock);
             // drawing map borders
             for(int i = 0; i < 4; i++)
-                DrawRectangleRec(gameData->mapBorder[i], BLUE);
+                DrawRectangleRec(gameData->mapBorder[i], (*gameData->gameSkin).secondaryColor);
             
             // drawing enemies from linked list of type *EnemyLL
             pthread_mutex_lock(&enemiesListLock);
@@ -116,5 +118,9 @@ void DrawGame(void* data)
             }
             pthread_mutex_unlock(&enemiesListLock);
         EndMode2D();
+        pthread_mutex_lock(&playerLock);
+        DrawText(TextFormat("SCORE: %u", gameData->score), 30, 30, 40, WHITE);
+        DrawRectangle(30, 80, (*gameData->player).lives, 15, GREEN);
+        pthread_mutex_unlock(&playerLock);
     EndDrawing();
 }

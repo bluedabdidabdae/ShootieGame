@@ -8,6 +8,49 @@
 #include "raylib.h"
 #include "headers/projectiles.h"
 
+void CheckProjEntityDamage(GameDataS *gameData)
+{
+    ProjectileLL *currentProjectile = gameData->projectileHead;
+    ProjectileLL *previousProjectile;
+    EnemyLL *currentEnemy;
+
+    while(currentProjectile->next != NULL)
+    {
+        previousProjectile = currentProjectile;
+        currentProjectile = currentProjectile->next;
+        switch(currentProjectile->owner)
+        {
+            case ENEMY:
+                if(CheckHitboxRec(currentProjectile->projectile, (*gameData->player).player))
+                {
+                    (*gameData->player).lives -= 50;
+                    ProjectilePop(previousProjectile, &currentProjectile);
+                }
+            break;
+            case PLAYER:
+                currentEnemy = gameData->enemiesHead;
+                while(currentEnemy->next != NULL)
+                {
+                    currentEnemy = currentEnemy->next;
+                    if(CheckHitboxRec(currentProjectile->projectile, currentEnemy->enemy))
+                    {
+                        currentEnemy->hitPoint -= 10;
+                        ProjectilePop(previousProjectile, &currentProjectile);
+                    }
+                }
+            break;
+        }
+    }
+}
+
+int CheckHitboxRec(Rectangle rect1, Rectangle rect2)
+{
+    return (rect1.x <= rect2.x + rect2.width &&
+            rect1.y <= rect2.y + rect2.height &&
+            rect1.x + rect1.height >= rect2.x &&
+            rect1.y + rect1.width >= rect2.y);
+}
+
 void UpdateProjectiles(ProjectileLL *projectileHead)
 {
     ProjectileLL *currentProjectile = projectileHead;

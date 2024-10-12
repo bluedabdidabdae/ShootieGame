@@ -7,22 +7,9 @@
 #define ENEMYMAXPDISTANCE 500
 #define ENEMYMINPDISTANCE 400
 
-//////////////////////////////////////////////////////////
-typedef enum behaviour_model{
-        APPROACHING,
-        BACKING,
-        STILL
-}Behaviour;
-typedef struct Enemy_Linked_List{
-    Rectangle enemy;
-    Color color;
-    Behaviour behaviour;
-    Rectangle healthBar;
-    int hitPoint;
-    Enemy_Linked_List *next;
-}EnemyLL;
-//////////////////////////////////////////////////////////
+#include "graphic.h"
 
+void EnemyPop(EnemyLL *prePop, EnemyLL **toPop);
 int SpawnEnemy(EnemyLL *destination, float x, float y);
 void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[]);
 void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectangle *player);
