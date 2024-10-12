@@ -42,8 +42,8 @@ void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *
                                    10, 10 };
     projectileHead->color = YELLOW;
 
-    Dx = projectileHead->projectile.x - mouseX; // dio cane
-    Dy = projectileHead->projectile.y - mouseY; // dio cane
+    Dx = projectileHead->projectile.x - mouseX;
+    Dy = projectileHead->projectile.y - mouseY;
 
     tmp = abs(Dx) + abs(Dy);
 
