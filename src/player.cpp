@@ -7,17 +7,10 @@
 // #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
-#include "headers/projectiles.h"
+#include "headers/global_types.h"
 #include "headers/player.h"
 
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-// GIGANTESCO TACONE, DA TOGLIERE QUANDO I BORDI MAPPA
-// SARANNO UNA LINKED LIST
-#include "headers/enemies.h"
-#include "headers/graphic.h"
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
+#define PLAYERPROJECTILESPEED 25.0f
 
 void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player, Vector2 *mousePosition)
 {

@@ -23,12 +23,9 @@
 #include <pthread.h>
 
 #include "raylib.h"
-#include "headers/projectiles.h"
-#include "headers/enemies.h"
-#include "headers/main.h"
 #include "headers/menu.h"
 #include "headers/graphic.h"
-#include "headers/game_engine.h"
+#include "headers/game.h"
 
 pthread_mutex_t enemiesListLock;
 pthread_mutex_t projectileListLock;
@@ -81,7 +78,7 @@ int main(int argc, char *argv[])
                 MainMenuHandler(&gameStatus, gameData.mousePosition);
             break;
             case PLAY:
-                GameEngine(&gameData);
+                GameHandler(&gameData);
                 gameStatus = MENU;
             break;
         }

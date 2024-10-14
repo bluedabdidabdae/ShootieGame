@@ -3,8 +3,16 @@
 #include <stdlib.h>
 
 #include "raylib.h"
+#include "headers/global_types.h"
 #include "headers/menu.h"
-#include "headers/graphic.h"
+
+#define MAINMENUBUTTONWIDTH 760
+#define MAINMENUBUTTONHEIGT 50
+#define MAINMENUBUTTONX 300
+#define MAINMENUBUTTONY 270
+
+// local functions
+States CheckCollisions(Vector2* mousePosition);
 
 void MainMenuHandler(States *gameStatus, Vector2 *mousePosition)
 {

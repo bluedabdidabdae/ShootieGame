@@ -8,6 +8,7 @@
 #include "graphic.h"
 
 void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player, Vector2 *mousePosition);
+void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player, Vector2 *mousePosition);
 void UpdatePlayer(Rectangle *player);
 
 #endif

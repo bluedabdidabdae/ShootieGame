@@ -7,8 +7,25 @@
 // #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
-#include "headers/projectiles.h"
+#include "headers/global_types.h"
 #include "headers/enemies.h"
+
+#define PROJECTILESPEED 12.0f
+
+#define ENEMYSPEED 3.0f
+#define ENEMYMAXPDISTANCE 500
+#define ENEMYMINPDISTANCE 400
+
+// local functions
+void EnemyPop(EnemyLL *prePop, EnemyLL **toPop);
+
+void EnemyPop(EnemyLL *prePop, EnemyLL **toPop)
+{
+    prePop->next = (*toPop)->next;
+    free(*toPop);
+    *toPop = prePop;
+    prePop = NULL;
+}
 
 void EnemyPop(EnemyLL *prePop, EnemyLL **toPop)
 {
@@ -31,7 +48,7 @@ int SpawnEnemy(EnemyLL *head, float x, float y)
         head->enemy = { x, y, 40, 40 };
         head->color = BROWN;
         head->behaviour = BACKING;
-        head->hitPoint = 25;
+        head->hitPoint = 40;
         head->healthBar = { x, y-20, 40, 10 };
         return 0;
     }
@@ -98,12 +115,19 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
 {
     float Dx, Dy, tmp;
     EnemyLL *previousEnemy;
+    EnemyLL *previousEnemy;
 
     while(currentEnemy->next != NULL){
 
         previousEnemy = currentEnemy;
+        previousEnemy = currentEnemy;
         currentEnemy = currentEnemy->next;
 
+        if(currentEnemy->hitPoint <= 0)
+        {
+            EnemyPop(previousEnemy, &currentEnemy);
+            goto ignore_stuff;
+        }
         if(currentEnemy->hitPoint <= 0)
         {
             EnemyPop(previousEnemy, &currentEnemy);

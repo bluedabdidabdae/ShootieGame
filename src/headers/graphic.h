@@ -77,7 +77,5 @@ typedef struct game_data_model{
 //////////////////////////////////////////////////////////
 
 void *HandleGraphics(void* data);
-void DrawMenu();
-void DrawGame(void* data);
 
 #endif

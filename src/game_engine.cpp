@@ -10,8 +10,7 @@
 #include "headers/projectiles.h"
 #include "headers/enemies.h"
 #include "headers/player.h"
-#include "headers/graphic.h"
-#include "headers/game_engine.h"
+#include "headers/game.h"
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;
@@ -19,7 +18,7 @@ extern pthread_mutex_t playerLock;
 extern pthread_mutex_t gameUpdateLock;
 extern pthread_mutex_t cameraLock;
 
-int GameEngine(GameDataS *gameData)
+int GameHandler(GameDataS *gameData)
 {
     int error;
 

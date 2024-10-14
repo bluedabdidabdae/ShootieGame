@@ -6,6 +6,8 @@
 // #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
+#include "headers/global_types.h"
+#include "headers/utility.h"
 #include "headers/projectiles.h"
 
 void CheckProjEntityDamage(GameDataS *gameData)

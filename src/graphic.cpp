@@ -4,15 +4,27 @@
 #include <pthread.h>
 
 #include "raylib.h"
-#include "headers/projectiles.h"
-#include "headers/enemies.h"
+#include "headers/global_types.h"
 #include "headers/graphic.h"
+
+#define WINDOWNAME "Shootie Shootie Game"
+#define TARGETFPS 60
+#define MAINMENUBUTTONWIDTH 760
+#define MAINMENUBUTTONHEIGT 50
+#define FADEVALUE 0.2
+#define MAINMENUBUTTONX 300
+#define MAINMENUBUTTONY 270
+#define MAINMENUTEXTCOLOR RAYWHITE
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;
 extern pthread_mutex_t playerLock;
 extern pthread_mutex_t gameUpdateLock;
 extern pthread_mutex_t cameraLock;
+
+// local functions
+void DrawMenu();
+void DrawGame(void* data);
 
 void *HandleGraphics(void* data)
 {

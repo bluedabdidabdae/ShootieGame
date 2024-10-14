@@ -10,8 +10,11 @@
 
 void CheckProjEntityDamage(GameDataS *gameData);
 int CheckHitboxRec(Rectangle rect1, Rectangle rect2);
+#include "raylib.h"
+#include "global_types.h"
+
+void CheckProjEntityDamage(GameDataS *gameData);
 void UpdateProjectiles(ProjectileLL *projectileHead);
-void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop);
 void CheckProjectilesBorders(ProjectileLL *projectileHead, Rectangle mapBorder[]);
 void CompletelyDeleteAllProjectiles(ProjectileLL *head);
 
