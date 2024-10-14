@@ -10,6 +10,8 @@
 #include "headers/global_types.h"
 #include "headers/player.h"
 
+#define PLAYERPROJECTILESPEED 25.0f
+
 void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player, Vector2 *mousePosition)
 {
     float Dx, Dy, tmp;

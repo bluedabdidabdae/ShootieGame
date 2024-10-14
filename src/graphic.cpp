@@ -8,8 +8,6 @@
 #include "headers/graphic.h"
 
 #define WINDOWNAME "Shootie Shootie Game"
-#define WIDTH 1335
-#define HEIGT 675
 #define TARGETFPS 60
 #define MAINMENUBUTTONWIDTH 760
 #define MAINMENUBUTTONHEIGT 50
@@ -17,7 +15,6 @@
 #define MAINMENUBUTTONX 300
 #define MAINMENUBUTTONY 270
 #define MAINMENUTEXTCOLOR RAYWHITE
-#define WALLTHICKNESS 10
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;

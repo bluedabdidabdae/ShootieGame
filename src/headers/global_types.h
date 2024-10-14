@@ -5,7 +5,11 @@
 
 #include "raylib.h"
 
-typedef uint unsigned int;
+#define WIDTH 1335
+#define HEIGT 675
+#define WALLTHICKNESS 10
+
+typedef unsigned int uint;
 //////////////////////////////////////////////////////////
 typedef enum StatesModel{
     MENU,       // 0

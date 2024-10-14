@@ -7,8 +7,10 @@
 // #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
-#include "headers/projectiles.h"
+#include "headers/global_types.h"
 #include "headers/enemies.h"
+
+#define PROJECTILESPEED 12.0f
 
 #define ENEMYSPEED 3.0f
 #define ENEMYMAXPDISTANCE 500
@@ -38,7 +40,7 @@ int SpawnEnemy(EnemyLL *head, float x, float y)
         head->enemy = { x, y, 40, 40 };
         head->color = BROWN;
         head->behaviour = BACKING;
-        head->hitPoint = 25;
+        head->hitPoint = 40;
         head->healthBar = { x, y-20, 40, 10 };
         return 0;
     }

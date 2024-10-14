@@ -3,11 +3,8 @@
 #ifndef PROJECTILES_H
 #define PROJECTILES_H
 
-#define PROJECTILESPEED 12.0f
-#define PLAYERPROJECTILESPEED 25.0f
-
 #include "raylib.h"
-#include "graphic.h"
+#include "global_types.h"
 
 void CheckProjEntityDamage(GameDataS *gameData);
 void UpdateProjectiles(ProjectileLL *projectileHead);

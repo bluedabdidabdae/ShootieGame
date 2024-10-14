@@ -4,7 +4,6 @@
 
 #include "raylib.h"
 #include "headers/global_types.h"
-#include "headers/graphic.h"
 #include "headers/menu.h"
 
 #define MAINMENUBUTTONWIDTH 760
