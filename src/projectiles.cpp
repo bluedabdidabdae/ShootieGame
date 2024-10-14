@@ -10,6 +10,9 @@
 #include "headers/utility.h"
 #include "headers/projectiles.h"
 
+// local functions
+void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop);
+
 void CheckProjEntityDamage(GameDataS *gameData)
 {
     ProjectileLL *currentProjectile = gameData->projectileHead;
@@ -43,14 +46,6 @@ void CheckProjEntityDamage(GameDataS *gameData)
             break;
         }
     }
-}
-
-int CheckHitboxRec(Rectangle rect1, Rectangle rect2)
-{
-    return (rect1.x <= rect2.x + rect2.width &&
-            rect1.y <= rect2.y + rect2.height &&
-            rect1.x + rect1.height >= rect2.x &&
-            rect1.y + rect1.width >= rect2.y);
 }
 
 void UpdateProjectiles(ProjectileLL *projectileHead)

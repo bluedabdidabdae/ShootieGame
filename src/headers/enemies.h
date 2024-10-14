@@ -3,13 +3,9 @@
 #ifndef ENEMIES_H
 #define ENEMIES_H
 
-#define ENEMYSPEED 3.0f
-#define ENEMYMAXPDISTANCE 500
-#define ENEMYMINPDISTANCE 400
+#include "raylib.h"
+#include "global_types.h"
 
-#include "graphic.h"
-
-void EnemyPop(EnemyLL *prePop, EnemyLL **toPop);
 int SpawnEnemy(EnemyLL *destination, float x, float y);
 void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[]);
 void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectangle *player);

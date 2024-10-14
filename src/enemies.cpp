@@ -27,14 +27,6 @@ void EnemyPop(EnemyLL *prePop, EnemyLL **toPop)
     prePop = NULL;
 }
 
-void EnemyPop(EnemyLL *prePop, EnemyLL **toPop)
-{
-    prePop->next = (*toPop)->next;
-    free(*toPop);
-    *toPop = prePop;
-    prePop = NULL;
-}
-
 int SpawnEnemy(EnemyLL *head, float x, float y)
 {
     EnemyLL *aux = head->next;
@@ -115,19 +107,12 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
 {
     float Dx, Dy, tmp;
     EnemyLL *previousEnemy;
-    EnemyLL *previousEnemy;
 
     while(currentEnemy->next != NULL){
 
         previousEnemy = currentEnemy;
-        previousEnemy = currentEnemy;
         currentEnemy = currentEnemy->next;
 
-        if(currentEnemy->hitPoint <= 0)
-        {
-            EnemyPop(previousEnemy, &currentEnemy);
-            goto ignore_stuff;
-        }
         if(currentEnemy->hitPoint <= 0)
         {
             EnemyPop(previousEnemy, &currentEnemy);
