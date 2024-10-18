@@ -24,7 +24,7 @@ extern pthread_mutex_t cameraLock;
 
 // local functions
 void DrawMenu();
-void DrawGame(void* data);
+void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture);
 
 void *HandleGraphics(void* data)
 {
@@ -34,6 +34,11 @@ void *HandleGraphics(void* data)
 
     InitWindow(WIDTH, HEIGT, WINDOWNAME);
     SetTargetFPS(TARGETFPS);
+
+    Image baseEnemyImage = LoadImage("resources/base_enemy.png");
+    ImageResize(&baseEnemyImage, 40, 40);
+    Texture2D baseEnemyTexture = LoadTextureFromImage(baseEnemyImage);
+    UnloadImage(baseEnemyImage);
 
     *gameData->mousePosition = GetMousePosition();
     // sending clear to update to main after
@@ -54,7 +59,7 @@ void *HandleGraphics(void* data)
                 gameData->mousePosition->x += gameData->camera->target.x - (WIDTH / 2);
                 gameData->mousePosition->y += gameData->camera->target.y - (HEIGT / 2);
                 pthread_mutex_unlock(&gameUpdateLock);
-                DrawGame(gameData);
+                DrawGame(gameData, &baseEnemyTexture);
             break;
         }
         gameData->frameCounter += 1;
@@ -67,23 +72,8 @@ void *HandleGraphics(void* data)
     return NULL;
 }
 
-void DrawMenu()
+void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
 {
-    BeginDrawing();
-        ClearBackground(BLACK);
-        DrawText(TextFormat("Shootie Shootie Game"), MAINMENUBUTTONX, 100, 70, MAINMENUTEXTCOLOR);
-    
-        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
-        DrawText(TextFormat("Play"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+5, 40, MAINMENUTEXTCOLOR);
-
-        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
-        DrawText(TextFormat("Exit"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
-    EndDrawing();
-}
-
-void DrawGame(void* data)
-{
-    GameDataS *gameData = (GameDataS*)data;
     pthread_mutex_lock(&enemiesListLock);
     EnemyLL *enemiesHead = gameData->enemiesHead;
     pthread_mutex_unlock(&enemiesListLock);
@@ -121,12 +111,13 @@ void DrawGame(void* data)
             {
                 enemiesHead = enemiesHead->next;
                 //DrawRectangleRec(enemiesHead->healthBar, RED);
+                DrawTexture(*baseEnemyTexture, enemiesHead->enemy.x, enemiesHead->enemy.y, WHITE);
                 DrawRectangle(enemiesHead->healthBar.x,
                               enemiesHead->healthBar.y,
                               enemiesHead->hitPoint,
                               enemiesHead->healthBar.height,
                               GREEN);
-                DrawRectangleRec(enemiesHead->enemy, enemiesHead->color);
+                //DrawRectangleRec(enemiesHead->enemy, enemiesHead->color);
             }
             pthread_mutex_unlock(&enemiesListLock);
         EndMode2D();
@@ -134,5 +125,19 @@ void DrawGame(void* data)
         DrawText(TextFormat("SCORE: %u", gameData->score), 30, 30, 40, WHITE);
         DrawRectangle(30, 80, (*gameData->player).lives, 15, GREEN);
         pthread_mutex_unlock(&playerLock);
+    EndDrawing();
+}
+
+void DrawMenu()
+{
+    BeginDrawing();
+        ClearBackground(BLACK);
+        DrawText(TextFormat("Shootie Shootie Game"), MAINMENUBUTTONX, 100, 70, MAINMENUTEXTCOLOR);
+    
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawText(TextFormat("Play"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+5, 40, MAINMENUTEXTCOLOR);
+
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawText(TextFormat("Exit"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
     EndDrawing();
 }

@@ -3,7 +3,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#define PLAYERSPEED 3.0f
+#define PLAYERSPEED 6.0f
 
 #include "raylib.h"
 #include "global_types.h"

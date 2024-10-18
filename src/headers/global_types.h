@@ -25,8 +25,13 @@ typedef enum behaviour_model{
         STILL
 }Behaviour;
 //////////////////////////////////////////////////////////
+typedef enum enemy_type_model{
+    NORMAL
+}EnemyType;
+//////////////////////////////////////////////////////////
 typedef struct Enemy_Linked_List{
     Rectangle enemy;
+    EnemyType enemyType;
     Color color;
     Behaviour behaviour;
     Rectangle healthBar;

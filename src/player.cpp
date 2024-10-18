@@ -33,7 +33,7 @@ void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *
     projectileHead->projectile = { player->x + player->width / 2,
                                    player->y + player->height / 2,
                                    10, 10 };
-    projectileHead->color = YELLOW;
+    projectileHead->color = BLUE;
 
     Dx = projectileHead->projectile.x - mouseX;
     Dy = projectileHead->projectile.y - mouseY;

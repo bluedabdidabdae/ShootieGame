@@ -29,7 +29,7 @@ int GameHandler(GameDataS *gameData)
     // Init player
     gameData->player = (PlayerS*)malloc(sizeof(PlayerS));
     (*gameData->player).player = { WIDTH/2-20, HEIGT/2-20, 40, 40 };
-    (*gameData->player).lives = 500;
+    (*gameData->player).lives = 200;
 
     // Init enemies linked list
     gameData->enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));

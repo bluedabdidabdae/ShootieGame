@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
     *gameData.toDraw = MAINMENU;
     
     gameData.gameSkin = (GameSkinS*)malloc(sizeof(GameSkinS));
-    (*gameData.gameSkin).primaryColor = WHITE;
-    (*gameData.gameSkin).secondaryColor = BLUE;
+    (*gameData.gameSkin).primaryColor = BLUE;
+    (*gameData.gameSkin).secondaryColor = WHITE;
     
     gameData.frameCounter = 0;
     gameData.mousePosition = NULL;

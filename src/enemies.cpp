@@ -10,11 +10,11 @@
 #include "headers/global_types.h"
 #include "headers/enemies.h"
 
-#define PROJECTILESPEED 12.0f
+#define PROJECTILESPEED 18.0f
 
 #define ENEMYSPEED 3.0f
-#define ENEMYMAXPDISTANCE 500
-#define ENEMYMINPDISTANCE 400
+#define ENEMYMAXPDISTANCE 600
+#define ENEMYMINPDISTANCE 500
 
 // local functions
 void EnemyPop(EnemyLL *prePop, EnemyLL **toPop);
@@ -38,6 +38,7 @@ int SpawnEnemy(EnemyLL *head, float x, float y)
         head = head->next;
         head->next = aux;
         head->enemy = { x, y, 40, 40 };
+        head->enemyType = NORMAL;
         head->color = BROWN;
         head->behaviour = BACKING;
         head->hitPoint = 40;
@@ -75,7 +76,7 @@ void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectan
     {
         currentEnemy = currentEnemy->next;
         // tiro a caso se il nemico spara o no
-        if(rand()%1000 < 15)
+        if(rand()%1000 < 20)
         {
             // aggiungo un proiettile in coda alla lista e lo inizializzo
             // con le coordinate ed il valore dei vettori per poi aggiornarne
@@ -88,7 +89,7 @@ void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectan
             projectileHead->projectile = { currentEnemy->enemy.x+currentEnemy->enemy.width/2,
                                            currentEnemy->enemy.y+currentEnemy->enemy.height/2,
                                            10, 10 };
-            projectileHead->color = PURPLE;
+            projectileHead->color = RED;
 
             Dx = projectileHead->projectile.x - (player->x + player->height / 2);
             Dy = projectileHead->projectile.y - (player->y + player->width / 2);
