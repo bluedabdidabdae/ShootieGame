@@ -56,8 +56,10 @@ int main(int argc, char *argv[])
     (*gameData.gameSkin).primaryColor = BLUE;
     (*gameData.gameSkin).secondaryColor = WHITE;
     
+    gameData.mousePosition = (Vector2*)malloc(sizeof(Vector2));
+    *gameData.mousePosition = GetMousePosition();
+
     gameData.frameCounter = 0;
-    gameData.mousePosition = NULL;
     gameData.camera = NULL;
     gameData.player = NULL;
     gameData.mapBorder = NULL;
@@ -75,6 +77,7 @@ int main(int argc, char *argv[])
         {
             case MENU:
                 pthread_mutex_lock(&gameUpdateLock);
+                *gameData.mousePosition = GetMousePosition();
                 MainMenuHandler(&gameStatus, gameData.mousePosition);
             break;
             case PLAY:

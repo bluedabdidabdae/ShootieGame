@@ -30,8 +30,6 @@ void *HandleGraphics(void* data)
 {
     GameDataS *gameData = (GameDataS*)data;
 
-    gameData->mousePosition = (Vector2*)malloc(sizeof(Vector2));
-
     InitWindow(WIDTH, HEIGT, WINDOWNAME);
     SetTargetFPS(TARGETFPS);
 
@@ -40,14 +38,12 @@ void *HandleGraphics(void* data)
     Texture2D baseEnemyTexture = LoadTextureFromImage(baseEnemyImage);
     UnloadImage(baseEnemyImage);
 
-    *gameData->mousePosition = GetMousePosition();
     // sending clear to update to main after
     // registering mouse pos for the first time
     pthread_mutex_unlock(&gameUpdateLock);
 
     while(*gameData->toDraw != CLOSEGAME)
     {
-        *gameData->mousePosition = GetMousePosition();
         switch(*gameData->toDraw)
         {
             case MAINMENU:
@@ -56,8 +52,6 @@ void *HandleGraphics(void* data)
             break;
             case GAME:
                 //sending clear to update to game engine
-                gameData->mousePosition->x += gameData->camera->target.x - (WIDTH / 2);
-                gameData->mousePosition->y += gameData->camera->target.y - (HEIGT / 2);
                 pthread_mutex_unlock(&gameUpdateLock);
                 DrawGame(gameData, &baseEnemyTexture);
             break;
@@ -80,8 +74,6 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
     pthread_mutex_lock(&projectileListLock);
     ProjectileLL *projectileHead = gameData->projectileHead;
     pthread_mutex_unlock(&projectileListLock);
-    // Updating camera target to the player position
-    
     
         ClearBackground(BLACK);
         pthread_mutex_lock(&cameraLock);
@@ -90,6 +82,7 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
             pthread_mutex_lock(&playerLock);
             
             DrawRectangleRec((*gameData->player).player, (*gameData->gameSkin).primaryColor);
+            DrawRectangle(gameData->mousePosition->x, gameData->mousePosition->y, 5, 5, RED);
 
             pthread_mutex_unlock(&playerLock);
             pthread_mutex_unlock(&cameraLock);
@@ -121,6 +114,7 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
             }
             pthread_mutex_unlock(&enemiesListLock);
         EndMode2D();
+        DrawFPS(600, 30);
         pthread_mutex_lock(&playerLock);
         DrawText(TextFormat("SCORE: %u", gameData->score), 30, 30, 40, WHITE);
         DrawRectangle(30, 80, (*gameData->player).lives, 15, GREEN);

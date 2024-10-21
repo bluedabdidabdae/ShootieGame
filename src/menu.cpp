@@ -18,6 +18,7 @@ void MainMenuHandler(States *gameStatus, Vector2 *mousePosition)
 {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
+        *mousePosition = GetMousePosition();
         *gameStatus = CheckCollisions(mousePosition);
         return;
     }

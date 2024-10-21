@@ -24,6 +24,8 @@ int GameHandler(GameDataS *gameData)
 
     uint lastFrameId;
 
+    bool isCameraLocked = true;
+
     gameData->score = 104;
 
     // Init player
@@ -38,13 +40,13 @@ int GameHandler(GameDataS *gameData)
     // Init projectiles linked list
     gameData->projectileHead = (ProjectileLL*)malloc(sizeof(ProjectileLL));
     gameData->projectileHead->next = NULL;
-
+/*
     // Spawning 4 enemies for testing purposes
     SpawnEnemy(gameData->enemiesHead, 40, 40);
-    SpawnEnemy(gameData->enemiesHead, 20, 400);
+    SpawnEnemy(gameData->enemiesHead, 1020, 400);
     SpawnEnemy(gameData->enemiesHead, 234, 467);
     SpawnEnemy(gameData->enemiesHead, 345, 340);
-    
+*/
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
     *gameData->camera = { 0 };
@@ -65,8 +67,7 @@ int GameHandler(GameDataS *gameData)
     {
         pthread_mutex_lock(&gameUpdateLock);
         lastFrameId = gameData->frameCounter;
-        //DrawGame(&camera, enemiesHead, &player, mapBorder, projectileHead);
-        
+                
         if(IsKeyPressed(KEY_M) || (*gameData->player).lives <= 0)
         {
             //if(GameMenuHandler() == 3)
@@ -95,8 +96,24 @@ int GameHandler(GameDataS *gameData)
             pthread_mutex_lock(&playerLock);
 
             UpdatePlayer(&(*gameData->player).player);
-            gameData->camera->target = (Vector2){ (*gameData->player).player.x + 20, (*gameData->player).player.y + 20 };
-            
+
+            *gameData->mousePosition = GetMousePosition();
+            if(IsKeyPressed(KEY_SPACE))
+                isCameraLocked = !isCameraLocked;
+
+            if(isCameraLocked)
+            {
+                // update camera position to track player
+                gameData->camera->target = (Vector2){ (*gameData->player).player.x + 20, (*gameData->player).player.y + 20 };
+                // normalize muose coordinates to new camera position
+                gameData->mousePosition->x += (*gameData->player).player.x + 20 - gameData->camera->offset.x;
+                gameData->mousePosition->y += (*gameData->player).player.y + 20 - gameData->camera->offset.y;
+            }
+            else
+            {
+                
+            }
+
             pthread_mutex_unlock(&cameraLock);
             
             pthread_mutex_lock(&projectileListLock);
