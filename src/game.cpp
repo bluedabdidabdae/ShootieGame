@@ -97,21 +97,33 @@ int GameHandler(GameDataS *gameData)
 
             UpdatePlayer(&(*gameData->player).player);
 
-            *gameData->mousePosition = GetMousePosition();
             if(IsKeyPressed(KEY_SPACE))
                 isCameraLocked = !isCameraLocked;
 
             if(isCameraLocked)
             {
-                // update camera position to track player
+                // update camera position to track player and get mouse pos relative to player
                 gameData->camera->target = (Vector2){ (*gameData->player).player.x + 20, (*gameData->player).player.y + 20 };
-                // normalize muose coordinates to new camera position
+                *gameData->mousePosition = GetMousePosition();
+                // normalize mouse coordinates to new camera position
                 gameData->mousePosition->x += (*gameData->player).player.x + 20 - gameData->camera->offset.x;
                 gameData->mousePosition->y += (*gameData->player).player.y + 20 - gameData->camera->offset.y;
             }
             else
             {
-                
+                // save camera position
+                Vector2 tmp = gameData->camera->target;
+                // update camera position to track player and get mouse pos relative to player
+                gameData->camera->target = (Vector2){ (*gameData->player).player.x + 20, (*gameData->player).player.y + 20 };
+                *gameData->mousePosition = GetMousePosition();
+                // normalize mouse coordinates to new camera position
+                gameData->mousePosition->x += (*gameData->player).player.x + 20 - gameData->camera->offset.x;
+                gameData->mousePosition->y += (*gameData->player).player.y + 20 - gameData->camera->offset.y;
+                // move mouse position to player position relative to camera
+                // idfking know how to do this
+                // idfking know how to do this
+                // revert to prev camera position
+                gameData->camera->target = tmp;                 
             }
 
             pthread_mutex_unlock(&cameraLock);
