@@ -34,12 +34,11 @@ void *HandleGraphics(void* data)
     SetTargetFPS(TARGETFPS);
 
     Image baseEnemyImage = LoadImage("resources/base_enemy.png");
-    ImageResize(&baseEnemyImage, 40, 40);
+    ImageResize(&baseEnemyImage, 20, 20);
     Texture2D baseEnemyTexture = LoadTextureFromImage(baseEnemyImage);
     UnloadImage(baseEnemyImage);
 
-    // sending clear to update to main after
-    // registering mouse pos for the first time
+    // sending clear to update to main
     pthread_mutex_unlock(&gameUpdateLock);
 
     while(*gameData->toDraw != CLOSEGAME)
@@ -82,7 +81,8 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
             pthread_mutex_lock(&playerLock);
             
             DrawRectangleRec((*gameData->player).player, (*gameData->gameSkin).primaryColor);
-            DrawRectangle(gameData->mousePosition->x, gameData->mousePosition->y, 5, 5, RED);
+
+            //DrawRectangle(gameData->mousePosition->x, gameData->mousePosition->y, 5, 5, RED);
 
             pthread_mutex_unlock(&playerLock);
             pthread_mutex_unlock(&cameraLock);
@@ -115,6 +115,7 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
             pthread_mutex_unlock(&enemiesListLock);
         EndMode2D();
         DrawFPS(600, 30);
+        //DrawRectangle(GetMouseX(), GetMouseY(), 5, 5, YELLOW);
         pthread_mutex_lock(&playerLock);
         DrawText(TextFormat("SCORE: %u", gameData->score), 30, 30, 40, WHITE);
         DrawRectangle(30, 80, (*gameData->player).lives, 15, GREEN);

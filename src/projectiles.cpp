@@ -39,7 +39,7 @@ void CheckProjEntityDamage(GameDataS *gameData)
                     currentEnemy = currentEnemy->next;
                     if(CheckHitboxRec(currentProjectile->projectile, currentEnemy->enemy))
                     {
-                        currentEnemy->hitPoint -= 10;
+                        currentEnemy->hitPoint -= 5;
                         ProjectilePop(previousProjectile, &currentProjectile);
                     }
                 }

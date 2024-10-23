@@ -27,7 +27,7 @@ void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *
 
     projectileHead->projectile = { player->x + player->width / 2,
                                    player->y + player->height / 2,
-                                   10, 10 };
+                                   5, 5 };
     projectileHead->color = BLUE;
 
     Dx = projectileHead->projectile.x - mousePosition->x;
@@ -49,6 +49,6 @@ void UpdatePlayer(Rectangle *player)
     if (IsKeyDown(KEY_D)) player->x += PLAYERSPEED;
     if (player->x < WALLTHICKNESS) player->x = WALLTHICKNESS;
     if (player->y < WALLTHICKNESS) player->y = WALLTHICKNESS;
-    if (player->x > WIDTH-40) player->x = WIDTH-40;
-    if (player->y > HEIGT-40) player->y = HEIGT-40;
+    if (player->x > WIDTH-WALLTHICKNESS-40) player->x = WIDTH-WALLTHICKNESS-40;
+    if (player->y > HEIGT-WALLTHICKNESS-40) player->y = HEIGT-WALLTHICKNESS-40;
 }

@@ -26,11 +26,13 @@ int GameHandler(GameDataS *gameData)
 
     bool isCameraLocked = true;
 
+    Vector2 lastPlayerPos;
+
     gameData->score = 104;
 
     // Init player
     gameData->player = (PlayerS*)malloc(sizeof(PlayerS));
-    (*gameData->player).player = { WIDTH/2-20, HEIGT/2-20, 40, 40 };
+    (*gameData->player).player = { WIDTH/2-20, HEIGT/2-20, 20, 20 };
     (*gameData->player).lives = 200;
 
     // Init enemies linked list
@@ -40,26 +42,27 @@ int GameHandler(GameDataS *gameData)
     // Init projectiles linked list
     gameData->projectileHead = (ProjectileLL*)malloc(sizeof(ProjectileLL));
     gameData->projectileHead->next = NULL;
-/*
+
     // Spawning 4 enemies for testing purposes
     SpawnEnemy(gameData->enemiesHead, 40, 40);
     SpawnEnemy(gameData->enemiesHead, 1020, 400);
     SpawnEnemy(gameData->enemiesHead, 234, 467);
     SpawnEnemy(gameData->enemiesHead, 345, 340);
-*/
+
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
     *gameData->camera = { 0 };
-    (*gameData->camera).target = (Vector2){ (*gameData->player).player.x + 20.0f, (*gameData->player).player.y + 20.0f };
+    (*gameData->camera).target = (Vector2){ (*gameData->player).player.x + (*gameData->player).player.width,
+                                            (*gameData->player).player.y + (*gameData->player).player.height };
     (*gameData->camera).offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
-    (*gameData->camera).zoom = 0.6f;
+    (*gameData->camera).zoom = 1.0f;
 
     // Temporary map borderes
     gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4);
-    gameData->mapBorder[0] = {0, 0, WIDTH+WALLTHICKNESS, WALLTHICKNESS};
-    gameData->mapBorder[1] = {0, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS};
-    gameData->mapBorder[2] = {0, HEIGT, WIDTH+WALLTHICKNESS, WALLTHICKNESS};
-    gameData->mapBorder[3] = {WIDTH, 0, WALLTHICKNESS, HEIGT+WALLTHICKNESS};
+    gameData->mapBorder[0] = {0, 0, WIDTH, WALLTHICKNESS};
+    gameData->mapBorder[1] = {0, 0, WALLTHICKNESS, HEIGT};
+    gameData->mapBorder[2] = {0, HEIGT-WALLTHICKNESS, WIDTH, WALLTHICKNESS};
+    gameData->mapBorder[3] = {WIDTH-WALLTHICKNESS, 0, WALLTHICKNESS, HEIGT};
 
     pthread_mutex_lock(&gameUpdateLock);
     *gameData->toDraw = GAME;
@@ -97,33 +100,23 @@ int GameHandler(GameDataS *gameData)
 
             UpdatePlayer(&(*gameData->player).player);
 
-            if(IsKeyPressed(KEY_SPACE))
-                isCameraLocked = !isCameraLocked;
-
-            if(isCameraLocked)
+            if(IsKeyDown(KEY_SPACE))
             {
                 // update camera position to track player and get mouse pos relative to player
-                gameData->camera->target = (Vector2){ (*gameData->player).player.x + 20, (*gameData->player).player.y + 20 };
+                gameData->camera->target = (Vector2){ (*gameData->player).player.x + (*gameData->player).player.width,
+                                                      (*gameData->player).player.y + (*gameData->player).player.height };
                 *gameData->mousePosition = GetMousePosition();
                 // normalize mouse coordinates to new camera position
-                gameData->mousePosition->x += (*gameData->player).player.x + 20 - gameData->camera->offset.x;
-                gameData->mousePosition->y += (*gameData->player).player.y + 20 - gameData->camera->offset.y;
+                gameData->mousePosition->x += (*gameData->player).player.x + (*gameData->player).player.width - gameData->camera->offset.x;
+                gameData->mousePosition->y += (*gameData->player).player.y + (*gameData->player).player.height - gameData->camera->offset.y;
             }
             else
             {
-                // save camera position
-                Vector2 tmp = gameData->camera->target;
-                // update camera position to track player and get mouse pos relative to player
-                gameData->camera->target = (Vector2){ (*gameData->player).player.x + 20, (*gameData->player).player.y + 20 };
+                // update mouse position
                 *gameData->mousePosition = GetMousePosition();
                 // normalize mouse coordinates to new camera position
-                gameData->mousePosition->x += (*gameData->player).player.x + 20 - gameData->camera->offset.x;
-                gameData->mousePosition->y += (*gameData->player).player.y + 20 - gameData->camera->offset.y;
-                // move mouse position to player position relative to camera
-                // idfking know how to do this
-                // idfking know how to do this
-                // revert to prev camera position
-                gameData->camera->target = tmp;                 
+                gameData->mousePosition->x += (gameData->camera->target.x - gameData->camera->offset.x);
+                gameData->mousePosition->y += (gameData->camera->target.y - gameData->camera->offset.y);
             }
 
             pthread_mutex_unlock(&cameraLock);

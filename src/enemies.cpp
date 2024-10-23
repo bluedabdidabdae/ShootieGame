@@ -37,12 +37,12 @@ int SpawnEnemy(EnemyLL *head, float x, float y)
     {
         head = head->next;
         head->next = aux;
-        head->enemy = { x, y, 40, 40 };
+        head->enemy = { x, y, 20, 20 };
         head->enemyType = NORMAL;
         head->color = BROWN;
         head->behaviour = BACKING;
-        head->hitPoint = 40;
-        head->healthBar = { x, y-20, 40, 10 };
+        head->hitPoint = 20;
+        head->healthBar = { x, y-10, 20, 5 };
         return 0;
     }
     // else
@@ -88,7 +88,7 @@ void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectan
 
             projectileHead->projectile = { currentEnemy->enemy.x+currentEnemy->enemy.width/2,
                                            currentEnemy->enemy.y+currentEnemy->enemy.height/2,
-                                           10, 10 };
+                                           5, 5 };
             projectileHead->color = RED;
 
             Dx = projectileHead->projectile.x - (player->x + player->height / 2);
@@ -121,12 +121,12 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
         }
         if(STILL == currentEnemy->behaviour)
         {
-            if(rand()%1000 < 980)
+            if(rand()%1000 < 970)
                 goto ignore_stuff;
             else
                 currentEnemy->behaviour = BACKING;
         }
-        else if(rand()%1000 < 10)
+        else if(rand()%1000 < 5)
         {
             currentEnemy->behaviour = STILL;
             goto ignore_stuff;

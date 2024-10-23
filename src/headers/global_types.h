@@ -7,7 +7,7 @@
 
 #define WIDTH 1335
 #define HEIGT 675
-#define WALLTHICKNESS 10
+#define WALLTHICKNESS 5
 
 typedef unsigned int uint;
 //////////////////////////////////////////////////////////
