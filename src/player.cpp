@@ -22,23 +22,28 @@ void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *
     // la posizione in "UpdateProjectiles(...)"
     aux = projectileHead->next;
     projectileHead->next = (ProjectileLL*)malloc(sizeof(ProjectileLL));
-    projectileHead = projectileHead->next;
-    projectileHead->next = aux;
+    if(projectileHead->next != NULL)
+    {
+        projectileHead = projectileHead->next;
+        projectileHead->next = aux;
 
-    projectileHead->projectile = { player->x + player->width / 2,
-                                   player->y + player->height / 2,
-                                   5, 5 };
-    projectileHead->color = BLUE;
+        projectileHead->projectile = { player->x + player->width / 2,
+                                    player->y + player->height / 2,
+                                    5, 5 };
+        projectileHead->color = BLUE;
 
-    Dx = projectileHead->projectile.x - mousePosition->x;
-    Dy = projectileHead->projectile.y - mousePosition->y;
+        Dx = projectileHead->projectile.x - mousePosition->x;
+        Dy = projectileHead->projectile.y - mousePosition->y;
 
-    tmp = abs(Dx) + abs(Dy);
+        tmp = abs(Dx) + abs(Dy);
 
-    projectileHead->vX = PLAYERPROJECTILESPEED * (Dx / tmp);
-    projectileHead->vY = PLAYERPROJECTILESPEED * (Dy / tmp);
+        projectileHead->vX = PLAYERPROJECTILESPEED * (Dx / tmp);
+        projectileHead->vY = PLAYERPROJECTILESPEED * (Dy / tmp);
 
-    projectileHead->owner = PLAYER;
+        projectileHead->owner = PLAYER;
+    }
+    // reverting ll to previous state
+    else projectileHead->next = aux;
 }
 
 void UpdatePlayer(Rectangle *player)

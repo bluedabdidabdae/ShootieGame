@@ -23,6 +23,7 @@
 #include <pthread.h>
 
 #include "raylib.h"
+#include "headers/global_types.h"
 #include "headers/menu.h"
 #include "headers/graphic.h"
 #include "headers/game.h"
@@ -33,45 +34,45 @@ pthread_mutex_t playerLock;
 pthread_mutex_t gameUpdateLock;
 pthread_mutex_t cameraLock;
 
+int InitData(GameDataS *gameData);
+int DeleteData(GameDataS *gameData);
+int ForceThreadKill(pthread_t *thread);
+
 int main(int argc, char *argv[])
 {
+    //SetTraceLogLevel(LOG_DEBUG);
+
     srand(time(NULL));
 
-    pthread_mutex_init(&enemiesListLock, NULL);
-    pthread_mutex_init(&projectileListLock, NULL);
-    pthread_mutex_init(&gameUpdateLock, NULL);
-    pthread_mutex_init(&playerLock, NULL);
-    pthread_mutex_init(&cameraLock, NULL);
-    pthread_t drawingThreadId = { 0 };
-
-    int mainError;
+    int error;
 
     States gameStatus = MENU;
     GameDataS gameData;
 
-    gameData.toDraw = (ToDraw*)malloc(sizeof(ToDraw));
-    *gameData.toDraw = MAINMENU;
-    
-    gameData.gameSkin = (GameSkinS*)malloc(sizeof(GameSkinS));
-    (*gameData.gameSkin).primaryColor = BLUE;
-    (*gameData.gameSkin).secondaryColor = WHITE;
-    
-    gameData.mousePosition = (Vector2*)malloc(sizeof(Vector2));
-    *gameData.mousePosition = GetMousePosition();
+    pthread_t drawingThreadId = { 0 };
 
-    gameData.frameCounter = 0;
-    gameData.camera = NULL;
-    gameData.player = NULL;
-    gameData.mapBorder = NULL;
-    gameData.enemiesHead = NULL;
-    gameData.projectileHead = NULL;
+    // initializing game data
+    error = InitData(&gameData);
+    if(error != 0)
+    {
+        TraceLog(LOG_ERROR, "Error allocating game data");
+        DeleteData(&gameData);
+        return 0;
+    }
 
-    mainError = pthread_create(&drawingThreadId, NULL, HandleGraphics, &gameData); 
-    if (mainError != 0) TraceLog(LOG_ERROR, "Error creating thread");
-    // waiting for the mouse pos to be updated
-    // for the first time
+    // initializing drawing thread
+    error = pthread_create(&drawingThreadId, NULL, HandleGraphics, &gameData); 
+    if (error != 0)
+    {
+        TraceLog(LOG_ERROR, "Error creating thread");
+        DeleteData(&gameData);
+        return 0;
+    }
+
+    // waiting clear to update from drawing thread
     pthread_mutex_lock(&gameUpdateLock);
 
+    // starting game loop
     while(gameStatus != EXITGAME){
         switch(gameStatus)
         {
@@ -81,14 +82,102 @@ int main(int argc, char *argv[])
                 MainMenuHandler(&gameStatus, gameData.mousePosition);
             break;
             case PLAY:
-                GameHandler(&gameData);
-                gameStatus = MENU;
+                error = GameHandler(&gameData);
+                if (error != 0)
+                {
+                    TraceLog(LOG_ERROR, "Game error, see prev. errors");
+                    *gameData.toDraw = CLOSEGAME;
+                    gameStatus = EXITGAME;
+                }
+                else gameStatus = MENU;
             break;
         }
     }
-    
+
     *gameData.toDraw = CLOSEGAME;
-    mainError = pthread_join(drawingThreadId, NULL);
-    if (mainError != 0) TraceLog(LOG_ERROR, "Error merging threads");
+    error = pthread_join(drawingThreadId, NULL);
+    if (error != 0)
+    {
+        TraceLog(LOG_ERROR, "Error merging threads, trying to force kill it");
+        error = ForceThreadKill(&drawingThreadId);
+        if(error != 0)
+        {
+            TraceLog(LOG_ERROR, "Situation is shit, couldn't kill thread, hope the OS works it out");
+            TraceLog(LOG_DEBUG, "Trying to at least close window");
+            CloseWindow();
+            DeleteData(&gameData);
+            TraceLog(LOG_DEBUG, "Deleted game data");
+            return -1;
+        }
+    }
+    
+    DeleteData(&gameData);
+    TraceLog(LOG_INFO, "Game terminated succesfully");
+    return 0;
+}
+
+int ForceThreadKill(pthread_t *thread)
+{
+    int error;
+    error = pthread_cancel(*thread);
+    if(error != 0)
+        return THREAD_ERROR;
+    return 0;
+}
+
+int DeleteData(GameDataS *gameData)
+{
+    if(gameData->toDraw != NULL)
+    {
+        free(gameData->toDraw);
+        TraceLog(LOG_DEBUG, "Deallocated to draw memory");
+    }
+    else TraceLog(LOG_DEBUG, "To draw memory was not allocated");
+
+    if(gameData->gameSkin != NULL)
+    {
+        free(gameData->gameSkin);
+        TraceLog(LOG_DEBUG, "Deallocated to game skin memory");
+    }
+    else TraceLog(LOG_DEBUG, "Game skin memory was not allocated");
+
+    if(gameData->mousePosition != NULL)
+    {
+        free(gameData->mousePosition);
+        TraceLog(LOG_DEBUG, "Deallocated to mouse position memory");
+    }
+    else TraceLog(LOG_DEBUG, "To mouse position memory was not allocated");
+
+    return 0;
+}
+
+int InitData(GameDataS *gameData)
+{
+    pthread_mutex_init(&enemiesListLock, NULL);
+    pthread_mutex_init(&projectileListLock, NULL);
+    pthread_mutex_init(&gameUpdateLock, NULL);
+    pthread_mutex_init(&playerLock, NULL);
+    pthread_mutex_init(&cameraLock, NULL);
+
+    gameData->toDraw = (ToDraw*)malloc(sizeof(ToDraw));
+    if(gameData->toDraw == NULL) return MALLOC_ERROR;
+    *gameData->toDraw = MAINMENU;
+    
+    gameData->gameSkin = (GameSkinS*)malloc(sizeof(GameSkinS));
+    if(gameData->gameSkin == NULL) return MALLOC_ERROR;
+    (*gameData->gameSkin).primaryColor = BLUE;
+    (*gameData->gameSkin).secondaryColor = WHITE;
+    
+    gameData->mousePosition = (Vector2*)malloc(sizeof(Vector2));
+    if(gameData->mousePosition == NULL) return MALLOC_ERROR;
+    *gameData->mousePosition = GetMousePosition();
+
+    gameData->frameCounter = 0;
+    gameData->camera = NULL;
+    gameData->player = NULL;
+    gameData->mapBorder = NULL;
+    gameData->enemiesHead = NULL;
+    gameData->projectileHead = NULL;
+
     return 0;
 }

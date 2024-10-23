@@ -10,7 +10,7 @@
 #include "headers/global_types.h"
 #include "headers/enemies.h"
 
-#define PROJECTILESPEED 18.0f
+#define PROJECTILESPEED 25.0f
 
 #define ENEMYSPEED 3.0f
 #define ENEMYMAXPDISTANCE 600
@@ -84,23 +84,28 @@ void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectan
             // la posizione in "UpdateProjectiles(...)"
             aux = projectileHead->next;
             projectileHead->next = (ProjectileLL*)malloc(sizeof(ProjectileLL));
-            projectileHead = projectileHead->next;
-            projectileHead->next = aux;
+            if(projectileHead->next != NULL)
+            {
+                projectileHead = projectileHead->next;
+                projectileHead->next = aux;
 
-            projectileHead->projectile = { currentEnemy->enemy.x+currentEnemy->enemy.width/2,
-                                           currentEnemy->enemy.y+currentEnemy->enemy.height/2,
-                                           5, 5 };
-            projectileHead->color = RED;
+                projectileHead->projectile = { currentEnemy->enemy.x+currentEnemy->enemy.width/2,
+                                            currentEnemy->enemy.y+currentEnemy->enemy.height/2,
+                                            5, 5 };
+                projectileHead->color = RED;
 
-            Dx = projectileHead->projectile.x - (player->x + player->height / 2);
-            Dy = projectileHead->projectile.y - (player->y + player->width / 2);
+                Dx = projectileHead->projectile.x - (player->x + player->height / 2);
+                Dy = projectileHead->projectile.y - (player->y + player->width / 2);
 
-            tmp = abs(Dx) + abs(Dy);
+                tmp = abs(Dx) + abs(Dy);
 
-            projectileHead->vX = PROJECTILESPEED * (Dx / tmp);
-            projectileHead->vY = PROJECTILESPEED * (Dy / tmp);
+                projectileHead->vX = PROJECTILESPEED * (Dx / tmp);
+                projectileHead->vY = PROJECTILESPEED * (Dy / tmp);
 
-            projectileHead->owner = ENEMY;
+                projectileHead->owner = ENEMY;
+            }
+            // reverting ll to original state
+            else projectileHead->next = aux;
         }
     }
 }

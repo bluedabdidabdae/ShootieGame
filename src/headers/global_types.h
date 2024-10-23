@@ -9,6 +9,9 @@
 #define HEIGT 675
 #define WALLTHICKNESS 5
 
+#define MALLOC_ERROR 11
+#define THREAD_ERROR 12
+
 typedef unsigned int uint;
 //////////////////////////////////////////////////////////
 typedef enum StatesModel{
