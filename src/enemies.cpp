@@ -15,6 +15,7 @@
 #define ENEMYSPEED 3.0f
 #define ENEMYMAXPDISTANCE 600
 #define ENEMYMINPDISTANCE 500
+#define HEALTHBAROFFSETY -10
 
 // local functions
 void EnemyPop(EnemyLL *prePop, EnemyLL **toPop);
@@ -42,7 +43,7 @@ int SpawnEnemy(EnemyLL *head, float x, float y)
         head->color = BROWN;
         head->behaviour = BACKING;
         head->hitPoint = 20;
-        head->healthBar = { x, y-10, 20, 5 };
+        head->healthBar = { x, y+HEALTHBAROFFSETY, 20, 5 };
         return 0;
     }
     // else
@@ -155,7 +156,7 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
         }
         
         currentEnemy->healthBar.x = currentEnemy->enemy.x;
-        currentEnemy->healthBar.y = currentEnemy->enemy.y-20;
+        currentEnemy->healthBar.y = currentEnemy->enemy.y+HEALTHBAROFFSETY;
         
         ignore_stuff:
             continue;

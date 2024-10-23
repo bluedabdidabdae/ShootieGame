@@ -114,7 +114,7 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
             }
             pthread_mutex_unlock(&enemiesListLock);
         EndMode2D();
-        DrawFPS(600, 30);
+        DrawFPS(5, 5);
         //DrawRectangle(GetMouseX(), GetMouseY(), 5, 5, YELLOW);
         pthread_mutex_lock(&playerLock);
         DrawText(TextFormat("SCORE: %u", gameData->score), 30, 30, 40, WHITE);
@@ -134,5 +134,6 @@ void DrawMenu()
 
         DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
         DrawText(TextFormat("Exit"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
+        DrawFPS(5, 5);
     EndDrawing();
 }
