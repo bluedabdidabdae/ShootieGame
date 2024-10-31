@@ -69,7 +69,8 @@ typedef struct game_skin_model{
 typedef enum to_draw_status{
     MAINMENU,
     GAME,
-    CLOSEGAME
+    CLOSEGAME,
+    ABORT
 }ToDraw;
 //////////////////////////////////////////////////////////
 typedef struct game_data_model{

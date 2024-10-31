@@ -103,14 +103,17 @@ int main(int argc, char *argv[])
         if(error != 0)
         {
             TraceLog(LOG_ERROR, "Situation is shit, couldn't kill thread, hope the OS works it out");
-            TraceLog(LOG_DEBUG, "Trying to at least close window");
+            TraceLog(LOG_ERROR, "<< ABORTING >>");
+            TraceLog(LOG_DEBUG, "Trying to make drawing thread to close the window");
             CloseWindow();
             DeleteData(&gameData);
             TraceLog(LOG_DEBUG, "Deleted game data");
-            return -1;
+            *gameData.toDraw = ABORT;
+            abort();
         }
     }
     
+    // normal game exit
     DeleteData(&gameData);
     TraceLog(LOG_INFO, "Game terminated succesfully");
     return 0;

@@ -54,6 +54,10 @@ void *HandleGraphics(void* data)
                 pthread_mutex_unlock(&gameUpdateLock);
                 DrawGame(gameData, &baseEnemyTexture);
             break;
+            case ABORT:
+                TraceLog(LOG_ERROR, "<< Aborting on drawing thread >>");
+                abort();
+            break;
         }
         gameData->frameCounter += 1;
         if(gameData->frameCounter >= 60)
