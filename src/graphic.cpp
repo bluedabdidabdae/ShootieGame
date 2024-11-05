@@ -21,6 +21,7 @@ extern pthread_mutex_t projectileListLock;
 extern pthread_mutex_t playerLock;
 extern pthread_mutex_t gameUpdateLock;
 extern pthread_mutex_t cameraLock;
+extern pthread_mutex_t frameCounterLock;
 
 // local functions
 void DrawMenu();
@@ -59,9 +60,9 @@ void *HandleGraphics(void* data)
                 abort();
             break;
         }
+        pthread_mutex_lock(&frameCounterLock);
         gameData->frameCounter += 1;
-        if(gameData->frameCounter >= 60)
-            gameData->frameCounter = 0;
+        pthread_mutex_unlock(&frameCounterLock);
     }
 
     CloseWindow();

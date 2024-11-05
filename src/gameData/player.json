@@ -1,0 +1,10 @@
+{
+    "player": [
+        {
+            "playerId": "1",
+            "baseHealth": "200",
+            "color": "blue",
+            "baseWeapon": "pistol"
+        }
+    ]
+}

@@ -18,6 +18,7 @@ extern pthread_mutex_t projectileListLock;
 extern pthread_mutex_t playerLock;
 extern pthread_mutex_t gameUpdateLock;
 extern pthread_mutex_t cameraLock;
+extern pthread_mutex_t frameCounterLock;
 
 void UpdateCameraMousePosition(GameDataS *gameData);
 void CloseGame(GameDataS *gameData);
@@ -27,7 +28,7 @@ int GameHandler(GameDataS *gameData)
 {
     int error;
 
-    uint lastFrameId;
+    uint lastFrameId = 0;
 
     error = InitGameData(gameData);
     if(error != 0)
@@ -44,7 +45,6 @@ int GameHandler(GameDataS *gameData)
     while(1)
     {
         pthread_mutex_lock(&gameUpdateLock);
-        lastFrameId = gameData->frameCounter;
                 
         if(IsKeyPressed(KEY_M) || (*gameData->player).lives <= 0)
         {
@@ -67,11 +67,15 @@ int GameHandler(GameDataS *gameData)
             pthread_mutex_unlock(&cameraLock);
             pthread_mutex_lock(&projectileListLock);
             
-            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            pthread_mutex_lock(&frameCounterLock);
+            TraceLog(LOG_ERROR, TextFormat("Current frame: %u", lastFrameId));
+            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameData->frameCounter >= lastFrameId + 50)
             {
+                lastFrameId = gameData->frameCounter;
                 // returns nothing
                 PlayerShooting(gameData->frameCounter, gameData->projectileHead, &(*gameData->player).player, gameData->mousePosition);
             }
+            pthread_mutex_unlock(&frameCounterLock);
 
             pthread_mutex_lock(&enemiesListLock);
 

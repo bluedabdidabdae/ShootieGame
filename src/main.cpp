@@ -33,6 +33,7 @@ pthread_mutex_t projectileListLock;
 pthread_mutex_t playerLock;
 pthread_mutex_t gameUpdateLock;
 pthread_mutex_t cameraLock;
+pthread_mutex_t frameCounterLock;
 
 int InitData(GameDataS *gameData);
 int DeleteData(GameDataS *gameData);

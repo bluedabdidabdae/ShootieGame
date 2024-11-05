@@ -1,0 +1,34 @@
+{
+    "weapons": [
+        {
+            "pistol": [
+                {
+                    "damage": 5,
+                    "shotsDeelay": 40,
+                    "size": 5
+                }
+            ],
+            "quickPistol": [
+                {
+                    "damage": 5,
+                    "shotsDeelay": 20,
+                    "size": 5
+                }
+            ],
+            "assRifle": [
+                {
+                    "damage": 8,
+                    "shotsDeelay": 30,
+                    "size": 7
+                }
+            ],
+            "subMachineGun": [
+                {
+                    "damage": 3,
+                    "shotsDeelay": 10,
+                    "size": 5
+                }
+            ]
+        }
+    ]
+}
