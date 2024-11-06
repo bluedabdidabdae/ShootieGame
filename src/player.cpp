@@ -54,6 +54,6 @@ void UpdatePlayer(Rectangle *player)
     if (IsKeyDown(KEY_D)) player->x += PLAYERSPEED;
     if (player->x < WALLTHICKNESS) player->x = WALLTHICKNESS;
     if (player->y < WALLTHICKNESS) player->y = WALLTHICKNESS;
-    if (player->x > WIDTH-WALLTHICKNESS-40) player->x = WIDTH-WALLTHICKNESS-40;
-    if (player->y > HEIGT-WALLTHICKNESS-40) player->y = HEIGT-WALLTHICKNESS-40;
+    if (player->x > WIDTH-WALLTHICKNESS-player->width) player->x = WIDTH-WALLTHICKNESS-player->width;
+    if (player->y > HEIGT-WALLTHICKNESS-player->height) player->y = HEIGT-WALLTHICKNESS-player->height;
 }

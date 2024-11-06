@@ -11,6 +11,7 @@
 
 #define MALLOC_ERROR 11
 #define THREAD_ERROR 12
+#define FILE_ERROR 13
 
 typedef unsigned int uint;
 //////////////////////////////////////////////////////////
@@ -31,6 +32,11 @@ typedef enum behaviour_model{
 typedef enum enemy_type_model{
     NORMAL
 }EnemyType;
+//////////////////////////////////////////////////////////
+typedef struct Weapon_model{
+    int weaponId;
+    char *weaponName;
+}WeaponS;
 //////////////////////////////////////////////////////////
 typedef struct Enemy_Linked_List{
     Rectangle enemy;
@@ -59,6 +65,8 @@ typedef struct Projectile_linked_List{
 typedef struct player_model{
     Rectangle player;
     int lives;
+    int weapons[2];
+    int activeWeapon;
 }PlayerS;
 //////////////////////////////////////////////////////////
 typedef struct game_skin_model{

@@ -12,6 +12,7 @@
 #include "headers/enemies.h"
 #include "headers/player.h"
 #include "headers/game.h"
+#include "headers/gather_data.h"
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;
@@ -26,17 +27,26 @@ int InitGameData(GameDataS *gameData);
 
 int GameHandler(GameDataS *gameData)
 {
-    int error;
+    int err;
 
     uint lastFrameId = 0;
 
-    error = InitGameData(gameData);
-    if(error != 0)
+    err = GatherData(gameData);
+    if(err != 0)
+    {
+        TraceLog(LOG_ERROR, "Error gathering game data - ABORTING");
+        // ignoring CloseGame(...);
+        CloseGame(gameData);
+        return err;
+    }
+
+    err = InitGameData(gameData);
+    if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error allocating game memory - ABORTING");
         // ignoring CloseGame(...); return value
         CloseGame(gameData);
-        return error;
+        return err;
     }
 
     pthread_mutex_lock(&gameUpdateLock);
@@ -68,8 +78,8 @@ int GameHandler(GameDataS *gameData)
             pthread_mutex_lock(&projectileListLock);
             
             pthread_mutex_lock(&frameCounterLock);
-            TraceLog(LOG_ERROR, TextFormat("Current frame: %u", lastFrameId));
-            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && gameData->frameCounter >= lastFrameId + 50)
+            //TraceLog(LOG_ERROR, TextFormat("Current frame: %u", lastFrameId));
+            if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && gameData->frameCounter >= lastFrameId + 40)
             {
                 lastFrameId = gameData->frameCounter;
                 // returns nothing
@@ -103,12 +113,9 @@ int InitGameData(GameDataS *gameData)
 {
     gameData->score = 104;
 
-    // Init player
-    gameData->player = (PlayerS*)malloc(sizeof(PlayerS));
-    if(gameData->player == NULL) return MALLOC_ERROR;
-    TraceLog(LOG_DEBUG, "Allocated player memory");
-    (*gameData->player).player = { WIDTH/2-20, HEIGT/2-20, 20, 20 };
-    (*gameData->player).lives = 200;
+    // Init player position (other par inited from json file)
+    (*gameData->player).player.x = WIDTH/2-(*gameData->player).player.width;
+    (*gameData->player).player.y = HEIGT/2-(*gameData->player).player.height;
 
     // Init enemies linked list
     gameData->enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));

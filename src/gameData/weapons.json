@@ -1,34 +1,58 @@
 {
-    "weapons": [
-        {
-            "pistol": [
-                {
-                    "damage": 5,
-                    "shotsDeelay": 40,
-                    "size": 5
-                }
-            ],
-            "quickPistol": [
-                {
-                    "damage": 5,
-                    "shotsDeelay": 20,
-                    "size": 5
-                }
-            ],
-            "assRifle": [
-                {
-                    "damage": 8,
-                    "shotsDeelay": 30,
-                    "size": 7
-                }
-            ],
-            "subMachineGun": [
-                {
-                    "damage": 3,
-                    "shotsDeelay": 10,
-                    "size": 5
-                }
-            ]
-        }
-    ]
+    "fists":
+    {
+        "weaponId": 1,
+        "damage": 2,
+        "shotsDeelay": 10,
+        "projectileSize": 0
+    },
+    "pistol":
+    {
+        "weaponId": 2,
+        "damage": 5,
+        "shotsDeelay": 40,
+        "projectileSize": 5
+    },
+    "quickPistol":
+    {
+        "weaponId": 3,
+        "damage": 5,
+        "shotsDeelay": 20,
+        "projectileSize": 5
+    },
+    "heavyPistol":
+    {
+        "weaponId": 4,
+        "damage": 10,
+        "shotsDeelay": 60,
+        "projectileSize": 10
+    },
+    "handCannon":
+    {
+        "weaponId": 5,
+        "damage": 30,
+        "shotsDeelay": 100,
+        "projectileSize": 15
+    },
+    "assaultRifle":
+    {
+        "weaponId": 6,
+        "damage": 8,
+        "shotsDeelay": 15,
+        "projectileSize": 8
+    },
+    "subMachineGun":
+    {
+        "weaponId": 7,
+        "damage": 3,
+        "shotsDeelay": 5,
+        "projectileSize": 5
+    },
+    "cheat":
+    {
+        "weaponId": 69,
+        "damage": 100,
+        "shotsDeelay": 0,
+        "projectileSize": 20
+    }
 }

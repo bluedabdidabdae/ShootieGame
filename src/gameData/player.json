@@ -1,10 +1,8 @@
 {
-    "player": [
-        {
-            "playerId": "1",
-            "baseHealth": "200",
-            "color": "blue",
-            "baseWeapon": "pistol"
-        }
-    ]
+    "baseHealth": 500,
+    "size":{
+        "x": 20,
+        "y": 20
+    },
+    "defaultWeapon": "pistol"
 }

@@ -41,7 +41,7 @@ int ForceThreadKill(pthread_t *thread);
 
 int main(int argc, char *argv[])
 {
-    //SetTraceLogLevel(LOG_DEBUG);
+    SetTraceLogLevel(LOG_DEBUG);
 
     srand(time(NULL));
 
