@@ -30,25 +30,24 @@ void EnemyPop(EnemyLL *prePop, EnemyLL **toPop)
 
 int SpawnEnemy(EnemyLL *head, float x, float y)
 {
-    EnemyLL *aux = head->next;
-    head->next = (EnemyLL*)malloc(sizeof(EnemyLL));
+    EnemyLL *aux1;
+    EnemyLL *aux2;
 
+    aux1 = (EnemyLL*)malloc(sizeof(EnemyLL));
     // if memory is allocated correctly
-    if(head->next != NULL)
+    if(aux1)
     {
-        head = head->next;
-        head->next = aux;
-        head->enemy = { x, y, 20, 20 };
-        head->enemyType = NORMAL;
-        head->color = BROWN;
-        head->behaviour = BACKING;
-        head->hitPoint = 20;
-        head->healthBar = { x, y+HEALTHBAROFFSETY, 20, 5 };
+        aux1->enemy = { x, y, 20, 20 };
+        aux1->enemyType = NORMAL;
+        aux1->color = BROWN;
+        aux1->behaviour = BACKING;
+        aux1->hitPoint = 20;
+        aux1->healthBar = { x, y+HEALTHBAROFFSETY, 20, 5 };
+        aux2 = head->next;
+        head->next = aux1;
+        head->next->next = aux2;
         return 0;
     }
-    // else
-    // bringing the ll back to original state and returning error
-    head->next = aux;
     return -1;
 }
 
@@ -71,7 +70,8 @@ void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[])
 void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectangle *player)
 {
     float Dx, Dy, tmp;
-    ProjectileLL *aux;
+    ProjectileLL *aux1;
+    ProjectileLL *aux2;
 
     while(currentEnemy->next != NULL)
     {
@@ -82,30 +82,31 @@ void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectan
             // aggiungo un proiettile in coda alla lista e lo inizializzo
             // con le coordinate ed il valore dei vettori per poi aggiornarne
             // la posizione in "UpdateProjectiles(...)"
-            aux = projectileHead->next;
-            projectileHead->next = (ProjectileLL*)malloc(sizeof(ProjectileLL));
-            if(projectileHead->next != NULL)
+            aux1 = (ProjectileLL*)malloc(sizeof(ProjectileLL));
+            if(aux1)
             {
-                projectileHead = projectileHead->next;
-                projectileHead->next = aux;
+                aux1->projectile = 
+                {   currentEnemy->enemy.x+currentEnemy->enemy.width/2,
+                    currentEnemy->enemy.y+currentEnemy->enemy.height/2,
+                    5,
+                    5
+                };
+                aux1->color = RED;
 
-                projectileHead->projectile = { currentEnemy->enemy.x+currentEnemy->enemy.width/2,
-                                            currentEnemy->enemy.y+currentEnemy->enemy.height/2,
-                                            5, 5 };
-                projectileHead->color = RED;
-
-                Dx = projectileHead->projectile.x - (player->x + player->height / 2);
-                Dy = projectileHead->projectile.y - (player->y + player->width / 2);
+                Dx = aux1->projectile.x - (player->x + player->height / 2);
+                Dy = aux1->projectile.y - (player->y + player->width / 2);
 
                 tmp = abs(Dx) + abs(Dy);
 
-                projectileHead->vX = PROJECTILESPEED * (Dx / tmp);
-                projectileHead->vY = PROJECTILESPEED * (Dy / tmp);
+                aux1->vX = PROJECTILESPEED * (Dx / tmp);
+                aux1->vY = PROJECTILESPEED * (Dy / tmp);
 
-                projectileHead->owner = ENEMY;
-            }
-            // reverting ll to original state
-            else projectileHead->next = aux;
+                aux1->owner = ENEMY;
+
+                aux2 = projectileHead->next;
+                projectileHead->next = aux1;
+                projectileHead->next->next = aux2;
+            }   
         }
     }
 }
