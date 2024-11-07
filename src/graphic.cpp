@@ -22,6 +22,7 @@ extern pthread_mutex_t playerLock;
 extern pthread_mutex_t gameUpdateLock;
 extern pthread_mutex_t cameraLock;
 extern pthread_mutex_t frameCounterLock;
+extern pthread_mutex_t weaponsLock;
 
 // local functions
 void DrawMenu();
@@ -81,11 +82,12 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
     
         ClearBackground(BLACK);
         pthread_mutex_lock(&cameraLock);
+        // drawing the game
         BeginMode2D(*gameData->camera);
             // drawing player
             pthread_mutex_lock(&playerLock);
             
-            DrawRectangleRec((*gameData->player).player, (*gameData->gameSkin).primaryColor);
+            DrawRectangleRec(gameData->player->player, gameData->gameSkin->primaryColor);
 
             //DrawRectangle(gameData->mousePosition->x, gameData->mousePosition->y, 5, 5, RED);
 
@@ -101,7 +103,7 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
             pthread_mutex_unlock(&projectileListLock);
             // drawing map borders
             for(int i = 0; i < 4; i++)
-                DrawRectangleRec(gameData->mapBorder[i], (*gameData->gameSkin).secondaryColor);
+                DrawRectangleRec(gameData->mapBorder[i], gameData->gameSkin->secondaryColor);
             
             // drawing enemies from linked list of type *EnemyLL
             pthread_mutex_lock(&enemiesListLock);
@@ -119,11 +121,19 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
             }
             pthread_mutex_unlock(&enemiesListLock);
         EndMode2D();
+        // drawing the ui
         DrawFPS(5, 5);
         //DrawRectangle(GetMouseX(), GetMouseY(), 5, 5, YELLOW);
         pthread_mutex_lock(&playerLock);
         DrawText(TextFormat("SCORE: %u", gameData->score), 30, 30, 40, WHITE);
-        DrawRectangle(30, 80, (*gameData->player).lives, 15, GREEN);
+        DrawRectangle(30, 80, gameData->player->lives, 15, GREEN);
+        DrawRectangle(WIDTH - 215, HEIGT - 85, 200, 50, Fade(WHITE, FADEVALUE));
+        pthread_mutex_lock(&weaponsLock);
+        DrawText(
+            TextFormat("%d %s", gameData->player->activeWeaponId == gameData->player->weapons[0] ? 1 : 2,
+            gameData->weaponsList[gameData->player->activeWeaponId].weaponName), 
+            WIDTH - 200, HEIGT - 70, 25, WHITE);
+        pthread_mutex_unlock(&weaponsLock);
         pthread_mutex_unlock(&playerLock);
     EndDrawing();
 }

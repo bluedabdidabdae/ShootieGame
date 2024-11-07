@@ -8,7 +8,7 @@
 #include "raylib.h"
 #include "global_types.h"
 
-void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player, Vector2 *mousePosition);
+void PlayerShooting(GameDataS *gameData);
 void UpdatePlayer(Rectangle *player);
 
 #endif

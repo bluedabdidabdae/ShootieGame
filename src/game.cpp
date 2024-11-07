@@ -31,20 +31,22 @@ int GameHandler(GameDataS *gameData)
 
     uint lastFrameId = 0;
 
+    // gathering data from files
     err = GatherData(gameData);
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error gathering game data - ABORTING");
-        // ignoring CloseGame(...);
+        // ignoring CloseGame ret value;
         CloseGame(gameData);
         return err;
     }
 
+    // initializing the rest of the data
     err = InitGameData(gameData);
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error allocating game memory - ABORTING");
-        // ignoring CloseGame(...); return value
+        // ignoring CloseGame ret value
         CloseGame(gameData);
         return err;
     }
@@ -79,11 +81,13 @@ int GameHandler(GameDataS *gameData)
             
             pthread_mutex_lock(&frameCounterLock);
             //TraceLog(LOG_ERROR, TextFormat("Current frame: %u", lastFrameId));
-            if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && gameData->frameCounter >= lastFrameId + 40)
+            if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)
+                && gameData->frameCounter >=
+                lastFrameId + gameData->weaponsList[gameData->player->activeWeaponId].shotsDeelay)
             {
                 lastFrameId = gameData->frameCounter;
                 // returns nothing
-                PlayerShooting(gameData->frameCounter, gameData->projectileHead, &(*gameData->player).player, gameData->mousePosition);
+                PlayerShooting(gameData);
             }
             pthread_mutex_unlock(&frameCounterLock);
 
@@ -94,7 +98,8 @@ int GameHandler(GameDataS *gameData)
             // returns nothing
             SnapEnemies(gameData->enemiesHead, gameData->mapBorder);
             // returns nothing
-            EnemiesShooting(gameData->enemiesHead, gameData->projectileHead, &(*gameData->player).player);
+            EnemiesShooting(gameData->enemiesHead, gameData->projectileHead,
+                            &(*gameData->player).player);
             // returns nothing
             UpdateProjectiles(gameData->projectileHead);
             // returns nothing
@@ -225,4 +230,12 @@ void CloseGame(GameDataS *gameData)
         gameData->camera = NULL;
     }
     else TraceLog(LOG_DEBUG, "Camera was not allocated");
+/////////////////////////////////////////////////////////////////////////////////
+    if(gameData->weaponsList != NULL)
+    {
+        // delete weaponList
+        free(gameData->weaponsList);
+        gameData->weaponsList = NULL;
+    }
+    else TraceLog(LOG_DEBUG, "WeaponList was not allocated");
 }

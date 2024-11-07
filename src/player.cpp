@@ -12,38 +12,39 @@
 
 #define PLAYERPROJECTILESPEED 25.0f
 
-void PlayerShooting(uint frameCounter, ProjectileLL *projectileHead, Rectangle *player, Vector2 *mousePosition)
+void PlayerShooting(GameDataS *gameData)
 {
     float Dx, Dy, tmp;
-    ProjectileLL *aux;
-    
-    // aggiungo un proiettile in testa alla lista e lo inizializzo
-    // con le coordinate ed il valore dei vettori per poi aggiornarne
-    // la posizione in "UpdateProjectiles(...)"
-    aux = projectileHead->next;
-    projectileHead->next = (ProjectileLL*)malloc(sizeof(ProjectileLL));
-    if(projectileHead->next != NULL)
+    ProjectileLL *aux1;
+    ProjectileLL *aux2;
+
+    aux1 = (ProjectileLL*)malloc(sizeof(ProjectileLL));
+    if(aux1)
     {
-        projectileHead = projectileHead->next;
-        projectileHead->next = aux;
+        aux1->projectile =
+        {
+            gameData->player->player.x + gameData->player->player.width / 2,
+            gameData->player->player.y + gameData->player->player.height / 2,
+            gameData->weaponsList[gameData->player->activeWeaponId].projectileSize,
+            gameData->weaponsList[gameData->player->activeWeaponId].projectileSize
+        };
+        
+        aux1->color = BLUE;
 
-        projectileHead->projectile = { player->x + player->width / 2,
-                                    player->y + player->height / 2,
-                                    5, 5 };
-        projectileHead->color = BLUE;
-
-        Dx = projectileHead->projectile.x - mousePosition->x;
-        Dy = projectileHead->projectile.y - mousePosition->y;
+        Dx = aux1->projectile.x - gameData->mousePosition->x;
+        Dy = aux1->projectile.y - gameData->mousePosition->y;
 
         tmp = abs(Dx) + abs(Dy);
 
-        projectileHead->vX = PLAYERPROJECTILESPEED * (Dx / tmp);
-        projectileHead->vY = PLAYERPROJECTILESPEED * (Dy / tmp);
+        aux1->vX = PLAYERPROJECTILESPEED * (Dx / tmp);
+        aux1->vY = PLAYERPROJECTILESPEED * (Dy / tmp);
+        
+        aux1->owner = PLAYER;
 
-        projectileHead->owner = PLAYER;
+        aux2 = gameData->projectileHead->next;
+        gameData->projectileHead->next = aux1;
+        gameData->projectileHead->next->next = aux2;
     }
-    // reverting ll to previous state
-    else projectileHead->next = aux;
 }
 
 void UpdatePlayer(Rectangle *player)

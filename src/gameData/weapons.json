@@ -1,58 +1,52 @@
 {
-    "fists":
-    {
-        "weaponId": 1,
-        "damage": 2,
-        "shotsDeelay": 10,
-        "projectileSize": 0
-    },
-    "pistol":
-    {
-        "weaponId": 2,
-        "damage": 5,
-        "shotsDeelay": 40,
-        "projectileSize": 5
-    },
-    "quickPistol":
-    {
-        "weaponId": 3,
-        "damage": 5,
-        "shotsDeelay": 20,
-        "projectileSize": 5
-    },
-    "heavyPistol":
-    {
-        "weaponId": 4,
-        "damage": 10,
-        "shotsDeelay": 60,
-        "projectileSize": 10
-    },
-    "handCannon":
-    {
-        "weaponId": 5,
-        "damage": 30,
-        "shotsDeelay": 100,
-        "projectileSize": 15
-    },
-    "assaultRifle":
-    {
-        "weaponId": 6,
-        "damage": 8,
-        "shotsDeelay": 15,
-        "projectileSize": 8
-    },
-    "subMachineGun":
-    {
-        "weaponId": 7,
-        "damage": 3,
-        "shotsDeelay": 5,
-        "projectileSize": 5
-    },
-    "cheat":
-    {
-        "weaponId": 69,
-        "damage": 100,
-        "shotsDeelay": 0,
-        "projectileSize": 20
-    }
+    "weapons":[
+        {
+            "name": "Fists",
+            "damage": 2,
+            "shotsDeelay": 10,
+            "projectileSize": 0
+        },
+        {
+            "name": "Pistol",
+            "damage": 5,
+            "shotsDeelay": 40,
+            "projectileSize": 5
+        },
+        {
+            "name": "Quick Pistol",
+            "damage": 5,
+            "shotsDeelay": 20,
+            "projectileSize": 5
+        },
+        {
+            "name": "Heavy Pistol",
+            "damage": 10,
+            "shotsDeelay": 60,
+            "projectileSize": 10
+        },
+        {
+            "name": "Hand Cannon",
+            "damage": 30,
+            "shotsDeelay": 100,
+            "projectileSize": 15
+        },
+        {
+            "name": "Rifle",
+            "damage": 8,
+            "shotsDeelay": 15,
+            "projectileSize": 8
+        },
+        {
+            "name": "SMG",
+            "damage": 3,
+            "shotsDeelay": 5,
+            "projectileSize": 5
+        },
+        {
+            "name": "cheat",
+            "damage": 100,
+            "shotsDeelay": 0,
+            "projectileSize": 40
+        }
+    ]
 }

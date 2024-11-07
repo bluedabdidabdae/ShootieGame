@@ -4,5 +4,5 @@
         "x": 20,
         "y": 20
     },
-    "defaultWeapon": "pistol"
+    "defaultWeaponId": 7
 }

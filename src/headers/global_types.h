@@ -9,6 +9,8 @@
 #define HEIGT 675
 #define WALLTHICKNESS 5
 
+#define WEAPONNAMEBUFFER 20
+
 #define MALLOC_ERROR 11
 #define THREAD_ERROR 12
 #define FILE_ERROR 13
@@ -34,8 +36,10 @@ typedef enum enemy_type_model{
 }EnemyType;
 //////////////////////////////////////////////////////////
 typedef struct Weapon_model{
-    int weaponId;
-    char *weaponName;
+    char weaponName[WEAPONNAMEBUFFER];
+    int damage;
+    int shotsDeelay;
+    float projectileSize;
 }WeaponS;
 //////////////////////////////////////////////////////////
 typedef struct Enemy_Linked_List{
@@ -66,7 +70,7 @@ typedef struct player_model{
     Rectangle player;
     int lives;
     int weapons[2];
-    int activeWeapon;
+    int activeWeaponId;
 }PlayerS;
 //////////////////////////////////////////////////////////
 typedef struct game_skin_model{
@@ -91,6 +95,7 @@ typedef struct game_data_model{
     Rectangle *mapBorder;
     EnemyLL *enemiesHead;
     ProjectileLL *projectileHead;
+    WeaponS *weaponsList;
     uint score;
 }GameDataS;
 //////////////////////////////////////////////////////////
