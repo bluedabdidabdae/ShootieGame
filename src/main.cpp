@@ -135,23 +135,23 @@ int DeleteData(GameDataS *gameData)
     if(gameData->toDraw != NULL)
     {
         free(gameData->toDraw);
-        TraceLog(LOG_DEBUG, "Deallocated to draw memory");
+        TraceLog(LOG_DEBUG, "Deallocated toDraw memory");
     }
-    else TraceLog(LOG_DEBUG, "To draw memory was not allocated");
+    else TraceLog(LOG_DEBUG, "ToDraw memory was not allocated");
 
     if(gameData->gameSkin != NULL)
     {
         free(gameData->gameSkin);
-        TraceLog(LOG_DEBUG, "Deallocated to game skin memory");
+        TraceLog(LOG_DEBUG, "Deallocated gameSkin memory");
     }
-    else TraceLog(LOG_DEBUG, "Game skin memory was not allocated");
+    else TraceLog(LOG_DEBUG, "GameSkin memory was not allocated");
 
     if(gameData->mousePosition != NULL)
     {
         free(gameData->mousePosition);
-        TraceLog(LOG_DEBUG, "Deallocated to mouse position memory");
+        TraceLog(LOG_DEBUG, "Deallocated mousePosition memory");
     }
-    else TraceLog(LOG_DEBUG, "To mouse position memory was not allocated");
+    else TraceLog(LOG_DEBUG, "To mouseposition memory was not allocated");
 
     return 0;
 }

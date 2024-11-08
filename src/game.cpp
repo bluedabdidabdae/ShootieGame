@@ -203,6 +203,7 @@ void CloseGame(GameDataS *gameData)
         // delete all projectiles
         CompletelyDeleteAllProjectiles(gameData->projectileHead);
         gameData->projectileHead = NULL;
+        TraceLog(LOG_DEBUG, "Deallocated projectile ll");
     }
     else TraceLog(LOG_DEBUG, "Projectile ll was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
@@ -211,6 +212,7 @@ void CloseGame(GameDataS *gameData)
         // delete map border
         free(gameData->mapBorder);
         gameData->mapBorder = NULL;
+        TraceLog(LOG_DEBUG, "Deallocated border ll");
     }
     else TraceLog(LOG_DEBUG, "Map border ll was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
@@ -219,6 +221,7 @@ void CloseGame(GameDataS *gameData)
         // delete player
         free(gameData->player);
         gameData->player= NULL;
+        TraceLog(LOG_DEBUG, "Deallocated player memory");
     }
     else TraceLog(LOG_DEBUG, "Player was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
@@ -227,6 +230,7 @@ void CloseGame(GameDataS *gameData)
         // delete camera
         free(gameData->camera);
         gameData->camera = NULL;
+        TraceLog(LOG_DEBUG, "Deallocated camera memory");
     }
     else TraceLog(LOG_DEBUG, "Camera was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
@@ -235,6 +239,7 @@ void CloseGame(GameDataS *gameData)
         // delete weaponList
         free(gameData->weaponsList);
         gameData->weaponsList = NULL;
+        TraceLog(LOG_DEBUG, "Deallocated weaponList memory");
     }
     else TraceLog(LOG_DEBUG, "WeaponList was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
@@ -243,6 +248,7 @@ void CloseGame(GameDataS *gameData)
         // delete enemiesList
         free(gameData->enemiesList);
         gameData->enemiesList = NULL;
+        TraceLog(LOG_DEBUG, "Deallocated enemiesList memory");
     }
     else TraceLog(LOG_DEBUG, "EnemiesList was not allocated");
 }
