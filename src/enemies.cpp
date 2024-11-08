@@ -28,7 +28,7 @@ void EnemyPop(EnemyLL *prePop, EnemyLL **toPop)
     prePop = NULL;
 }
 
-int SpawnEnemy(EnemyLL *head, float x, float y)
+int SpawnEnemy(GameDataS *gameData, float x, float y, EnemyType enemyType)
 {
     EnemyLL *aux1;
     EnemyLL *aux2;
@@ -37,15 +37,20 @@ int SpawnEnemy(EnemyLL *head, float x, float y)
     // if memory is allocated correctly
     if(aux1)
     {
-        aux1->enemy = { x, y, 20, 20 };
-        aux1->enemyType = NORMAL;
-        aux1->color = BROWN;
+        aux1->enemyType = enemyType;
+        aux1->enemy = {
+            x,
+            y,
+            gameData->enemiesList[enemyType].enemy.height,
+            gameData->enemiesList[enemyType].enemy.width
+        };
+        aux1->weaponId = gameData->enemiesList[enemyType].baseWeaponId;
         aux1->behaviour = BACKING;
-        aux1->hitPoint = 20;
-        aux1->healthBar = { x, y+HEALTHBAROFFSETY, 20, 5 };
-        aux2 = head->next;
-        head->next = aux1;
-        head->next->next = aux2;
+        aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;
+        aux1->healthBar = { x, y+HEALTHBAROFFSETY, (float)aux1->hitPoint, 5 };
+        aux2 = gameData->enemiesHead->next;
+        gameData->enemiesHead->next = aux1;
+        gameData->enemiesHead->next->next = aux2;
         return 0;
     }
     return -1;
@@ -67,11 +72,13 @@ void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[])
     }
 }
 
-void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectangle *player)
+void EnemiesShooting(GameDataS *gameData)
 {
     float Dx, Dy, tmp;
     ProjectileLL *aux1;
     ProjectileLL *aux2;
+    EnemyLL *currentEnemy = gameData->enemiesHead;
+    ProjectileLL *projectileHead = gameData->projectileHead;
 
     while(currentEnemy->next != NULL)
     {
@@ -79,27 +86,26 @@ void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectan
         // tiro a caso se il nemico spara o no
         if(rand()%1000 < 20)
         {
-            // aggiungo un proiettile in coda alla lista e lo inizializzo
-            // con le coordinate ed il valore dei vettori per poi aggiornarne
-            // la posizione in "UpdateProjectiles(...)"
             aux1 = (ProjectileLL*)malloc(sizeof(ProjectileLL));
             if(aux1)
             {
                 aux1->projectile = 
                 {   currentEnemy->enemy.x+currentEnemy->enemy.width/2,
                     currentEnemy->enemy.y+currentEnemy->enemy.height/2,
-                    5,
-                    5
+                    gameData->weaponsList[currentEnemy->weaponId].projectileSize,
+                    gameData->weaponsList[currentEnemy->weaponId].projectileSize
                 };
                 aux1->color = RED;
 
-                Dx = aux1->projectile.x - (player->x + player->height / 2);
-                Dy = aux1->projectile.y - (player->y + player->width / 2);
+                aux1->damage = gameData->weaponsList[currentEnemy->weaponId].damage;
+
+                Dx = aux1->projectile.x - (gameData->player->player.x + gameData->player->player.height / 2);
+                Dy = aux1->projectile.y - (gameData->player->player.y + gameData->player->player.width / 2);
 
                 tmp = abs(Dx) + abs(Dy);
 
-                aux1->vX = PROJECTILESPEED * (Dx / tmp);
-                aux1->vY = PROJECTILESPEED * (Dy / tmp);
+                aux1->vX = gameData->weaponsList[currentEnemy->weaponId].projectileSpeed * (Dx / tmp);
+                aux1->vY = gameData->weaponsList[currentEnemy->weaponId].projectileSpeed * (Dy / tmp);
 
                 aux1->owner = ENEMY;
 

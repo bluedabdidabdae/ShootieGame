@@ -29,6 +29,8 @@ void PlayerShooting(GameDataS *gameData)
             gameData->weaponsList[gameData->player->activeWeaponId].projectileSize
         };
         
+        aux1->damage = gameData->weaponsList[gameData->player->activeWeaponId].damage;
+
         aux1->color = BLUE;
 
         Dx = aux1->projectile.x - gameData->mousePosition->x;
@@ -36,8 +38,8 @@ void PlayerShooting(GameDataS *gameData)
 
         tmp = abs(Dx) + abs(Dy);
 
-        aux1->vX = PLAYERPROJECTILESPEED * (Dx / tmp);
-        aux1->vY = PLAYERPROJECTILESPEED * (Dy / tmp);
+        aux1->vX = gameData->weaponsList[gameData->player->activeWeaponId].projectileSpeed * (Dx / tmp);
+        aux1->vY = gameData->weaponsList[gameData->player->activeWeaponId].projectileSpeed * (Dy / tmp);
         
         aux1->owner = PLAYER;
 

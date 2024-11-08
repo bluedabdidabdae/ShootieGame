@@ -10,9 +10,11 @@
 #define RAWBUFFERSIZE 2048
 #define PLAYERFILE "gameData/player.json"
 #define WEAPONFILE "gameData/weapons.json"
+#define ENEMIESFILE "gameData/enemies.json"
 
 int GatherPlayerData(GameDataS *gameData);
 int GatherWeaponData(WeaponS **weaponsList);
+int GatherEnemiesData(GameDataS *gameData);
 
 int GatherData(GameDataS *gameData)
 {
@@ -26,7 +28,132 @@ int GatherData(GameDataS *gameData)
     ret = GatherPlayerData(gameData);
     if(0 != ret) return ret;
 
+    ret = GatherEnemiesData(gameData);
+    if(0 != ret) return ret;
+
     return 0;
+}
+
+int GatherEnemiesData(GameDataS *gameData)
+{
+    FILE *rawFile;
+    cJSON *enemiesData;
+    cJSON *aux1;
+    cJSON *aux2;
+    cJSON *aux3;
+    int arrSize;
+    int ret = 0;
+    int i;
+    char buffer[RAWBUFFERSIZE];
+
+    // opening and parsing weapons.json file
+    rawFile = fopen(ENEMIESFILE, "r");
+    if(!rawFile)
+    {
+        strcpy(buffer, "Error opening enemies file");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    if(fread(buffer, 1, sizeof(buffer), rawFile) < 0)
+    {
+        strcpy(buffer, "Error reading enemies file");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    fclose(rawFile);
+    enemiesData = cJSON_Parse(buffer);
+    if(!enemiesData)
+    {
+        strcpy(buffer, cJSON_GetErrorPtr());
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, "Parsed enemies.json");
+
+    // loading weapons array
+    aux1 = cJSON_GetObjectItemCaseSensitive(enemiesData, "enemies");
+    if(!aux1)
+    {
+        strcpy(buffer, "Error loading enemies array - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, "Loaded enemies array");
+
+    arrSize = cJSON_GetArraySize(aux1);
+
+    // allocating weapons memory
+    gameData->enemiesList = (EnemiesS*)malloc(sizeof(EnemiesS)*arrSize);
+    if(!gameData->enemiesList)
+    {
+        strcpy(buffer, "Error allocating initial enemiesList memory - ABORTING");
+        ret = MALLOC_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, "Allocated enemiesList memory");
+
+    // initializing enemiesList
+    i = 0;
+    while(i < arrSize){
+
+        // fetching weapon data
+        aux2 = cJSON_GetArrayItem(aux1, i);
+        if(!aux2)
+        {
+            strcpy(buffer, "Error loading enemies array index - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        TraceLog(LOG_DEBUG, TextFormat("Loaded enemies array index: %d", i));
+
+        // gathering enemy size
+        aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "size");
+        if(!aux3 || !cJSON_IsNumber(aux3))
+        {
+            strcpy(buffer, "Error loading enemy size - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        gameData->enemiesList[i].enemy.height = (float)aux3->valueint;
+        gameData->enemiesList[i].enemy.width = (float)aux3->valueint;
+        TraceLog(LOG_DEBUG, "Loaded enemy size");
+        
+        // gathering enemy baseHealth
+        aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "baseHealth");
+        if(!aux3 || !cJSON_IsNumber(aux3))
+        {
+            strcpy(buffer, "Error loading enemy baseHealth - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        gameData->enemiesList[i].baseHealth = aux3->valueint;
+        TraceLog(LOG_DEBUG, "Loaded enemy baseHealth");
+        
+        // gathering enemy baseWeapon
+        aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "baseWeaponId");
+        if(!aux3 || !cJSON_IsNumber(aux3))
+        {
+            strcpy(buffer, "Error loading enemy baseWeaponId - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        gameData->enemiesList[i].baseWeaponId = aux3->valueint;
+        TraceLog(LOG_DEBUG, "Loaded enemy baseWeaponId\n");
+        
+        i++;
+    }
+    
+    cleanup:
+
+        if(ret)
+            TraceLog(LOG_ERROR, buffer);
+
+        if(enemiesData)
+            cJSON_Delete(enemiesData);
+
+        TraceLog(LOG_DEBUG, "Closed json files");
+
+        return ret;
 }
 
 int GatherWeaponData(WeaponS **weaponsList)
@@ -147,6 +274,28 @@ int GatherWeaponData(WeaponS **weaponsList)
         (*weaponsList)[i].projectileSize = (float)aux3->valueint;
         TraceLog(LOG_DEBUG, "Loaded weapon projectileSize");
         
+        // gathering weapon damage
+        aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "damage");
+        if(!aux3 || !cJSON_IsNumber(aux3))
+        {
+            strcpy(buffer, "Error loading weapon damage - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        (*weaponsList)[i].damage = aux3->valueint;
+        TraceLog(LOG_DEBUG, "Loaded weapon damage");
+        
+        // gathering weapon projectileSpeed
+        aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "projectileSpeed");
+        if(!aux3 || !cJSON_IsNumber(aux3))
+        {
+            strcpy(buffer, "Error loading weapon projectileSpeed - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        (*weaponsList)[i].projectileSpeed = aux3->valueint;
+        TraceLog(LOG_DEBUG, "Loaded weapon projectileSpeed\n");
+        
         i++;
     }
     
@@ -167,7 +316,6 @@ int GatherPlayerData(GameDataS *gameData)
 {
     FILE *rawFile;
     cJSON *playerData;
-    cJSON *weaponData;
     cJSON *aux1;
     cJSON *aux2;
     cJSON *aux3;
@@ -200,31 +348,6 @@ int GatherPlayerData(GameDataS *gameData)
         goto cleanup;
     }
     TraceLog(LOG_DEBUG, "Parsed player.json");
-
-    // opening and parsing weapons.json file
-    rawFile = fopen(WEAPONFILE, "r");
-    if(!rawFile)
-    {
-        strcpy(buffer, "Error opening weapons file");
-        ret = FILE_ERROR;
-        goto cleanup;
-    }
-    if(fread(buffer, 1, sizeof(buffer), rawFile) < 0)
-    {
-        strcpy(buffer, "Error reading weapons file");
-        ret = FILE_ERROR;
-        goto cleanup;
-    }
-    fclose(rawFile);
-
-    weaponData = cJSON_Parse(buffer);
-    if(!weaponData)
-    {
-        strcpy(buffer, cJSON_GetErrorPtr());
-        ret = FILE_ERROR;
-        goto cleanup;
-    }
-    TraceLog(LOG_DEBUG, "Parsed weapons.json");
 
     // allocating player memory
     gameData->player = (PlayerS*)malloc(sizeof(PlayerS));
@@ -296,8 +419,6 @@ int GatherPlayerData(GameDataS *gameData)
 
         if(playerData)
             cJSON_Delete(playerData);
-        if(weaponData)
-            cJSON_Delete(weaponData);
 
         TraceLog(LOG_DEBUG, "Closed json files");
 

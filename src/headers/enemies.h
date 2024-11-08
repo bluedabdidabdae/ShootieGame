@@ -6,9 +6,9 @@
 #include "raylib.h"
 #include "global_types.h"
 
-int SpawnEnemy(EnemyLL *destination, float x, float y);
+int SpawnEnemy(GameDataS *gameData, float x, float y, EnemyType enemyType);
 void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[]);
-void EnemiesShooting(EnemyLL *currentEnemy, ProjectileLL *projectileHead, Rectangle *player);
+void EnemiesShooting(GameDataS *gameData);
 void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player);
 void CompletelyDeleteAllEnemies(EnemyLL *head);
 

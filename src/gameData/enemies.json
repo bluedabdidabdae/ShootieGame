@@ -1,7 +1,11 @@
 {
-    "minion":
-    {
-        "baseHealth": 20,
-        "weapon": "quickPistol"
-    }
+    "enemies":
+    [
+        {
+            "name": "minion",
+            "baseHealth": 20,
+            "size": 20,
+            "baseWeaponId": 0
+        }
+    ]
 }

@@ -28,7 +28,7 @@ void CheckProjEntityDamage(GameDataS *gameData)
             case ENEMY:
                 if(CheckHitboxRec(currentProjectile->projectile, (*gameData->player).player))
                 {
-                    (*gameData->player).lives -= 50;
+                    (*gameData->player).lives -= currentProjectile->damage;
                     ProjectilePop(previousProjectile, &currentProjectile);
                 }
             break;
@@ -39,7 +39,7 @@ void CheckProjEntityDamage(GameDataS *gameData)
                     currentEnemy = currentEnemy->next;
                     if(CheckHitboxRec(currentProjectile->projectile, currentEnemy->enemy))
                     {
-                        currentEnemy->hitPoint -= 5;
+                        currentEnemy->hitPoint -= currentProjectile->damage;
                         ProjectilePop(previousProjectile, &currentProjectile);
                     }
                 }

@@ -98,8 +98,7 @@ int GameHandler(GameDataS *gameData)
             // returns nothing
             SnapEnemies(gameData->enemiesHead, gameData->mapBorder);
             // returns nothing
-            EnemiesShooting(gameData->enemiesHead, gameData->projectileHead,
-                            &(*gameData->player).player);
+            EnemiesShooting(gameData);
             // returns nothing
             UpdateProjectiles(gameData->projectileHead);
             // returns nothing
@@ -136,10 +135,10 @@ int InitGameData(GameDataS *gameData)
 
     // Spawning 4 enemies for testing purposes
     // ignoring return values (0/-1)
-    SpawnEnemy(gameData->enemiesHead, 40, 40);
-    SpawnEnemy(gameData->enemiesHead, 1020, 400);
-    SpawnEnemy(gameData->enemiesHead, 234, 467);
-    SpawnEnemy(gameData->enemiesHead, 345, 340);
+    SpawnEnemy(gameData, 40, 40, NORMAL);
+    SpawnEnemy(gameData, 1020, 400, NORMAL);
+    SpawnEnemy(gameData, 234, 467, NORMAL);
+    SpawnEnemy(gameData, 345, 340, NORMAL);
 
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
@@ -238,4 +237,12 @@ void CloseGame(GameDataS *gameData)
         gameData->weaponsList = NULL;
     }
     else TraceLog(LOG_DEBUG, "WeaponList was not allocated");
+/////////////////////////////////////////////////////////////////////////////////
+    if(gameData->enemiesList != NULL)
+    {
+        // delete enemiesList
+        free(gameData->enemiesList);
+        gameData->enemiesList = NULL;
+    }
+    else TraceLog(LOG_DEBUG, "EnemiesList was not allocated");
 }

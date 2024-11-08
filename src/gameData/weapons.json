@@ -1,52 +1,53 @@
 {
     "weapons":[
         {
-            "name": "Fists",
-            "damage": 2,
-            "shotsDeelay": 10,
-            "projectileSize": 0
-        },
-        {
             "name": "Pistol",
             "damage": 5,
             "shotsDeelay": 40,
-            "projectileSize": 5
+            "projectileSize": 5,
+            "projectileSpeed": 25
         },
         {
             "name": "Quick Pistol",
             "damage": 5,
             "shotsDeelay": 20,
-            "projectileSize": 5
+            "projectileSize": 5,
+            "projectileSpeed": 25
         },
         {
             "name": "Heavy Pistol",
             "damage": 10,
             "shotsDeelay": 60,
-            "projectileSize": 10
+            "projectileSize": 10,
+            "projectileSpeed": 23
         },
         {
             "name": "Hand Cannon",
             "damage": 30,
             "shotsDeelay": 100,
-            "projectileSize": 15
+            "projectileSize": 15,
+            "projectileSpeed": 40
         },
         {
             "name": "Rifle",
             "damage": 8,
             "shotsDeelay": 15,
-            "projectileSize": 8
+            "projectileSize": 8,
+            "projectileSpeed": 30
         },
         {
             "name": "SMG",
             "damage": 3,
             "shotsDeelay": 5,
-            "projectileSize": 5
+            "projectileSize": 5,
+            "projectileSpeed": 25
         },
         {
             "name": "cheat",
             "damage": 100,
             "shotsDeelay": 0,
-            "projectileSize": 40
+            "projectileSize": 40,
+            "projectileSpeed": 30
         }
     ]
 }
