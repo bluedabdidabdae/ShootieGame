@@ -212,7 +212,7 @@ void CloseGame(GameDataS *gameData)
         // delete map border
         free(gameData->mapBorder);
         gameData->mapBorder = NULL;
-        TraceLog(LOG_DEBUG, "Deallocated border ll");
+        TraceLog(LOG_DEBUG, "Deallocated mapBorder ll");
     }
     else TraceLog(LOG_DEBUG, "Map border ll was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
