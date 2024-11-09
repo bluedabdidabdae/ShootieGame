@@ -22,6 +22,13 @@
             "projectileSpeed": 23
         },
         {
+            "name": "Auto Pistol",
+            "damage": 1,
+            "shotsDeelay": 2,
+            "projectileSize": 3,
+            "projectileSpeed": 20
+        },
+        {
             "name": "Hand Cannon",
             "damage": 30,
             "shotsDeelay": 100,
