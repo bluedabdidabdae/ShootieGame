@@ -13,6 +13,7 @@
 #include "headers/player.h"
 #include "headers/game.h"
 #include "headers/gather_data.h"
+#include "headers/utility.h"
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;
@@ -20,6 +21,7 @@ extern pthread_mutex_t playerLock;
 extern pthread_mutex_t gameUpdateLock;
 extern pthread_mutex_t cameraLock;
 extern pthread_mutex_t frameCounterLock;
+extern pthread_mutex_t mapLock;
 
 void UpdateCameraMousePosition(GameDataS *gameData);
 void CloseGame(GameDataS *gameData);
@@ -41,6 +43,16 @@ int GameHandler(GameDataS *gameData)
         return err;
     }
 
+    // loading map from files
+    err = LoadMap(gameData, 0);
+    if(err != 0)
+    {
+        TraceLog(LOG_ERROR, "Error loading map - ABORTING");
+        // ignoring LoadMap ret value;
+        CloseGame(gameData);
+        return err;
+    }
+
     // initializing the rest of the data
     err = InitGameData(gameData);
     if(err != 0)
@@ -58,7 +70,7 @@ int GameHandler(GameDataS *gameData)
     {
         pthread_mutex_lock(&gameUpdateLock);
                 
-        if(IsKeyPressed(KEY_M) || (*gameData->player).lives <= 0)
+        if(IsKeyPressed(KEY_M) || gameData->player->lives <= 0)
         {
             //if(GameMenuHandler() == 3)
             // returns nothing
@@ -69,9 +81,12 @@ int GameHandler(GameDataS *gameData)
         {
             pthread_mutex_lock(&cameraLock);
             pthread_mutex_lock(&playerLock);
+            pthread_mutex_lock(&mapLock);
 
             // returns nothing
-            UpdatePlayer(&(*gameData->player).player);
+            UpdatePlayer(gameData->player, gameData->level);
+
+            pthread_mutex_unlock(&mapLock);
 
             // returns nothing
             UpdateCameraMousePosition(gameData);
@@ -92,17 +107,22 @@ int GameHandler(GameDataS *gameData)
             pthread_mutex_unlock(&frameCounterLock);
 
             pthread_mutex_lock(&enemiesListLock);
+            pthread_mutex_lock(&mapLock);
 
             // returns nothing
-            UpdateEnemies(gameData->enemiesHead, &(*gameData->player).player);
-            // returns nothing
-            SnapEnemies(gameData->enemiesHead, gameData->mapBorder);
+            UpdateEnemies(gameData->enemiesHead, &gameData->player->player, gameData->level);
+            
+            pthread_mutex_unlock(&mapLock);
             // returns nothing
             EnemiesShooting(gameData);
             // returns nothing
             UpdateProjectiles(gameData->projectileHead);
             // returns nothing
-            CheckProjectilesBorders(gameData->projectileHead, gameData->mapBorder);
+            pthread_mutex_lock(&mapLock);
+            // returns nothing
+            CheckProjectilesBorders(gameData->projectileHead, gameData->level);
+            
+            pthread_mutex_unlock(&mapLock);
             // returns nothing
             CheckProjEntityDamage(gameData);
 
@@ -118,8 +138,8 @@ int InitGameData(GameDataS *gameData)
     gameData->score = 104;
 
     // Init player position (other par inited from json file)
-    (*gameData->player).player.x = WIDTH/2-(*gameData->player).player.width;
-    (*gameData->player).player.y = HEIGT/2-(*gameData->player).player.height;
+    (*gameData->player).player.x = 950;
+    (*gameData->player).player.y = 400;
 
     // Init enemies linked list
     gameData->enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));
@@ -135,7 +155,7 @@ int InitGameData(GameDataS *gameData)
 
     // Spawning 4 enemies for testing purposes
     // ignoring return values (0/-1)
-    SpawnEnemy(gameData, 40, 40, NORMAL);
+    SpawnEnemy(gameData, 100, 100, NORMAL);
     SpawnEnemy(gameData, 1020, 400, NORMAL);
     SpawnEnemy(gameData, 234, 467, NORMAL);
     SpawnEnemy(gameData, 345, 340, NORMAL);

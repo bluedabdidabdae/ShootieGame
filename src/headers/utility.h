@@ -7,5 +7,7 @@
 #include "global_types.h"
 
 int CheckHitboxRec(Rectangle rect1, Rectangle rect2);
+int CheckHitboxMap(int level[MAPY][MAPX], Rectangle *entity);
+void SnapToMap(GameDataS *gameData, Rectangle *entity, Vector2 *lastPos);
 
 #endif

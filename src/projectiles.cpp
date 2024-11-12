@@ -9,6 +9,7 @@
 #include "headers/global_types.h"
 #include "headers/utility.h"
 #include "headers/projectiles.h"
+#include "headers/utility.h"
 
 // local functions
 void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop);
@@ -26,7 +27,7 @@ void CheckProjEntityDamage(GameDataS *gameData)
         switch(currentProjectile->owner)
         {
             case ENEMY:
-                if(CheckHitboxRec(currentProjectile->projectile, (*gameData->player).player))
+                if(CheckHitboxRec(currentProjectile->projectile, gameData->player->player))
                 {
                     (*gameData->player).lives -= currentProjectile->damage;
                     ProjectilePop(previousProjectile, &currentProjectile);
@@ -67,32 +68,20 @@ void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop)
     prePop = NULL;
 }
 
-void CheckProjectilesBorders(ProjectileLL *projectileHead, Rectangle mapBorder[])
+void CheckProjectilesBorders(ProjectileLL *projectileHead, int level[MAPY][MAPX])
 {
-    ProjectileLL *currentProjectile = currentProjectile;
+    ProjectileLL *currentProjectile = projectileHead;
     ProjectileLL *previousProjectile;
 
-    if(currentProjectile->next != NULL)
+    if(currentProjectile->next)
     {
         do{
-            // passo al prossimo proiettile (a differenza della
-            // linked list dei nemici questa mantiene il primo 
-            // nodo vuoto ed allocato fino a fine partita,
-            // in futuro le faccio uguali, dipende
-            // con quale dei due modi mi trovo più comodo)
+            // passo al prossimo proiettile
             previousProjectile = currentProjectile;
             currentProjectile = currentProjectile->next;
 
-            // deleto i proiettili che impattano coi bordi della mappa
-            // LASCIARE TUTTI GLI ELSE, ALTRIMENTI SI SFONDA LA MEMORIA
-            // controlli per le collisioni tra il proiettile ed i 4 bordi mappa
-            if(currentProjectile->projectile.x < mapBorder[1].x+mapBorder[1].width)
-                ProjectilePop(previousProjectile, &currentProjectile);
-            else if(currentProjectile->projectile.x > mapBorder[3].x-currentProjectile->projectile.width)
-                ProjectilePop(previousProjectile, &currentProjectile);
-            else if(currentProjectile->projectile.y < mapBorder[0].y+mapBorder[0].height)
-                ProjectilePop(previousProjectile, &currentProjectile);
-            else if(currentProjectile->projectile.y > mapBorder[2].y-currentProjectile->projectile.height)
+            // if it collides with the map i explode it
+            if(CheckHitboxMap(level, &currentProjectile->projectile))
                 ProjectilePop(previousProjectile, &currentProjectile);
 
             // check se ho fatto il pop dell'ultimo elemento della lista

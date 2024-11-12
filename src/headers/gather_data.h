@@ -4,5 +4,6 @@
 #define GATHER_DATA_H
 
 int GatherData(GameDataS *gameData);
+int LoadMap(GameDataS *gameData, int levelId);
 
 #endif

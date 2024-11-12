@@ -9,6 +9,6 @@
 #include "global_types.h"
 
 void PlayerShooting(GameDataS *gameData);
-void UpdatePlayer(Rectangle *player);
+void UpdatePlayer(PlayerS *player, int level[MAPY][MAPX]);
 
 #endif

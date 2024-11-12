@@ -8,9 +8,11 @@
 #include "headers/global_types.h"
 
 #define RAWBUFFERSIZE 2048
+#define MAPRAWBUFFERSIZE 16384
 #define PLAYERFILE "gameData/player.json"
 #define WEAPONFILE "gameData/weapons.json"
 #define ENEMIESFILE "gameData/enemies.json"
+#define MAPFILE "gameData/levels.json"
 
 int GatherPlayerData(GameDataS *gameData);
 int GatherWeaponData(WeaponS **weaponsList);
@@ -18,7 +20,7 @@ int GatherEnemiesData(GameDataS *gameData);
 
 int GatherData(GameDataS *gameData)
 {
-    int ret;
+    int ret = 0;
 
     TraceLog(LOG_DEBUG, "Entered GatherData func");
 
@@ -31,7 +33,141 @@ int GatherData(GameDataS *gameData)
     ret = GatherEnemiesData(gameData);
     if(0 != ret) return ret;
 
-    return 0;
+    return ret;
+}
+
+int LoadMap(GameDataS *gameData, int levelId)
+{
+    FILE *rawFile;
+    cJSON *mapsData;
+    cJSON *aux1;
+    cJSON *aux2;
+    cJSON *aux3;
+    cJSON *aux4;
+    cJSON *aux5;
+    int arrSize;
+    int ret = 0;
+    int i, ii;
+    char buffer[MAPRAWBUFFERSIZE];
+
+    TraceLog(LOG_DEBUG, "Entered LoadMap func");
+
+    // opening and parsing levels.json file
+    rawFile = fopen(MAPFILE, "r");
+    if(!rawFile)
+    {
+        strcpy(buffer, "Error opening levels file");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, "Opened levels.json");
+    if(fread(buffer, 1, sizeof(buffer), rawFile) < 0)
+    {
+        strcpy(buffer, "Error reading levels file");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    fclose(rawFile);
+    TraceLog(LOG_DEBUG, "Read levels.json");
+    mapsData = cJSON_Parse(buffer);
+    if(!mapsData)
+    {
+        strcpy(buffer, cJSON_GetErrorPtr());
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, "Parsed levels.json");
+    
+    // loading levels array
+    aux1 = cJSON_GetObjectItemCaseSensitive(mapsData, "levels");
+    if(!aux1)
+    {
+        strcpy(buffer, "Error loading levels array - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, "Loaded levels array");
+
+    arrSize = cJSON_GetArraySize(aux1);
+    if(levelId >= arrSize)
+    {
+        strcpy(buffer, "Error, specified level is out of limit - ABORTING");
+        ret = ARRAY_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, "Loaded specified level from array");
+
+    // fetching levels data
+    aux2 = cJSON_GetArrayItem(aux1, levelId);
+    if(!aux2)
+    {
+        strcpy(buffer, TextFormat("Error loading enemies array index: %d - ABORTING", levelId));
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, TextFormat("Loaded levels array index: %d", levelId));
+
+    // fetching level matrix
+    aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "map");
+    if(!aux3)
+    {
+        strcpy(buffer, "Error loading level matrix - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, "Loaded level matrix");
+
+    // fetching level y 0
+    aux4 = cJSON_GetArrayItem(aux3, 0);
+    if(!aux4)
+    {
+        strcpy(buffer, TextFormat("Error loading level y: %d - ABORTING", 0));
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, TextFormat("Loaded level y: %d", 0));
+
+    // fetching level x 0
+    aux5 = cJSON_GetArrayItem(aux4, 0);
+    if(!aux4)
+    {
+        strcpy(buffer, TextFormat("Error loading level x: %d - ABORTING", 0));
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, TextFormat("Loaded level x: %d", 0));
+    
+    // loading map
+    for(i = 0; i < MAPY; i++)
+    {
+        // fetching level x 0
+        aux5 = cJSON_GetArrayItem(aux4, 0);
+        if(!aux4)
+        {
+            strcpy(buffer, "Error loading map - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        
+        // loading map
+        for(ii = 0; ii < MAPX; ii++)
+        {
+            gameData->level[i][ii] = aux5->valueint;
+            aux5 = aux5->next;
+        }
+        aux4 = aux4->next;
+    }
+
+    cleanup:
+        if(ret)
+            TraceLog(LOG_ERROR, buffer);
+
+        if(mapsData)
+            cJSON_Delete(mapsData);
+
+        TraceLog(LOG_DEBUG, "Closed json files");
+
+        return ret;
 }
 
 int GatherEnemiesData(GameDataS *gameData)

@@ -9,12 +9,13 @@
 #include "raylib.h"
 #include "headers/global_types.h"
 #include "headers/enemies.h"
+#include "headers/utility.h"
 
 #define PROJECTILESPEED 25.0f
 
 #define ENEMYSPEED 3.0f
-#define ENEMYMAXPDISTANCE 600
-#define ENEMYMINPDISTANCE 500
+#define ENEMYMAXPDISTANCE 350
+#define ENEMYMINPDISTANCE 250
 #define HEALTHBAROFFSETY -10
 
 // local functions
@@ -54,22 +55,6 @@ int SpawnEnemy(GameDataS *gameData, float x, float y, EnemyType enemyType)
         return 0;
     }
     return -1;
-}
-
-void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[])
-{
-    while(currentEnemy->next != NULL){
-        currentEnemy = currentEnemy->next;
-        if(currentEnemy->enemy.x < mapBorder[1].x+mapBorder[1].width)
-            currentEnemy->enemy.x = mapBorder[1].x+mapBorder[1].width;
-        else if(currentEnemy->enemy.x > mapBorder[3].x-currentEnemy->enemy.width)
-            currentEnemy->enemy.x = mapBorder[3].x-currentEnemy->enemy.width;
-        
-        if(currentEnemy->enemy.y < mapBorder[0].y+mapBorder[0].height)
-            currentEnemy->enemy.y = mapBorder[0].y+mapBorder[0].height;
-        else if(currentEnemy->enemy.y > mapBorder[2].y-currentEnemy->enemy.height)
-            currentEnemy->enemy.y = mapBorder[2].y-currentEnemy->enemy.height;
-    }
 }
 
 void EnemiesShooting(GameDataS *gameData)
@@ -117,7 +102,7 @@ void EnemiesShooting(GameDataS *gameData)
     }
 }
 
-void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
+void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player, int level[MAPY][MAPX])
 {
     float Dx, Dy, tmp;
     EnemyLL *previousEnemy;
@@ -154,19 +139,30 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player)
             currentEnemy->behaviour = APPROACHING;
         else if(abs(Dx)+abs(Dy) < ENEMYMINPDISTANCE)
             currentEnemy->behaviour = BACKING;
-        
+
+        Dx = ENEMYSPEED * (Dx / tmp);
+        Dy = ENEMYSPEED * (Dy / tmp);
+
         switch(currentEnemy->behaviour)
         {
             case BACKING:
-                currentEnemy->enemy.x += ENEMYSPEED * (Dx / tmp);
-                currentEnemy->enemy.y += ENEMYSPEED * (Dy / tmp);
+                currentEnemy->enemy.x += Dx;
+                if (CheckHitboxMap(level, &currentEnemy->enemy))
+                    currentEnemy->enemy.x -= Dx;
+                currentEnemy->enemy.y += Dy;
+                if (CheckHitboxMap(level, &currentEnemy->enemy))
+                    currentEnemy->enemy.y -= Dy;
             break;
             case APPROACHING:
-                currentEnemy->enemy.x -= ENEMYSPEED * (Dx / tmp);
-                currentEnemy->enemy.y -= ENEMYSPEED * (Dy / tmp);
+                currentEnemy->enemy.x -= Dx;
+                if (CheckHitboxMap(level, &currentEnemy->enemy))
+                    currentEnemy->enemy.x += Dx;
+                currentEnemy->enemy.y -= Dy;
+                if (CheckHitboxMap(level, &currentEnemy->enemy))
+                    currentEnemy->enemy.y += Dy;
             break;
         }
-        
+
         currentEnemy->healthBar.x = currentEnemy->enemy.x;
         currentEnemy->healthBar.y = currentEnemy->enemy.y+HEALTHBAROFFSETY;
         

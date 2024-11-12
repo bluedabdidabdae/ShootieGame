@@ -7,9 +7,9 @@
 #include "global_types.h"
 
 int SpawnEnemy(GameDataS *gameData, float x, float y, EnemyType enemyType);
-void SnapEnemies(EnemyLL *currentEnemy, Rectangle mapBorder[]);
+void SnapEnemies(GameDataS *gameData);
 void EnemiesShooting(GameDataS *gameData);
-void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player);
+void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player, int level[MAPY][MAPX]);
 void CompletelyDeleteAllEnemies(EnemyLL *head);
 
 #endif

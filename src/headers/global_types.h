@@ -7,13 +7,16 @@
 
 #define WIDTH 1335
 #define HEIGT 675
-#define WALLTHICKNESS 5
+#define WALLTHICKNESS 25
 
 #define WEAPONNAMEBUFFER 20
+#define MAPX 53
+#define MAPY 27
 
 #define MALLOC_ERROR 11
 #define THREAD_ERROR 12
 #define FILE_ERROR 13
+#define ARRAY_ERROR 14
 
 typedef unsigned int uint;
 //////////////////////////////////////////////////////////
@@ -106,6 +109,7 @@ typedef struct game_data_model{
     ProjectileLL *projectileHead;
     WeaponS *weaponsList;
     EnemiesS *enemiesList;
+    int level[MAPY][MAPX];
     uint score;
 }GameDataS;
 //////////////////////////////////////////////////////////

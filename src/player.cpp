@@ -9,6 +9,7 @@
 #include "raylib.h"
 #include "headers/global_types.h"
 #include "headers/player.h"
+#include "headers/utility.h"
 
 #define PLAYERPROJECTILESPEED 25.0f
 
@@ -49,14 +50,30 @@ void PlayerShooting(GameDataS *gameData)
     }
 }
 
-void UpdatePlayer(Rectangle *player)
+void UpdatePlayer(PlayerS *player, int level[MAPY][MAPX])
 {
-    if (IsKeyDown(KEY_W)) player->y -= PLAYERSPEED;
-    if (IsKeyDown(KEY_A)) player->x -= PLAYERSPEED;
-    if (IsKeyDown(KEY_S)) player->y += PLAYERSPEED;
-    if (IsKeyDown(KEY_D)) player->x += PLAYERSPEED;
-    if (player->x < WALLTHICKNESS) player->x = WALLTHICKNESS;
-    if (player->y < WALLTHICKNESS) player->y = WALLTHICKNESS;
-    if (player->x > WIDTH-WALLTHICKNESS-player->width) player->x = WIDTH-WALLTHICKNESS-player->width;
-    if (player->y > HEIGT-WALLTHICKNESS-player->height) player->y = HEIGT-WALLTHICKNESS-player->height;
+    if (IsKeyDown(KEY_W))
+    {
+        player->player.y -= PLAYERSPEED;
+        if (CheckHitboxMap(level, &player->player))
+            player->player.y += PLAYERSPEED;
+    }
+    if (IsKeyDown(KEY_A))
+    {
+        player->player.x -= PLAYERSPEED;
+        if (CheckHitboxMap(level, &player->player))
+            player->player.x += PLAYERSPEED;
+    }
+    if (IsKeyDown(KEY_S))
+    {
+        player->player.y += PLAYERSPEED;
+        if (CheckHitboxMap(level, &player->player))
+            player->player.y -= PLAYERSPEED;
+    }
+    if (IsKeyDown(KEY_D))
+    {
+        player->player.x += PLAYERSPEED;
+        if (CheckHitboxMap(level, &player->player))
+            player->player.x -= PLAYERSPEED;
+    }
 }
