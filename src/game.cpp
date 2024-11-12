@@ -155,7 +155,7 @@ int InitGameData(GameDataS *gameData)
 
     // Spawning 4 enemies for testing purposes
     // ignoring return values (0/-1)
-    SpawnEnemy(gameData, 100, 100, NORMAL);
+    SpawnEnemy(gameData, 150, 150, NORMAL);
     SpawnEnemy(gameData, 1020, 400, NORMAL);
     SpawnEnemy(gameData, 234, 467, NORMAL);
     SpawnEnemy(gameData, 345, 340, NORMAL);
