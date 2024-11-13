@@ -16,7 +16,7 @@ int CheckHitboxMap(int level[MAPY][MAPX], Rectangle *entity)
     {
         for(ii = x; ii < x+3; ii++)
         {
-            if(level[i][ii])
+            if(level[i][ii] > 1)
             {
                 if(
                     entity->x <= WALLTHICKNESS*ii+WALLTHICKNESS &&

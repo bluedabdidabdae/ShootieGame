@@ -76,7 +76,7 @@ int LoadMapTextures(Texture2D **mapTextures)
     int ret = 0;
     char buffer[MAPRAWBUFFERSIZE];
 
-    *mapTextures = (Texture2D*)malloc(sizeof(Texture2D)*2);
+    *mapTextures = (Texture2D*)malloc(sizeof(Texture2D)*4);
     if(!*mapTextures)
     {
         strcpy(buffer, "Error allocating mapTextures memory - ABORTING");
@@ -84,10 +84,27 @@ int LoadMapTextures(Texture2D **mapTextures)
         goto cleanup;
     }
 
-    tmp = LoadImage("resources/test_wall.png");
-    ImageResize(&tmp, WALLTHICKNESS+12, WALLTHICKNESS+11);
+
+    tmp = LoadImage("resources/floors/broken_stone_floor.png");
+    ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS);
     (*mapTextures)[1] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
+
+    tmp = LoadImage("resources/walls/stone_wall.png");
+    ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS+12);
+    (*mapTextures)[2] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+
+    tmp = LoadImage("resources/walls/broken_stone_wall.png");
+    ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS+12);
+    (*mapTextures)[3] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+
+    tmp = LoadImage("resources/walls/broken_stone_wall_with_moss.png");
+    ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS+12);
+    (*mapTextures)[4] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+
     
     cleanup:
         if(ret)

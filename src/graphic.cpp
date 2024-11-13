@@ -117,7 +117,30 @@ void DrawGame(GameDataS *gameData)
         pthread_mutex_lock(&cameraLock);
         // drawing the game
         BeginMode2D(*gameData->camera);
-            // drawing player
+            // drawing map borders
+            pthread_mutex_lock(&mapLock);
+            for(int i = 0; i < MAPY; i++)
+            {
+                for(int ii = MAPX-1; ii >= 0; ii--)
+                {
+                    if(gameData->level[i][ii] > 1)
+                        DrawTexture(
+                            gameData->mapTextures[gameData->level[i][ii]],
+                            WALLTHICKNESS*ii,
+                            WALLTHICKNESS*i,
+                            WHITE
+                            );
+                    else
+                        DrawTexture(
+                            gameData->mapTextures[gameData->level[i][ii]],
+                            WALLTHICKNESS*ii,
+                            WALLTHICKNESS*i+12,
+                            WHITE
+                            );
+                }
+            }
+                        
+            pthread_mutex_unlock(&mapLock);
             // drawing projectiles
             pthread_mutex_lock(&projectileListLock);
             while(projectileHead->next != NULL)
@@ -127,18 +150,6 @@ void DrawGame(GameDataS *gameData)
             }
             pthread_mutex_unlock(&projectileListLock);
 
-            // drawing map borders
-            pthread_mutex_lock(&mapLock);
-            for(int i = 0; i < MAPY; i++)
-                for(int ii = MAPX-1; ii >= 0; ii--)
-                    if(gameData->level[i][ii])
-                        DrawTexture(
-                            gameData->mapTextures[gameData->level[i][ii]],
-                            WALLTHICKNESS*ii,
-                            WALLTHICKNESS*i,
-                            WHITE
-                            );
-            pthread_mutex_unlock(&mapLock);
             
             // drawing enemies from linked list of type *EnemyLL
             pthread_mutex_lock(&enemiesListLock);
@@ -160,6 +171,7 @@ void DrawGame(GameDataS *gameData)
             }
             pthread_mutex_unlock(&enemiesListLock);
 
+            // drawing player
             pthread_mutex_lock(&playerLock);
             DrawRectangleRec(gameData->player->player, gameData->gameSkin->primaryColor);
             pthread_mutex_unlock(&playerLock);
@@ -172,7 +184,7 @@ void DrawGame(GameDataS *gameData)
         //DrawRectangle(GetMouseX(), GetMouseY(), 5, 5, YELLOW);
         pthread_mutex_lock(&playerLock);
         DrawText(TextFormat("SCORE: %u", gameData->score), WALLTHICKNESS, WALLTHICKNESS, 40, WHITE);
-        DrawRectangle(WALLTHICKNESS, 80, gameData->player->lives, 15, GREEN);
+        DrawRectangle(WALLTHICKNESS, 80, gameData->player->lives*10, 15, GREEN);
         DrawRectangle(WIDTH - 215, HEIGT - 85, 200, 50, Fade(WHITE, FADEVALUE));
         pthread_mutex_lock(&weaponDataLock);
         DrawText(

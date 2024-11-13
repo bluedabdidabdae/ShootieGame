@@ -170,7 +170,7 @@ int InitGameData(GameDataS *gameData)
     (*gameData->camera).target = (Vector2){ (*gameData->player).player.x + (*gameData->player).player.width,
                                             (*gameData->player).player.y + (*gameData->player).player.height };
     (*gameData->camera).offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
-    (*gameData->camera).zoom = 1.5f;
+    (*gameData->camera).zoom = 1.7f;
 
     // Temporary map borderes
     gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4);

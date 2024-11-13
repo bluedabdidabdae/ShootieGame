@@ -45,9 +45,9 @@
         {
             "name": "SMG",
             "damage": 3,
-            "shotsDeelay": 5,
+            "shotsDeelay": 16,
             "projectileSize": 5,
-            "projectileSpeed": 25
+            "projectileSpeed": 8
         },
         {
             "name": "cheat",

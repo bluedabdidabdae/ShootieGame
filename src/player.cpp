@@ -11,8 +11,6 @@
 #include "headers/player.h"
 #include "headers/utility.h"
 
-#define PLAYERPROJECTILESPEED 25.0f
-
 void PlayerShooting(GameDataS *gameData)
 {
     float Dx, Dy, tmp;

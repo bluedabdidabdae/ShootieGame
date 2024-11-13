@@ -69,7 +69,7 @@ void EnemiesShooting(GameDataS *gameData)
     {
         currentEnemy = currentEnemy->next;
         // tiro a caso se il nemico spara o no
-        if(rand()%1000 < 20)
+        if(rand()%1000 < 30)
         {
             aux1 = (ProjectileLL*)malloc(sizeof(ProjectileLL));
             if(aux1)
@@ -89,8 +89,11 @@ void EnemiesShooting(GameDataS *gameData)
 
                 tmp = abs(Dx) + abs(Dy);
 
-                aux1->vX = gameData->weaponsList[currentEnemy->weaponId].projectileSpeed * (Dx / tmp);
-                aux1->vY = gameData->weaponsList[currentEnemy->weaponId].projectileSpeed * (Dy / tmp);
+                //aux1->vX = gameData->weaponsList[currentEnemy->weaponId].projectileSpeed * (Dx / tmp);
+                //aux1->vY = gameData->weaponsList[currentEnemy->weaponId].projectileSpeed * (Dy / tmp);
+
+                aux1->vX = 5 * (Dx / tmp);
+                aux1->vY = 5 * (Dy / tmp);
 
                 aux1->owner = ENEMY;
 

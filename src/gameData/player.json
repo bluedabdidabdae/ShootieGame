@@ -1,8 +1,8 @@
 {
-    "baseHealth": 300,
+    "baseHealth": 60,
     "size":{
         "x": 20,
         "y": 20
     },
-    "defaultWeaponId": 5
+    "defaultWeaponId": 6
 }
