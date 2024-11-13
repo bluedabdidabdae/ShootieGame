@@ -49,7 +49,7 @@ typedef struct Weapon_model{
 typedef struct Enemies_model{
     int baseHealth;
     int baseWeaponId;
-    // Texture *texture;
+    Texture2D texture;
     Rectangle enemy;
 }EnemiesS;
 //////////////////////////////////////////////////////////
@@ -109,6 +109,8 @@ typedef struct game_data_model{
     ProjectileLL *projectileHead;
     WeaponS *weaponsList;
     EnemiesS *enemiesList;
+    Texture2D *mapTextures;
+    bool isCameraLocked;
     int level[MAPY][MAPX];
     uint score;
 }GameDataS;

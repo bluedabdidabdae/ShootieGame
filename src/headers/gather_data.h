@@ -5,5 +5,7 @@
 
 int GatherData(GameDataS *gameData);
 int LoadMap(GameDataS *gameData, int levelId);
+int LoadMapTextures(Texture2D **mapTextures);
+int LoadEnemiesTextures(GameDataS *gameData);
 
 #endif

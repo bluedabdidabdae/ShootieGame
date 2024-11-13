@@ -6,6 +6,7 @@
 #include "raylib.h"
 #include "headers/global_types.h"
 #include "headers/graphic.h"
+#include "headers/gather_data.h"
 
 #define WINDOWNAME "Shootie Shootie Game"
 #define TARGETFPS 60
@@ -22,24 +23,23 @@ extern pthread_mutex_t playerLock;
 extern pthread_mutex_t gameUpdateLock;
 extern pthread_mutex_t cameraLock;
 extern pthread_mutex_t frameCounterLock;
-extern pthread_mutex_t weaponsLock;
 extern pthread_mutex_t mapLock;
+extern pthread_mutex_t weaponDataLock;
 
 // local functions
 void DrawMenu();
-void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture);
+void DrawGame(GameDataS *gameData);
+void LoadGameTextures(GameDataS *gameData);
+void DrawMenuLoop();
+void DrawGameLoop(GameDataS *gameData);
 
 void *HandleGraphics(void* data)
 {
+    int ret = 0;
     GameDataS *gameData = (GameDataS*)data;
 
     InitWindow(WIDTH, HEIGT, WINDOWNAME);
     SetTargetFPS(TARGETFPS);
-
-    Image baseEnemyImage = LoadImage("resources/base_enemy.png");
-    ImageResize(&baseEnemyImage, 20, 20);
-    Texture2D baseEnemyTexture = LoadTextureFromImage(baseEnemyImage);
-    UnloadImage(baseEnemyImage);
 
     // sending clear to update to main
     pthread_mutex_unlock(&gameUpdateLock);
@@ -49,22 +49,17 @@ void *HandleGraphics(void* data)
         switch(*gameData->toDraw)
         {
             case MAINMENU:
-                pthread_mutex_unlock(&gameUpdateLock);
-                DrawMenu();
+                DrawMenuLoop();
             break;
             case GAME:
-                //sending clear to update to game engine
-                pthread_mutex_unlock(&gameUpdateLock);
-                DrawGame(gameData, &baseEnemyTexture);
+                LoadGameTextures(gameData);
+                DrawGameLoop(gameData);
             break;
             case ABORT:
                 TraceLog(LOG_ERROR, "<< Aborting on drawing thread >>");
                 abort();
             break;
         }
-        pthread_mutex_lock(&frameCounterLock);
-        gameData->frameCounter += 1;
-        pthread_mutex_unlock(&frameCounterLock);
     }
 
     CloseWindow();
@@ -72,7 +67,44 @@ void *HandleGraphics(void* data)
     return NULL;
 }
 
-void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
+void DrawMenuLoop()
+{
+    pthread_mutex_unlock(&gameUpdateLock);
+    DrawMenu();
+}
+
+void DrawGameLoop(GameDataS *gameData)
+{
+    while(GAME == *gameData->toDraw)
+    {
+        //sending clear to update to game engine
+        pthread_mutex_unlock(&gameUpdateLock);
+        DrawGame(gameData);
+
+        pthread_mutex_lock(&frameCounterLock);
+        gameData->frameCounter += 1;
+        pthread_mutex_unlock(&frameCounterLock);
+    }
+}
+
+void LoadGameTextures(GameDataS *gameData)
+{
+    int ret;
+
+    pthread_mutex_lock(&mapLock);
+    ret = LoadMapTextures(&gameData->mapTextures);
+    if(ret) TraceLog(LOG_INFO, "MapTextures not loaded");
+    else TraceLog(LOG_DEBUG, "MapTextures loaded");
+    pthread_mutex_unlock(&mapLock);
+
+    pthread_mutex_lock(&enemiesListLock);
+    LoadEnemiesTextures(gameData);
+    if(ret) TraceLog(LOG_INFO, "EnemiesTextures not loaded");
+    else TraceLog(LOG_DEBUG, "EnemiesTextures loaded");
+    pthread_mutex_unlock(&enemiesListLock);
+}
+
+void DrawGame(GameDataS *gameData)
 {
     pthread_mutex_lock(&enemiesListLock);
     EnemyLL *enemiesHead = gameData->enemiesHead;
@@ -86,14 +118,6 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
         // drawing the game
         BeginMode2D(*gameData->camera);
             // drawing player
-            pthread_mutex_lock(&playerLock);
-            
-            DrawRectangleRec(gameData->player->player, gameData->gameSkin->primaryColor);
-
-            //DrawRectangle(gameData->mousePosition->x, gameData->mousePosition->y, 5, 5, RED);
-
-            pthread_mutex_unlock(&playerLock);
-            pthread_mutex_unlock(&cameraLock);
             // drawing projectiles
             pthread_mutex_lock(&projectileListLock);
             while(projectileHead->next != NULL)
@@ -106,15 +130,14 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
             // drawing map borders
             pthread_mutex_lock(&mapLock);
             for(int i = 0; i < MAPY; i++)
-                for(int ii = 0; ii < MAPX; ii++)
-                    if(gameData->level[i][ii] == 1)
-                        DrawRectangle(
-                        WALLTHICKNESS*ii,
-                        WALLTHICKNESS*i,
-                        WALLTHICKNESS,
-                        WALLTHICKNESS,
-                        gameData->gameSkin->secondaryColor
-                        );
+                for(int ii = MAPX-1; ii >= 0; ii--)
+                    if(gameData->level[i][ii])
+                        DrawTexture(
+                            gameData->mapTextures[gameData->level[i][ii]],
+                            WALLTHICKNESS*ii,
+                            WALLTHICKNESS*i,
+                            WHITE
+                            );
             pthread_mutex_unlock(&mapLock);
             
             // drawing enemies from linked list of type *EnemyLL
@@ -123,7 +146,11 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
             {
                 enemiesHead = enemiesHead->next;
                 //DrawRectangleRec(enemiesHead->healthBar, RED);
-                DrawTexture(*baseEnemyTexture, enemiesHead->enemy.x, enemiesHead->enemy.y, WHITE);
+                DrawTexture(
+                    gameData->enemiesList[enemiesHead->enemyType].texture,
+                    enemiesHead->enemy.x,
+                    enemiesHead->enemy.y,
+                    WHITE);
                 DrawRectangle(enemiesHead->healthBar.x,
                               enemiesHead->healthBar.y,
                               enemiesHead->hitPoint,
@@ -132,6 +159,13 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
                 //DrawRectangleRec(enemiesHead->enemy, enemiesHead->color);
             }
             pthread_mutex_unlock(&enemiesListLock);
+
+            pthread_mutex_lock(&playerLock);
+            DrawRectangleRec(gameData->player->player, gameData->gameSkin->primaryColor);
+            pthread_mutex_unlock(&playerLock);
+            pthread_mutex_unlock(&cameraLock);
+
+            DrawRectangle(gameData->mousePosition->x, gameData->mousePosition->y, 5, 5, RED);
         EndMode2D();
         // drawing the ui
         DrawFPS(5, 5);
@@ -140,12 +174,12 @@ void DrawGame(GameDataS *gameData, Texture2D *baseEnemyTexture)
         DrawText(TextFormat("SCORE: %u", gameData->score), WALLTHICKNESS, WALLTHICKNESS, 40, WHITE);
         DrawRectangle(WALLTHICKNESS, 80, gameData->player->lives, 15, GREEN);
         DrawRectangle(WIDTH - 215, HEIGT - 85, 200, 50, Fade(WHITE, FADEVALUE));
-        pthread_mutex_lock(&weaponsLock);
+        pthread_mutex_lock(&weaponDataLock);
         DrawText(
             TextFormat("%d %s", gameData->player->activeWeaponId == gameData->player->weapons[0] ? 1 : 2,
             gameData->weaponsList[gameData->player->activeWeaponId].weaponName), 
             WIDTH - 200, HEIGT - 70, WALLTHICKNESS, WHITE);
-        pthread_mutex_unlock(&weaponsLock);
+        pthread_mutex_unlock(&weaponDataLock);
         pthread_mutex_unlock(&playerLock);
     EndDrawing();
 }

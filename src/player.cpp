@@ -52,28 +52,37 @@ void PlayerShooting(GameDataS *gameData)
 
 void UpdatePlayer(PlayerS *player, int level[MAPY][MAPX])
 {
+    int x = player->player.x/WALLTHICKNESS;
+    int y = player->player.y/WALLTHICKNESS;
+
     if (IsKeyDown(KEY_W))
     {
         player->player.y -= PLAYERSPEED;
         if (CheckHitboxMap(level, &player->player))
-            player->player.y += PLAYERSPEED;
+            player->player.y = WALLTHICKNESS*(int)(player->player.y/WALLTHICKNESS)+WALLTHICKNESS;
     }
     if (IsKeyDown(KEY_A))
     {
         player->player.x -= PLAYERSPEED;
         if (CheckHitboxMap(level, &player->player))
-            player->player.x += PLAYERSPEED;
+            player->player.x = WALLTHICKNESS*(int)(player->player.x/WALLTHICKNESS)+WALLTHICKNESS;
     }
     if (IsKeyDown(KEY_S))
     {
         player->player.y += PLAYERSPEED;
         if (CheckHitboxMap(level, &player->player))
-            player->player.y -= PLAYERSPEED;
+        {
+            player->player.y = WALLTHICKNESS*(int)(player->player.y/WALLTHICKNESS);
+            player->player.y += WALLTHICKNESS-player->player.height-1;
+        }
     }
     if (IsKeyDown(KEY_D))
     {
         player->player.x += PLAYERSPEED;
         if (CheckHitboxMap(level, &player->player))
-            player->player.x -= PLAYERSPEED;
+        {
+            player->player.x = WALLTHICKNESS*(int)(player->player.x/WALLTHICKNESS);
+            player->player.x += WALLTHICKNESS-player->player.width-1;
+        }
     }
 }

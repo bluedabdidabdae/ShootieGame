@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
+#include "raylib.h"
 #include "headers/cJSON.h"
 #include "headers/global_types.h"
 
@@ -18,22 +20,79 @@ int GatherPlayerData(GameDataS *gameData);
 int GatherWeaponData(WeaponS **weaponsList);
 int GatherEnemiesData(GameDataS *gameData);
 
+extern pthread_mutex_t enemiesListLock;
+extern pthread_mutex_t projectileListLock;
+extern pthread_mutex_t playerLock;
+extern pthread_mutex_t gameUpdateLock;
+extern pthread_mutex_t cameraLock;
+extern pthread_mutex_t frameCounterLock;
+extern pthread_mutex_t mapLock;
+extern pthread_mutex_t weaponDataLock;
+
 int GatherData(GameDataS *gameData)
 {
     int ret = 0;
 
     TraceLog(LOG_DEBUG, "Entered GatherData func");
-
+    
+    pthread_mutex_lock(&weaponDataLock);
     ret = GatherWeaponData(&gameData->weaponsList);
     if(0 != ret) return ret;
+    pthread_mutex_unlock(&weaponDataLock);
 
+    pthread_mutex_lock(&playerLock);
     ret = GatherPlayerData(gameData);
     if(0 != ret) return ret;
+    pthread_mutex_unlock(&playerLock);
 
+    pthread_mutex_lock(&enemiesListLock);
     ret = GatherEnemiesData(gameData);
     if(0 != ret) return ret;
+    pthread_mutex_unlock(&enemiesListLock);
 
     return ret;
+}
+
+int LoadEnemiesTextures(GameDataS *gameData)
+{
+    Image tmp;
+    int ret = 0;
+    char buffer[MAPRAWBUFFERSIZE];
+
+    tmp = LoadImage("resources/base_enemy.png");
+    ImageResize(&tmp, gameData->enemiesList[0].enemy.width, gameData->enemiesList[0].enemy.height);
+    gameData->enemiesList[0].texture = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    
+    cleanup:
+        if(ret)
+            TraceLog(LOG_ERROR, buffer);
+        return ret;
+}
+
+int LoadMapTextures(Texture2D **mapTextures)
+{
+    Image tmp;
+    int ret = 0;
+    char buffer[MAPRAWBUFFERSIZE];
+
+    *mapTextures = (Texture2D*)malloc(sizeof(Texture2D)*2);
+    if(!*mapTextures)
+    {
+        strcpy(buffer, "Error allocating mapTextures memory - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+
+    tmp = LoadImage("resources/test_wall.png");
+    ImageResize(&tmp, WALLTHICKNESS+12, WALLTHICKNESS+11);
+    (*mapTextures)[1] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    
+    cleanup:
+        if(ret)
+            TraceLog(LOG_ERROR, buffer);
+        return ret;
 }
 
 int LoadMap(GameDataS *gameData, int levelId)

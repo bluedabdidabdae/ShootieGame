@@ -141,6 +141,8 @@ int InitGameData(GameDataS *gameData)
     (*gameData->player).player.x = 950;
     (*gameData->player).player.y = 400;
 
+    gameData->isCameraLocked = true;
+
     // Init enemies linked list
     gameData->enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));
     if(gameData->enemiesHead == NULL) return MALLOC_ERROR;
@@ -168,7 +170,7 @@ int InitGameData(GameDataS *gameData)
     (*gameData->camera).target = (Vector2){ (*gameData->player).player.x + (*gameData->player).player.width,
                                             (*gameData->player).player.y + (*gameData->player).player.height };
     (*gameData->camera).offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
-    (*gameData->camera).zoom = 1.0f;
+    (*gameData->camera).zoom = 1.5f;
 
     // Temporary map borderes
     gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4);
@@ -184,7 +186,10 @@ int InitGameData(GameDataS *gameData)
 
 void UpdateCameraMousePosition(GameDataS *gameData)
 {
-    if(IsKeyDown(KEY_SPACE))
+    if(IsKeyPressed(KEY_SPACE))
+        gameData->isCameraLocked = !gameData->isCameraLocked;
+
+    if(gameData->isCameraLocked)
     {
         // update camera position to track player and get mouse pos relative to player
         gameData->camera->target = (Vector2){ (*gameData->player).player.x + (*gameData->player).player.width,
@@ -271,4 +276,13 @@ void CloseGame(GameDataS *gameData)
         TraceLog(LOG_DEBUG, "Deallocated enemiesList memory");
     }
     else TraceLog(LOG_DEBUG, "EnemiesList was not allocated");
+/////////////////////////////////////////////////////////////////////////////////
+    if(gameData->mapTextures != NULL)
+    {
+        // delete mapTextures
+        free(gameData->mapTextures);
+        gameData->mapTextures = NULL;
+        TraceLog(LOG_DEBUG, "Deallocated mapTextures memory");
+    }
+    else TraceLog(LOG_DEBUG, "MapTextures was not allocated");
 }

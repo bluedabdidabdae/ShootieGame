@@ -33,8 +33,8 @@ pthread_mutex_t playerLock;
 pthread_mutex_t gameUpdateLock;
 pthread_mutex_t cameraLock;
 pthread_mutex_t frameCounterLock;
-pthread_mutex_t weaponsLock;
 pthread_mutex_t mapLock;
+pthread_mutex_t weaponDataLock;
 
 int InitData(GameDataS *gameData);
 int DeleteData(GameDataS *gameData);
@@ -163,8 +163,10 @@ int InitData(GameDataS *gameData)
     pthread_mutex_init(&gameUpdateLock, NULL);
     pthread_mutex_init(&playerLock, NULL);
     pthread_mutex_init(&cameraLock, NULL);
-    pthread_mutex_init(&weaponsLock, NULL);
+    pthread_mutex_init(&weaponDataLock, NULL);
     pthread_mutex_init(&mapLock, NULL);
+    pthread_mutex_init(&mapLock, NULL);
+    pthread_mutex_init(&weaponDataLock, NULL);
 
     gameData->toDraw = (ToDraw*)malloc(sizeof(ToDraw));
     if(gameData->toDraw == NULL) return MALLOC_ERROR;
