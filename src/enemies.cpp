@@ -55,8 +55,8 @@ int SpawnEnemy(GameDataS *gameData, float x, float y, EnemyType enemyType)
         aux1->enemy = {
             x,
             y,
-            gameData->enemiesList[enemyType].enemy.height,
-            gameData->enemiesList[enemyType].enemy.width
+            gameData->enemiesList[enemyType].enemy.x,
+            gameData->enemiesList[enemyType].enemy.y
         };
         aux1->weaponId = gameData->enemiesList[enemyType].baseWeaponId;
         aux1->behaviour = BACKING;
@@ -88,8 +88,8 @@ int SpawnEnemy(GameDataS *gameData, EnemyType enemyType)
             aux1->enemy = {
                 x,
                 y,
-                gameData->enemiesList[enemyType].enemy.height,
-                gameData->enemiesList[enemyType].enemy.width
+                gameData->enemiesList[enemyType].enemy.x,
+                gameData->enemiesList[enemyType].enemy.y
             };
         }while(CheckHitboxMap(gameData->level, &aux1->enemy));
 

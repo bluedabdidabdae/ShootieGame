@@ -42,14 +42,13 @@ int ForceThreadKill(pthread_t *thread);
 
 int main(int argc, char *argv[])
 {
-    SetTraceLogLevel(LOG_DEBUG);
+    int error;
+    GameDataS gameData;
+    States gameStatus = MENU;
+ 
+    //SetTraceLogLevel(LOG_DEBUG);
 
     srand(time(NULL));
-
-    int error;
-
-    States gameStatus = MENU;
-    GameDataS gameData;
 
     pthread_t drawingThreadId = { 0 };
 

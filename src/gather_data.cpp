@@ -60,7 +60,7 @@ int LoadEnemiesTextures(GameDataS *gameData)
     char buffer[MAPRAWBUFFERSIZE];
 
     tmp = LoadImage("resources/base_enemy.png");
-    ImageResize(&tmp, gameData->enemiesList[0].enemy.width, gameData->enemiesList[0].enemy.height);
+    ImageResize(&tmp, gameData->enemiesList[0].enemy.x, gameData->enemiesList[0].enemy.y);
     gameData->enemiesList[0].texture = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
     
@@ -70,13 +70,20 @@ int LoadEnemiesTextures(GameDataS *gameData)
         return ret;
 }
 
+/*
+ * REALLY IMPORTANT
+ * The first element of the array MUST be ignored, 
+ * since it also gets ignored in all the other functions
+ * wich interact with the map. In fact the 0 block is
+ * the void block.
+*/
 int LoadMapTextures(Texture2D **mapTextures)
 {
     Image tmp;
     int ret = 0;
     char buffer[MAPRAWBUFFERSIZE];
 
-    *mapTextures = (Texture2D*)malloc(sizeof(Texture2D)*4);
+    *mapTextures = (Texture2D*)malloc(sizeof(Texture2D)*5);
     if(!*mapTextures)
     {
         strcpy(buffer, "Error allocating mapTextures memory - ABORTING");
@@ -84,6 +91,8 @@ int LoadMapTextures(Texture2D **mapTextures)
         goto cleanup;
     }
 
+    // Ignore this line, read the comment at the func start
+    // (*mapTextures)[0]
 
     tmp = LoadImage("resources/floors/broken_stone_floor.png");
     ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS);
@@ -326,8 +335,8 @@ int GatherEnemiesData(GameDataS *gameData)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        gameData->enemiesList[i].enemy.height = (float)aux3->valueint;
-        gameData->enemiesList[i].enemy.width = (float)aux3->valueint;
+        gameData->enemiesList[i].enemy.x = (float)aux3->valueint;
+        gameData->enemiesList[i].enemy.y = (float)aux3->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy size");
         
         // gathering enemy baseHealth

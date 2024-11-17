@@ -50,7 +50,7 @@ typedef struct Enemies_model{
     int baseHealth;
     int baseWeaponId;
     Texture2D texture;
-    Rectangle enemy;
+    Vector2 enemy;
 }EnemiesS;
 //////////////////////////////////////////////////////////
 typedef struct Enemy_Linked_List{

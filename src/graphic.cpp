@@ -32,6 +32,7 @@ void DrawGame(GameDataS *gameData);
 void LoadGameTextures(GameDataS *gameData);
 void DrawMenuLoop();
 void DrawGameLoop(GameDataS *gameData);
+void UnloadGameTextures(GameDataS *gameData);
 
 void *HandleGraphics(void* data)
 {
@@ -54,9 +55,15 @@ void *HandleGraphics(void* data)
             case GAME:
                 LoadGameTextures(gameData);
                 DrawGameLoop(gameData);
+                /*
+                 * its safe to interact with game data from this point
+                 * since the main thread is waiting for a clear to update
+                 * to deallocate all the memory relative to the game
+                */
+                UnloadGameTextures(gameData);
             break;
             case ABORT:
-                TraceLog(LOG_ERROR, "<< Aborting on drawing thread >>");
+                TraceLog(LOG_DEBUG, "<< Aborting on drawing thread >>");
                 abort();
             break;
         }
@@ -85,6 +92,25 @@ void DrawGameLoop(GameDataS *gameData)
         gameData->frameCounter += 1;
         pthread_mutex_unlock(&frameCounterLock);
     }
+}
+
+void UnloadGameTextures(GameDataS *gameData)
+{
+    int i;
+
+    pthread_mutex_lock(&mapLock);
+
+    for(i = 1; i < 5; i++)
+        UnloadTexture(gameData->mapTextures[i]);
+
+    pthread_mutex_unlock(&mapLock);
+
+    pthread_mutex_lock(&enemiesListLock);
+
+    for(i = 0; i < 1; i++)
+        UnloadTexture(gameData->enemiesList[i].texture);
+
+    pthread_mutex_unlock(&enemiesListLock);
 }
 
 void LoadGameTextures(GameDataS *gameData)
