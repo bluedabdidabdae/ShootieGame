@@ -65,7 +65,6 @@ void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop)
     prePop->next = (*toPop)->next;
     free(*toPop);
     *toPop = prePop;
-    prePop = NULL;
 }
 
 void CheckProjectilesBorders(ProjectileLL *projectileHead, int level[MAPY][MAPX])
@@ -85,11 +84,11 @@ void CheckProjectilesBorders(ProjectileLL *projectileHead, int level[MAPY][MAPX]
                 ProjectilePop(previousProjectile, &currentProjectile);
 
             // check se ho fatto il pop dell'ultimo elemento della lista
-            if(currentProjectile == NULL)
+            if(!currentProjectile->next)
                 return;
             
             // check se ho finito la lista
-        }while(currentProjectile->next != NULL);
+        }while(currentProjectile->next);
     }
 }
 

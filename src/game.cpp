@@ -22,6 +22,7 @@ extern pthread_mutex_t gameUpdateLock;
 extern pthread_mutex_t cameraLock;
 extern pthread_mutex_t frameCounterLock;
 extern pthread_mutex_t mapLock;
+extern pthread_mutex_t weaponDataLock;
 
 void UpdateCameraMousePosition(GameDataS *gameData);
 void CloseGame(GameDataS *gameData);
@@ -72,6 +73,10 @@ int GameHandler(GameDataS *gameData)
                 
         if(IsKeyPressed(KEY_M) || gameData->player->lives <= 0)
         {
+            *gameData->toDraw = MAINMENU;
+            
+            // waiting for the drawing thread to start drawing the main menu
+            pthread_mutex_lock(&gameUpdateLock);
             //if(GameMenuHandler() == 3)
             // returns nothing
             CloseGame(gameData);
@@ -79,56 +84,57 @@ int GameHandler(GameDataS *gameData)
         }
         else
         {
-            pthread_mutex_lock(&cameraLock);
             pthread_mutex_lock(&playerLock);
+            pthread_mutex_lock(&cameraLock);
             pthread_mutex_lock(&mapLock);
 
-            // returns nothing
             UpdatePlayer(gameData->player, gameData->level);
-
-            pthread_mutex_unlock(&mapLock);
-
-            // returns nothing
             UpdateCameraMousePosition(gameData);
-
             pthread_mutex_unlock(&cameraLock);
-            pthread_mutex_lock(&projectileListLock);
-            
+
+            pthread_mutex_lock(&enemiesListLock);
+            UpdateEnemies(gameData->enemiesHead, &gameData->player->player, gameData->level);
+            pthread_mutex_unlock(&mapLock);
+            pthread_mutex_unlock(&enemiesListLock);
+
             pthread_mutex_lock(&frameCounterLock);
-            //TraceLog(LOG_ERROR, TextFormat("Current frame: %u", lastFrameId));
+            pthread_mutex_lock(&weaponDataLock);
+            
             if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)
                 && gameData->frameCounter >=
                 lastFrameId + gameData->weaponsList[gameData->player->activeWeaponId].shotsDeelay)
             {
                 lastFrameId = gameData->frameCounter;
-                // returns nothing
+                pthread_mutex_lock(&projectileListLock);
                 PlayerShooting(gameData);
+                pthread_mutex_unlock(&projectileListLock);
             }
             pthread_mutex_unlock(&frameCounterLock);
-
-            pthread_mutex_lock(&enemiesListLock);
-            pthread_mutex_lock(&mapLock);
-
-            // returns nothing
-            UpdateEnemies(gameData->enemiesHead, &gameData->player->player, gameData->level);
             
-            pthread_mutex_unlock(&mapLock);
-            // returns nothing
+            pthread_mutex_lock(&projectileListLock);
+
             EnemiesShooting(gameData);
-            // returns nothing
-            UpdateProjectiles(gameData->projectileHead);
-            // returns nothing
-            pthread_mutex_lock(&mapLock);
-            // returns nothing
-            CheckProjectilesBorders(gameData->projectileHead, gameData->level);
-            
-            pthread_mutex_unlock(&mapLock);
-            // returns nothing
-            CheckProjEntityDamage(gameData);
 
             pthread_mutex_unlock(&projectileListLock);
             pthread_mutex_unlock(&playerLock);
+            pthread_mutex_unlock(&weaponDataLock);
+
+            pthread_mutex_lock(&mapLock);
+            pthread_mutex_lock(&projectileListLock);
+
+            UpdateProjectiles(gameData->projectileHead);
+            CheckProjectilesBorders(gameData->projectileHead, gameData->level);
+
+            pthread_mutex_unlock(&mapLock);
+
+            pthread_mutex_lock(&enemiesListLock);
+            pthread_mutex_lock(&playerLock);
+
+            CheckProjEntityDamage(gameData);
+
             pthread_mutex_unlock(&enemiesListLock);
+            pthread_mutex_unlock(&playerLock);
+            pthread_mutex_unlock(&projectileListLock);
         }
     }
 }
@@ -138,8 +144,8 @@ int InitGameData(GameDataS *gameData)
     gameData->score = 104;
 
     // Init player position (other par inited from json file)
-    (*gameData->player).player.x = 950;
-    (*gameData->player).player.y = 400;
+    (*gameData->player).player.x = 170;
+    (*gameData->player).player.y = 170;
 
     gameData->isCameraLocked = true;
 
@@ -155,12 +161,9 @@ int InitGameData(GameDataS *gameData)
     TraceLog(LOG_DEBUG, "Allocated proejctile head memory");
     gameData->projectileHead->next = NULL;
 
-    // Spawning 4 enemies for testing purposes
+    // Spawning 10 enemies for testing purposes
     // ignoring return values (0/-1)
-    SpawnEnemy(gameData, 150, 150, NORMAL);
-    SpawnEnemy(gameData, 1020, 400, NORMAL);
-    SpawnEnemy(gameData, 234, 467, NORMAL);
-    SpawnEnemy(gameData, 345, 340, NORMAL);
+    SpawnEnemies(gameData, 10, NORMAL);
 
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
@@ -186,33 +189,17 @@ int InitGameData(GameDataS *gameData)
 
 void UpdateCameraMousePosition(GameDataS *gameData)
 {
-    if(IsKeyPressed(KEY_SPACE))
-        gameData->isCameraLocked = !gameData->isCameraLocked;
-
-    if(gameData->isCameraLocked)
-    {
-        // update camera position to track player and get mouse pos relative to player
-        gameData->camera->target = (Vector2){ (*gameData->player).player.x + (*gameData->player).player.width,
-                                              (*gameData->player).player.y + (*gameData->player).player.height };
-        *gameData->mousePosition = GetMousePosition();
-        // normalize mouse coordinates to new camera position
-        gameData->mousePosition->x += (*gameData->player).player.x + (*gameData->player).player.width - gameData->camera->offset.x;
-        gameData->mousePosition->y += (*gameData->player).player.y + (*gameData->player).player.height - gameData->camera->offset.y;
-    }
-    else
-    {
-        // update mouse position
-        *gameData->mousePosition = GetMousePosition();
-        // normalize mouse coordinates to new camera position
-        gameData->mousePosition->x += (gameData->camera->target.x - gameData->camera->offset.x);
-        gameData->mousePosition->y += (gameData->camera->target.y - gameData->camera->offset.y);
-    }
+    // update camera position to track player and get mouse pos relative to player
+    gameData->camera->target = (Vector2){ gameData->player->player.x + gameData->player->player.width,
+                                            gameData->player->player.y + gameData->player->player.height };
+    *gameData->mousePosition = GetMousePosition();
+    // normalize mouse coordinates to new camera position
+    gameData->mousePosition->x += gameData->player->player.x + gameData->player->player.width - gameData->camera->offset.x;
+    gameData->mousePosition->y += gameData->player->player.y + gameData->player->player.height - gameData->camera->offset.y;
 }
 
 void CloseGame(GameDataS *gameData)
 {
-    *gameData->toDraw = MAINMENU;
-    pthread_mutex_lock(&gameUpdateLock);
 /////////////////////////////////////////////////////////////////////////////////
     if(gameData->enemiesHead != NULL)
     {

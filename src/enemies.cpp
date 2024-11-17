@@ -29,6 +29,19 @@ void EnemyPop(EnemyLL *prePop, EnemyLL **toPop)
     prePop = NULL;
 }
 
+int SpawnEnemies(GameDataS *gameData, int number, EnemyType enemyType)
+{
+    int i;
+    int ret = 0;
+
+    for(i = 0; i < number; i++)
+    {
+        ret = SpawnEnemy(gameData, enemyType);
+        if(ret) return ret;
+    }
+    return ret;
+}
+
 int SpawnEnemy(GameDataS *gameData, float x, float y, EnemyType enemyType)
 {
     EnemyLL *aux1;
@@ -45,6 +58,41 @@ int SpawnEnemy(GameDataS *gameData, float x, float y, EnemyType enemyType)
             gameData->enemiesList[enemyType].enemy.height,
             gameData->enemiesList[enemyType].enemy.width
         };
+        aux1->weaponId = gameData->enemiesList[enemyType].baseWeaponId;
+        aux1->behaviour = BACKING;
+        aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;
+        aux1->healthBar = { x, y+HEALTHBAROFFSETY, (float)aux1->hitPoint, 5 };
+        aux2 = gameData->enemiesHead->next;
+        gameData->enemiesHead->next = aux1;
+        gameData->enemiesHead->next->next = aux2;
+        return 0;
+    }
+    return -1;
+}
+
+int SpawnEnemy(GameDataS *gameData, EnemyType enemyType)
+{
+    EnemyLL *aux1;
+    EnemyLL *aux2;
+    float x, y;
+
+
+    aux1 = (EnemyLL*)malloc(sizeof(EnemyLL));
+    // if memory is allocated correctly
+    if(aux1)
+    {
+        aux1->enemyType = enemyType;
+        do{
+            x = rand()%(WALLTHICKNESS*MAPX)-WALLTHICKNESS+WALLTHICKNESS;
+            y = rand()%(WALLTHICKNESS*MAPY)-WALLTHICKNESS+WALLTHICKNESS;
+            aux1->enemy = {
+                x,
+                y,
+                gameData->enemiesList[enemyType].enemy.height,
+                gameData->enemiesList[enemyType].enemy.width
+            };
+        }while(CheckHitboxMap(gameData->level, &aux1->enemy));
+
         aux1->weaponId = gameData->enemiesList[enemyType].baseWeaponId;
         aux1->behaviour = BACKING;
         aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;

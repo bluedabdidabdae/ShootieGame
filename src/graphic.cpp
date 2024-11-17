@@ -116,7 +116,9 @@ void DrawGame(GameDataS *gameData)
         ClearBackground(BLACK);
         pthread_mutex_lock(&cameraLock);
         // drawing the game
+        pthread_mutex_lock(&playerLock);
         BeginMode2D(*gameData->camera);
+        pthread_mutex_unlock(&cameraLock);
             // drawing map borders
             pthread_mutex_lock(&mapLock);
             for(int i = 0; i < MAPY; i++)
@@ -140,6 +142,10 @@ void DrawGame(GameDataS *gameData)
                 }
             }
                         
+            // drawing player
+            DrawRectangleRec(gameData->player->player, gameData->gameSkin->primaryColor);
+            pthread_mutex_unlock(&playerLock);
+
             pthread_mutex_unlock(&mapLock);
             // drawing projectiles
             pthread_mutex_lock(&projectileListLock);
@@ -171,13 +177,7 @@ void DrawGame(GameDataS *gameData)
             }
             pthread_mutex_unlock(&enemiesListLock);
 
-            // drawing player
-            pthread_mutex_lock(&playerLock);
-            DrawRectangleRec(gameData->player->player, gameData->gameSkin->primaryColor);
-            pthread_mutex_unlock(&playerLock);
-            pthread_mutex_unlock(&cameraLock);
-
-            DrawRectangle(gameData->mousePosition->x, gameData->mousePosition->y, 5, 5, RED);
+            //DrawRectangle(gameData->mousePosition->x, gameData->mousePosition->y, 5, 5, RED);
         EndMode2D();
         // drawing the ui
         DrawFPS(5, 5);

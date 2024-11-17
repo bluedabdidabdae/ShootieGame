@@ -7,7 +7,7 @@
 
 #define WIDTH 1335
 #define HEIGT 675
-#define WALLTHICKNESS 25
+#define WALLTHICKNESS 30
 
 #define WEAPONNAMEBUFFER 20
 #define MAPX 53
