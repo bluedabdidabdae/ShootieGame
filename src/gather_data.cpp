@@ -53,17 +53,47 @@ int GatherData(GameDataS *gameData)
     return ret;
 }
 
-int LoadEnemiesTextures(GameDataS *gameData)
+int LoadWeaponsTextures(GameDataS *gameData)
 {
     Image tmp;
     int ret = 0;
+    int i;
     char buffer[MAPRAWBUFFERSIZE];
 
-    tmp = LoadImage("resources/base_enemy.png");
-    ImageResize(&tmp, gameData->enemiesList[0].enemy.x, gameData->enemiesList[0].enemy.y);
-    gameData->enemiesList[0].texture = LoadTextureFromImage(tmp);
-    UnloadImage(tmp);
-    
+    for(i = 0; i < 8; i++)
+    {
+        tmp = gameData->weaponsList[i].projectileImage;
+        ImageResize(&tmp, gameData->weaponsList[i].projectileSize, gameData->weaponsList[i].projectileSize);
+        gameData->weaponsList[i].projectileTexture = LoadTextureFromImage(tmp);
+        //UnloadImage(tmp);
+    }
+
+    cleanup:
+        if(ret)
+            TraceLog(LOG_ERROR, buffer);
+        return ret;
+}
+
+int LoadEnemiesTextures(GameDataS *gameData)
+{
+    Image tmp;
+    int i = 0;
+    int ret = 0;
+    char buffer[MAPRAWBUFFERSIZE];
+
+    for(i = 0; i < 1; i++)
+    {
+        tmp = gameData->enemiesList[i].enemyImage;
+        ImageResize(&tmp, gameData->enemiesList[i].enemy.x, gameData->enemiesList[i].enemy.y);
+        gameData->enemiesList[i].enemyTexture = LoadTextureFromImage(tmp);
+        UnloadImage(tmp);
+
+        tmp = gameData->enemiesList[i].weapon.projectileImage;
+        ImageResize(&tmp, gameData->enemiesList[i].weapon.projectileSize, gameData->enemiesList[i].weapon.projectileSize);
+        gameData->enemiesList[i].weapon.projectileTexture = LoadTextureFromImage(tmp);
+        UnloadImage(tmp);
+    }
+
     cleanup:
         if(ret)
             TraceLog(LOG_ERROR, buffer);
@@ -262,6 +292,7 @@ int GatherEnemiesData(GameDataS *gameData)
     cJSON *aux1;
     cJSON *aux2;
     cJSON *aux3;
+    cJSON *aux4;
     int arrSize;
     int ret = 0;
     int i;
@@ -317,7 +348,7 @@ int GatherEnemiesData(GameDataS *gameData)
     i = 0;
     while(i < arrSize){
 
-        // fetching weapon data
+        // fetching enemy
         aux2 = cJSON_GetArrayItem(aux1, i);
         if(!aux2)
         {
@@ -327,18 +358,37 @@ int GatherEnemiesData(GameDataS *gameData)
         }
         TraceLog(LOG_DEBUG, TextFormat("Loaded enemies array index: %d", i));
 
-        // gathering enemy size
+        // fetching enemy size
         aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "size");
-        if(!aux3 || !cJSON_IsNumber(aux3))
+        if(!aux3)
         {
-            strcpy(buffer, "Error loading enemy size - ABORTING");
+            strcpy(buffer, "Error fetching enemy size - ABORTING");
             ret = FILE_ERROR;
             goto cleanup;
         }
-        gameData->enemiesList[i].enemy.x = (float)aux3->valueint;
-        gameData->enemiesList[i].enemy.y = (float)aux3->valueint;
-        TraceLog(LOG_DEBUG, "Loaded enemy size");
+        TraceLog(LOG_DEBUG, "Fetched enemy size");
         
+        // gathering enemy size
+        aux4 = cJSON_GetObjectItemCaseSensitive(aux3, "x");
+        if(!aux4 || !cJSON_IsNumber(aux4))
+        {
+            strcpy(buffer, "Error loading enemy size x - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        gameData->enemiesList[i].enemy.x = (float)aux4->valueint;
+        TraceLog(LOG_DEBUG, "Loaded enemy size x");
+        
+        aux4 = cJSON_GetObjectItemCaseSensitive(aux3, "y");
+        if(!aux4 || !cJSON_IsNumber(aux4))
+        {
+            strcpy(buffer, "Error loading enemy size y - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        gameData->enemiesList[i].enemy.y = (float)aux4->valueint;
+        TraceLog(LOG_DEBUG, "Loaded enemy size y");
+
         // gathering enemy baseHealth
         aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "baseHealth");
         if(!aux3 || !cJSON_IsNumber(aux3))
@@ -350,17 +400,86 @@ int GatherEnemiesData(GameDataS *gameData)
         gameData->enemiesList[i].baseHealth = aux3->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy baseHealth");
         
-        // gathering enemy baseWeapon
-        aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "baseWeaponId");
-        if(!aux3 || !cJSON_IsNumber(aux3))
+        // gathering enemy image
+        aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "enemyImage");
+        if(!aux3 || !cJSON_IsString(aux3))
         {
-            strcpy(buffer, "Error loading enemy baseWeaponId - ABORTING");
+            strcpy(buffer, "Error loading enemyImage - ABORTING");
             ret = FILE_ERROR;
             goto cleanup;
         }
-        gameData->enemiesList[i].baseWeaponId = aux3->valueint;
-        TraceLog(LOG_DEBUG, "Loaded enemy baseWeaponId\n");
+        gameData->enemiesList[i].enemyImage = LoadImage(aux3->valuestring);
+        TraceLog(LOG_DEBUG, "Loaded enemyImage");
+
+        // fetching enemy weapon data
+        aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "weapon");
+        if(!aux3)
+        {
+            strcpy(buffer, "Error loading enemy weapon - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        TraceLog(LOG_DEBUG, "Loaded enemy weapon");
+
+        // gathering enemy weapon damage
+        aux4 = cJSON_GetObjectItemCaseSensitive(aux3, "damage");
+        if(!aux4 || !cJSON_IsNumber(aux4))
+        {
+            strcpy(buffer, "Error loading enemy weapon/damage - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+        gameData->enemiesList[i].weapon.damage = aux4->valueint;
+        TraceLog(LOG_DEBUG, "Loaded enemy weapon/damage");
+
+        // gathering enemy weapon shotsDeelay
+        aux4 = cJSON_GetObjectItemCaseSensitive(aux3, "shotsDeelay");
+        if(!aux4 || !cJSON_IsNumber(aux4))
+        {
+            strcpy(buffer, "Error loading enemy weapon/shotsDeelay - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+
+        gameData->enemiesList[i].weapon.shotsDeelay = aux4->valueint;
+        TraceLog(LOG_DEBUG, "Loaded enemy weapon/shotsDeelay");
         
+        // gathering enemy weapon projectileSize
+        aux4 = cJSON_GetObjectItemCaseSensitive(aux3, "projectileSize");
+        if(!aux4 || !cJSON_IsNumber(aux4))
+        {
+            strcpy(buffer, "Error loading enemy weapon/projectileSize - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+
+        gameData->enemiesList[i].weapon.projectileSize = aux4->valueint;
+        TraceLog(LOG_DEBUG, "Loaded enemy weapon/projectileSize");
+
+        // gathering enemy weapon projectileSpeed
+        aux4 = cJSON_GetObjectItemCaseSensitive(aux3, "projectileSpeed");
+        if(!aux4 || !cJSON_IsNumber(aux4))
+        {
+            strcpy(buffer, "Error loading enemy weapon/projectileSpeed - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+
+        gameData->enemiesList[i].weapon.projectileSpeed = aux4->valueint;
+        TraceLog(LOG_DEBUG, "Loaded enemy weapon/projectileSpeed");
+
+        // gathering enemy projectileImage
+        aux4 = cJSON_GetObjectItemCaseSensitive(aux3, "projectileImage");
+        if(!aux4 || !cJSON_IsString(aux4))
+        {
+            strcpy(buffer, "Error loading enemy weapon/projectileImage - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+
+        gameData->enemiesList[i].weapon.projectileImage = LoadImage(aux4->valuestring);
+        TraceLog(LOG_DEBUG, "Loaded enemy weapon/projectileImage\n");
+
         i++;
     }
     
@@ -517,6 +636,18 @@ int GatherWeaponData(WeaponS **weaponsList)
         (*weaponsList)[i].projectileSpeed = aux3->valueint;
         TraceLog(LOG_DEBUG, "Loaded weapon projectileSpeed\n");
         
+        // gathering weapon projectileImage
+        aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "projectileImage");
+        if(!aux3 || !cJSON_IsString(aux3))
+        {
+            strcpy(buffer, "Error loading weapon weapon/projectileImage - ABORTING");
+            ret = FILE_ERROR;
+            goto cleanup;
+        }
+
+        (*weaponsList)[i].projectileImage = LoadImage(aux3->valuestring);
+        TraceLog(LOG_DEBUG, "Loaded weapon weapon/projectileImage\n");
+
         i++;
     }
     

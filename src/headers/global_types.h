@@ -44,13 +44,21 @@ typedef struct Weapon_model{
     int shotsDeelay;
     float projectileSize;
     int projectileSpeed;
+    union{
+        Texture2D projectileTexture;
+        Image projectileImage;
+    };
 }WeaponS;
 //////////////////////////////////////////////////////////
 typedef struct Enemies_model{
     int baseHealth;
     int baseWeaponId;
-    Texture2D texture;
     Vector2 enemy;
+    WeaponS weapon;
+    union{
+        Texture2D enemyTexture;
+        Image enemyImage;
+    };
 }EnemiesS;
 //////////////////////////////////////////////////////////
 typedef struct Enemy_Linked_List{
@@ -58,8 +66,8 @@ typedef struct Enemy_Linked_List{
     EnemyType enemyType;
     Behaviour behaviour;
     Rectangle healthBar;
-    int weaponId;
     int hitPoint;
+    Texture2D *texture;
     Enemy_Linked_List *next;
 }EnemyLL;
 //////////////////////////////////////////////////////////
@@ -70,7 +78,7 @@ typedef enum projectile_owner_model{
 //////////////////////////////////////////////////////////
 typedef struct Projectile_linked_List{
     Rectangle projectile;
-    Color color;
+    Texture2D *texture;
     float vX;
     float vY;
     int damage;

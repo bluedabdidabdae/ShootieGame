@@ -20,22 +20,23 @@ void CheckProjEntityDamage(GameDataS *gameData)
     ProjectileLL *previousProjectile;
     EnemyLL *currentEnemy;
 
-    while(currentProjectile->next != NULL)
+    while(currentProjectile->next)
     {
         previousProjectile = currentProjectile;
         currentProjectile = currentProjectile->next;
+
         switch(currentProjectile->owner)
         {
             case ENEMY:
                 if(CheckHitboxRec(currentProjectile->projectile, gameData->player->player))
                 {
-                    (*gameData->player).lives -= currentProjectile->damage;
+                    gameData->player->lives -= currentProjectile->damage;
                     ProjectilePop(previousProjectile, &currentProjectile);
                 }
             break;
             case PLAYER:
                 currentEnemy = gameData->enemiesHead;
-                while(currentEnemy->next != NULL)
+                while(currentEnemy->next)
                 {
                     currentEnemy = currentEnemy->next;
                     if(CheckHitboxRec(currentProjectile->projectile, currentEnemy->enemy))
@@ -49,14 +50,22 @@ void CheckProjEntityDamage(GameDataS *gameData)
     }
 }
 
-void UpdateProjectiles(ProjectileLL *projectileHead)
+void UpdateProjectiles(ProjectileLL *projectileHead, int level[MAPY][MAPX])
 {
     ProjectileLL *currentProjectile = projectileHead;
-    while(currentProjectile->next != NULL)
-    {
+    ProjectileLL *previousProjectile;
+
+    while(currentProjectile->next){
+        // passo al prossimo proiettile
+        previousProjectile = currentProjectile;
         currentProjectile = currentProjectile->next;
+
         currentProjectile->projectile.x -= currentProjectile->vX;
         currentProjectile->projectile.y -= currentProjectile->vY;
+
+        // if it collides with the map i explode it
+        if(CheckHitboxMap(level, &currentProjectile->projectile))
+            ProjectilePop(previousProjectile, &currentProjectile);
     }
 }
 
@@ -65,31 +74,6 @@ void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop)
     prePop->next = (*toPop)->next;
     free(*toPop);
     *toPop = prePop;
-}
-
-void CheckProjectilesBorders(ProjectileLL *projectileHead, int level[MAPY][MAPX])
-{
-    ProjectileLL *currentProjectile = projectileHead;
-    ProjectileLL *previousProjectile;
-
-    if(currentProjectile->next)
-    {
-        do{
-            // passo al prossimo proiettile
-            previousProjectile = currentProjectile;
-            currentProjectile = currentProjectile->next;
-
-            // if it collides with the map i explode it
-            if(CheckHitboxMap(level, &currentProjectile->projectile))
-                ProjectilePop(previousProjectile, &currentProjectile);
-
-            // check se ho fatto il pop dell'ultimo elemento della lista
-            if(!currentProjectile->next)
-                return;
-            
-            // check se ho finito la lista
-        }while(currentProjectile->next);
-    }
 }
 
 void CompletelyDeleteAllProjectiles(ProjectileLL *head)

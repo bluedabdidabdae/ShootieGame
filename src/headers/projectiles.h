@@ -7,8 +7,7 @@
 #include "global_types.h"
 
 void CheckProjEntityDamage(GameDataS *gameData);
-void UpdateProjectiles(ProjectileLL *projectileHead);
-void CheckProjectilesBorders(ProjectileLL *projectileHead, int level[MAPY][MAPX]);
+void UpdateProjectiles(ProjectileLL *projectileHead, int level[MAPY][MAPX]);
 void CompletelyDeleteAllProjectiles(ProjectileLL *head);
 
 #endif

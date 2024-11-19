@@ -26,7 +26,6 @@ void EnemyPop(EnemyLL *prePop, EnemyLL **toPop)
     prePop->next = (*toPop)->next;
     free(*toPop);
     *toPop = prePop;
-    prePop = NULL;
 }
 
 int SpawnEnemies(GameDataS *gameData, int number, EnemyType enemyType)
@@ -58,7 +57,7 @@ int SpawnEnemy(GameDataS *gameData, float x, float y, EnemyType enemyType)
             gameData->enemiesList[enemyType].enemy.x,
             gameData->enemiesList[enemyType].enemy.y
         };
-        aux1->weaponId = gameData->enemiesList[enemyType].baseWeaponId;
+        aux1->texture = &gameData->enemiesList[enemyType].enemyTexture;
         aux1->behaviour = BACKING;
         aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;
         aux1->healthBar = { x, y+HEALTHBAROFFSETY, (float)aux1->hitPoint, 5 };
@@ -93,7 +92,7 @@ int SpawnEnemy(GameDataS *gameData, EnemyType enemyType)
             };
         }while(CheckHitboxMap(gameData->level, &aux1->enemy));
 
-        aux1->weaponId = gameData->enemiesList[enemyType].baseWeaponId;
+        aux1->texture = &gameData->enemiesList[enemyType].enemyTexture;
         aux1->behaviour = BACKING;
         aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;
         aux1->healthBar = { x, y+HEALTHBAROFFSETY, (float)aux1->hitPoint, 5 };
@@ -125,20 +124,18 @@ void EnemiesShooting(GameDataS *gameData)
                 aux1->projectile = 
                 {   currentEnemy->enemy.x+currentEnemy->enemy.width/2,
                     currentEnemy->enemy.y+currentEnemy->enemy.height/2,
-                    gameData->weaponsList[currentEnemy->weaponId].projectileSize,
-                    gameData->weaponsList[currentEnemy->weaponId].projectileSize
+                    gameData->enemiesList[currentEnemy->enemyType].weapon.projectileSize,
+                    gameData->enemiesList[currentEnemy->enemyType].weapon.projectileSize
                 };
-                aux1->color = RED;
+                
+                aux1->damage = gameData->enemiesList[currentEnemy->enemyType].weapon.damage;
 
-                aux1->damage = gameData->weaponsList[currentEnemy->weaponId].damage;
+                aux1->texture = &gameData->enemiesList[currentEnemy->enemyType].weapon.projectileTexture;
 
                 Dx = aux1->projectile.x - (gameData->player->player.x + gameData->player->player.height / 2);
                 Dy = aux1->projectile.y - (gameData->player->player.y + gameData->player->player.width / 2);
 
                 tmp = abs(Dx) + abs(Dy);
-
-                //aux1->vX = gameData->weaponsList[currentEnemy->weaponId].projectileSpeed * (Dx / tmp);
-                //aux1->vY = gameData->weaponsList[currentEnemy->weaponId].projectileSpeed * (Dy / tmp);
 
                 aux1->vX = 5 * (Dx / tmp);
                 aux1->vY = 5 * (Dy / tmp);
@@ -153,32 +150,33 @@ void EnemiesShooting(GameDataS *gameData)
     }
 }
 
-void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player, int level[MAPY][MAPX])
+void UpdateEnemies(EnemyLL *enemiesHead, Rectangle *player, int level[MAPY][MAPX])
 {
     float Dx, Dy, tmp;
     EnemyLL *previousEnemy;
+    EnemyLL *currentEnemy = enemiesHead;
 
-    while(currentEnemy->next != NULL){
+    while(currentEnemy->next){
 
         previousEnemy = currentEnemy;
         currentEnemy = currentEnemy->next;
 
-        if(currentEnemy->hitPoint <= 0)
+        if(0 >= currentEnemy->hitPoint)
         {
             EnemyPop(previousEnemy, &currentEnemy);
-            goto ignore_stuff;
+            continue;
         }
         if(STILL == currentEnemy->behaviour)
         {
             if(rand()%1000 < 970)
-                goto ignore_stuff;
+                continue;
             else
                 currentEnemy->behaviour = BACKING;
         }
         else if(rand()%1000 < 5)
         {
             currentEnemy->behaviour = STILL;
-            goto ignore_stuff;
+            continue;
         }
         
         Dx = currentEnemy->enemy.x - player->x;
@@ -216,9 +214,6 @@ void UpdateEnemies(EnemyLL *currentEnemy, Rectangle *player, int level[MAPY][MAP
 
         currentEnemy->healthBar.x = currentEnemy->enemy.x;
         currentEnemy->healthBar.y = currentEnemy->enemy.y+HEALTHBAROFFSETY;
-        
-        ignore_stuff:
-            continue;
     }
 }
 

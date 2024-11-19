@@ -9,8 +9,8 @@ int CheckHitboxMap(int level[MAPY][MAPX], Rectangle *entity)
     int i, ii;
     int x, y;
 
-    x = entity->x/WALLTHICKNESS;
-    y = entity->y/WALLTHICKNESS;
+    x = entity->x/WALLTHICKNESS >= 0 ? entity->x/WALLTHICKNESS : 0;
+    y = entity->y/WALLTHICKNESS >= 0 ? entity->y/WALLTHICKNESS : 0;
 
     for(i = y; i < y+3 && i < MAPY; i++)
     {

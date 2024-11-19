@@ -3,9 +3,20 @@
     [
         {
             "name": "minion",
-            "baseHealth": 20,
-            "size": 20,
-            "baseWeaponId": 0
+            "baseHealth": 40,
+            "size":{
+                "x": 40,
+                "y": 40
+            },
+            "enemyImage": "resources/enemies/base_enemy.png",
+            "weapon":
+            {
+                "damage": 0,
+                "shotsDeelay": 20,
+                "projectileSize": 15,
+                "projectileSpeed": 25,
+                "projectileImage": "resources/projectiles/base_bullet.png"
+            }
         }
     ]
 }

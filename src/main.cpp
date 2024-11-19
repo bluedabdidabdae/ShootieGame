@@ -17,6 +17,18 @@
 
 */
 
+/*
+ * Raylib log levels:
+ * LOG_ALL: 0
+ * LOG_TRACE: 1
+ * LOG_DEBUG: 2
+ * LOG_INFO: 3
+ * LOG_WARNING: 4
+ * LOG_ERROR: 5
+ * LOG_FATAL: 6
+ * LOG_NONE: 7
+*/
+
 #include <ctime>
 #include <stdlib.h>
 #include <pthread.h>
@@ -45,8 +57,8 @@ int main(int argc, char *argv[])
     int error;
     GameDataS gameData;
     States gameStatus = MENU;
- 
-    //SetTraceLogLevel(LOG_DEBUG);
+
+    SetTraceLogLevel(LOG_ALL);
 
     srand(time(NULL));
 
@@ -105,7 +117,7 @@ int main(int argc, char *argv[])
         {
             TraceLog(LOG_ERROR, "Situation is shit, couldn't kill thread, hope the OS works it out");
             TraceLog(LOG_ERROR, "<< ABORTING >>");
-            TraceLog(LOG_DEBUG, "Trying to make drawing thread to close the window");
+            TraceLog(LOG_ERROR, "Trying to make drawing thread to close the window");
             CloseWindow();
             DeleteData(&gameData);
             TraceLog(LOG_DEBUG, "Deleted game data");

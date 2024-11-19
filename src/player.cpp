@@ -20,6 +20,7 @@ void PlayerShooting(GameDataS *gameData)
     aux1 = (ProjectileLL*)malloc(sizeof(ProjectileLL));
     if(aux1)
     {
+        
         aux1->projectile =
         {
             gameData->player->player.x + gameData->player->player.width / 2,
@@ -30,7 +31,7 @@ void PlayerShooting(GameDataS *gameData)
         
         aux1->damage = gameData->weaponsList[gameData->player->activeWeaponId].damage;
 
-        aux1->color = BLUE;
+        aux1->texture = &gameData->weaponsList[gameData->player->activeWeaponId].projectileTexture;
 
         Dx = aux1->projectile.x - gameData->mousePosition->x;
         Dy = aux1->projectile.y - gameData->mousePosition->y;

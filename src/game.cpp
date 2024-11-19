@@ -84,19 +84,24 @@ int GameHandler(GameDataS *gameData)
         }
         else
         {
-            pthread_mutex_lock(&playerLock);
             pthread_mutex_lock(&cameraLock);
+            pthread_mutex_lock(&playerLock);
             pthread_mutex_lock(&mapLock);
 
+            TraceLog(LOG_DEBUG, "Updating player");
             UpdatePlayer(gameData->player, gameData->level);
+            TraceLog(LOG_DEBUG, "Updating camera and mouse");
             UpdateCameraMousePosition(gameData);
             pthread_mutex_unlock(&cameraLock);
+            pthread_mutex_unlock(&playerLock);
 
             pthread_mutex_lock(&enemiesListLock);
+            TraceLog(LOG_DEBUG, "Updating enemies");
             UpdateEnemies(gameData->enemiesHead, &gameData->player->player, gameData->level);
             pthread_mutex_unlock(&mapLock);
             pthread_mutex_unlock(&enemiesListLock);
 
+            pthread_mutex_lock(&playerLock);
             pthread_mutex_lock(&frameCounterLock);
             pthread_mutex_lock(&weaponDataLock);
             
@@ -105,6 +110,7 @@ int GameHandler(GameDataS *gameData)
                 lastFrameId + gameData->weaponsList[gameData->player->activeWeaponId].shotsDeelay)
             {
                 lastFrameId = gameData->frameCounter;
+                TraceLog(LOG_DEBUG, "Player shoots");
                 pthread_mutex_lock(&projectileListLock);
                 PlayerShooting(gameData);
                 pthread_mutex_unlock(&projectileListLock);
@@ -113,6 +119,7 @@ int GameHandler(GameDataS *gameData)
             
             pthread_mutex_lock(&projectileListLock);
 
+            TraceLog(LOG_DEBUG, "Enemies shooting");
             EnemiesShooting(gameData);
 
             pthread_mutex_unlock(&projectileListLock);
@@ -122,19 +129,20 @@ int GameHandler(GameDataS *gameData)
             pthread_mutex_lock(&mapLock);
             pthread_mutex_lock(&projectileListLock);
 
-            UpdateProjectiles(gameData->projectileHead);
-            CheckProjectilesBorders(gameData->projectileHead, gameData->level);
+            TraceLog(LOG_DEBUG, "Updating projectiles");
+            UpdateProjectiles(gameData->projectileHead, gameData->level);
 
             pthread_mutex_unlock(&mapLock);
 
             pthread_mutex_lock(&enemiesListLock);
             pthread_mutex_lock(&playerLock);
 
+            TraceLog(LOG_DEBUG, "Checking projectiles damage");
             CheckProjEntityDamage(gameData);
 
+            pthread_mutex_unlock(&projectileListLock);
             pthread_mutex_unlock(&enemiesListLock);
             pthread_mutex_unlock(&playerLock);
-            pthread_mutex_unlock(&projectileListLock);
         }
     }
 }
@@ -163,7 +171,7 @@ int InitGameData(GameDataS *gameData)
 
     // Spawning 10 enemies for testing purposes
     // ignoring return values (0/-1)
-    SpawnEnemies(gameData, 10, NORMAL);
+    SpawnEnemies(gameData, 50, NORMAL);
 
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));

@@ -4,57 +4,65 @@
             "name": "Pistol",
             "damage": 5,
             "shotsDeelay": 40,
-            "projectileSize": 5,
-            "projectileSpeed": 25
+            "projectileSize": 8,
+            "projectileSpeed": 10,
+            "projectileImage": "resources/projectiles/base_bullet.png"
         },
         {
             "name": "Quick Pistol",
             "damage": 5,
             "shotsDeelay": 20,
-            "projectileSize": 5,
-            "projectileSpeed": 25
+            "projectileSize": 7,
+            "projectileSpeed": 10,
+            "projectileImage": "resources/projectiles/base_bullet.png"
         },
         {
             "name": "Heavy Pistol",
             "damage": 10,
             "shotsDeelay": 60,
-            "projectileSize": 10,
-            "projectileSpeed": 23
+            "projectileSize": 15,
+            "projectileSpeed": 15,
+            "projectileImage": "resources/projectiles/weak_base_bullet.png"
         },
         {
             "name": "Auto Pistol",
             "damage": 1,
             "shotsDeelay": 2,
-            "projectileSize": 3,
-            "projectileSpeed": 20
+            "projectileSize": 5,
+            "projectileSpeed": 11,
+            "projectileImage": "resources/projectiles/weak_base_bullet.png"
         },
         {
             "name": "Hand Cannon",
             "damage": 30,
             "shotsDeelay": 100,
-            "projectileSize": 15,
-            "projectileSpeed": 40
+            "projectileSize": 18,
+            "projectileSpeed": 15,
+            "projectileImage": "resources/projectiles/base_bullet.png"
         },
         {
             "name": "Rifle",
             "damage": 8,
             "shotsDeelay": 15,
-            "projectileSize": 8,
-            "projectileSpeed": 30
+            "projectileSize": 10,
+            "projectileSpeed": 16,
+            "projectileImage": "resources/projectiles/base_bullet.png"
         },
         {
             "name": "SMG",
             "damage": 3,
-            "shotsDeelay": 16,
+            "shotsDeelay": 10,
             "projectileSize": 5,
-            "projectileSpeed": 8
+            "projectileSpeed": 8,
+            "projectileImage": "resources/projectiles/weak_base_bullet.png"
         },
         {
             "name": "cheat",
             "damage": 100,
             "shotsDeelay": 0,
             "projectileSize": 40,
-            "projectileSpeed": 30
+            "projectileSpeed": 30,
+            "projectileImage": "resources/projectiles/base_bullet.png"
         }
     ]
 }
