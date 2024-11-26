@@ -111,6 +111,8 @@ int main(int argc, char *argv[])
     error = pthread_join(drawingThreadId, NULL);
     if (error != 0)
     {
+        // per ora la gestione del thread rimarrà così, mi basta sapere
+        // se c'è stato un problema o no
         TraceLog(LOG_ERROR, "Error merging threads, trying to force kill it");
         error = ForceThreadKill(&drawingThreadId);
         if(error != 0)

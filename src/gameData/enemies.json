@@ -12,10 +12,27 @@
             "weapon":
             {
                 "damage": 0,
-                "shotsDeelay": 20,
+                "shotsDeelay": 30,
                 "projectileSize": 15,
-                "projectileSpeed": 25,
+                "projectileSpeed": 5,
                 "projectileImage": "resources/projectiles/base_bullet.png"
+            }
+        },
+        {
+            "name": "sniper",
+            "baseHealth": 15,
+            "size":{
+                "x": 25,
+                "y": 25
+            },
+            "enemyImage": "resources/enemies/base_enemy.png",
+            "weapon":
+            {
+                "damage": 0,
+                "shotsDeelay": 10,
+                "projectileSize": 25,
+                "projectileSpeed": 8,
+                "projectileImage": "resources/projectiles/sniper_bullet.png"
             }
         }
     ]

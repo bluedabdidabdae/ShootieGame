@@ -135,8 +135,6 @@ void LoadGameTextures(GameDataS *gameData)
     if(ret) TraceLog(LOG_INFO, "WeaponsTextures not loaded");
     else TraceLog(LOG_DEBUG, "WeaponsTextures loaded");
     pthread_mutex_unlock(&weaponDataLock);
-
-
 }
 
 void DrawGame(GameDataS *gameData)
@@ -164,6 +162,7 @@ void DrawGame(GameDataS *gameData)
             {
                 for(int ii = MAPX-1; ii >= 0; ii--)
                 {
+                    // separating walls from floor tiles
                     if(gameData->level[i][ii] > 1)
                         DrawTexture(
                             gameData->mapTextures[gameData->level[i][ii]],
@@ -189,6 +188,7 @@ void DrawGame(GameDataS *gameData)
 
             // drawing projectiles
             TraceLog(LOG_DEBUG, "Drawing projectiles");
+            pthread_mutex_lock(&weaponDataLock);
             pthread_mutex_lock(&projectileListLock);
             while(projectileHead->next != NULL)
             {
@@ -199,8 +199,8 @@ void DrawGame(GameDataS *gameData)
                     projectileHead->projectile.y,
                     WHITE);
             }
+            pthread_mutex_unlock(&weaponDataLock);
             pthread_mutex_unlock(&projectileListLock);
-
             
             // drawing enemies from linked list of type *EnemyLL
             TraceLog(LOG_DEBUG, "Drawing enemies");
@@ -213,6 +213,7 @@ void DrawGame(GameDataS *gameData)
                     enemiesHead->enemy.x,
                     enemiesHead->enemy.y,
                     WHITE);
+                // the following code draws the hitbox and hp
                 //DrawRectangle(enemiesHead->healthBar.x,
                 //              enemiesHead->healthBar.y,
                 //              enemiesHead->hitPoint,

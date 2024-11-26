@@ -8,13 +8,17 @@ int CheckHitboxMap(int level[MAPY][MAPX], Rectangle *entity)
 {
     int i, ii;
     int x, y;
+    int ret = 0;
 
-    x = entity->x/WALLTHICKNESS >= 0 ? entity->x/WALLTHICKNESS : 0;
-    y = entity->y/WALLTHICKNESS >= 0 ? entity->y/WALLTHICKNESS : 0;
+    x = entity->x/WALLTHICKNESS;
+    y = entity->y/WALLTHICKNESS;
 
-    for(i = y; i < y+3 && i < MAPY; i++)
+    if(entity->x/WALLTHICKNESS < 0|| entity->y/WALLTHICKNESS < 0)
+        ret = 1;
+
+    for(i = y; i < y+2 && i < MAPY && !ret; i++)
     {
-        for(ii = x; ii < x+3 && ii < MAPX; ii++)
+        for(ii = x; ii < x+2 && ii < MAPX && !ret; ii++)
         {
             if(level[i][ii] > 1 || 0 == level[i][ii])
             {
@@ -24,11 +28,13 @@ int CheckHitboxMap(int level[MAPY][MAPX], Rectangle *entity)
                     entity->x >= WALLTHICKNESS*ii-entity->width &&
                     entity->y >= WALLTHICKNESS*i-entity->height
                 )
-                    return 1;
+                {
+                    ret = 1;
+                }
             }
         }
     }
-    return 0;
+    return ret;
 }
 
 int CheckHitboxRec(Rectangle rect1, Rectangle rect2)

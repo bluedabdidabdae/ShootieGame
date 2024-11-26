@@ -43,6 +43,7 @@ void CheckProjEntityDamage(GameDataS *gameData)
                     {
                         currentEnemy->hitPoint -= currentProjectile->damage;
                         ProjectilePop(previousProjectile, &currentProjectile);
+                        break;
                     }
                 }
             break;
@@ -65,7 +66,10 @@ void UpdateProjectiles(ProjectileLL *projectileHead, int level[MAPY][MAPX])
 
         // if it collides with the map i explode it
         if(CheckHitboxMap(level, &currentProjectile->projectile))
+        {
             ProjectilePop(previousProjectile, &currentProjectile);
+            
+        }
     }
 }
 

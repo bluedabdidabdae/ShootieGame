@@ -35,7 +35,8 @@ typedef enum behaviour_model{
 }Behaviour;
 //////////////////////////////////////////////////////////
 typedef enum enemy_type_model{
-    NORMAL
+    MINION,
+    SNIPER
 }EnemyType;
 //////////////////////////////////////////////////////////
 typedef struct Weapon_model{

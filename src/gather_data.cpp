@@ -9,7 +9,7 @@
 #include "headers/cJSON.h"
 #include "headers/global_types.h"
 
-#define RAWBUFFERSIZE 2048
+#define RAWBUFFERSIZE 4096
 #define MAPRAWBUFFERSIZE 16384
 #define PLAYERFILE "gameData/player.json"
 #define WEAPONFILE "gameData/weapons.json"
@@ -81,7 +81,7 @@ int LoadEnemiesTextures(GameDataS *gameData)
     int ret = 0;
     char buffer[MAPRAWBUFFERSIZE];
 
-    for(i = 0; i < 1; i++)
+    for(i = 0; i < 2; i++)
     {
         tmp = gameData->enemiesList[i].enemyImage;
         ImageResize(&tmp, gameData->enemiesList[i].enemy.x, gameData->enemiesList[i].enemy.y);

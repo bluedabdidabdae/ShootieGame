@@ -11,7 +11,7 @@
 #include "headers/player.h"
 #include "headers/utility.h"
 
-void PlayerShooting(GameDataS *gameData)
+void PlayerShooting(PlayerS *player, WeaponS weaponsList[], ProjectileLL *projectileHead, Vector2 *mousePosition)
 {
     float Dx, Dy, tmp;
     ProjectileLL *aux1;
@@ -20,32 +20,31 @@ void PlayerShooting(GameDataS *gameData)
     aux1 = (ProjectileLL*)malloc(sizeof(ProjectileLL));
     if(aux1)
     {
-        
         aux1->projectile =
         {
-            gameData->player->player.x + gameData->player->player.width / 2,
-            gameData->player->player.y + gameData->player->player.height / 2,
-            gameData->weaponsList[gameData->player->activeWeaponId].projectileSize,
-            gameData->weaponsList[gameData->player->activeWeaponId].projectileSize
+            player->player.x,
+            player->player.y,
+            weaponsList[player->activeWeaponId].projectileSize,
+            weaponsList[player->activeWeaponId].projectileSize
         };
         
-        aux1->damage = gameData->weaponsList[gameData->player->activeWeaponId].damage;
+        aux1->damage = weaponsList[player->activeWeaponId].damage;
 
-        aux1->texture = &gameData->weaponsList[gameData->player->activeWeaponId].projectileTexture;
+        aux1->texture = &weaponsList[player->activeWeaponId].projectileTexture;
 
-        Dx = aux1->projectile.x - gameData->mousePosition->x;
-        Dy = aux1->projectile.y - gameData->mousePosition->y;
+        Dx = aux1->projectile.x - mousePosition->x;
+        Dy = aux1->projectile.y - mousePosition->y;
 
         tmp = abs(Dx) + abs(Dy);
 
-        aux1->vX = gameData->weaponsList[gameData->player->activeWeaponId].projectileSpeed * (Dx / tmp);
-        aux1->vY = gameData->weaponsList[gameData->player->activeWeaponId].projectileSpeed * (Dy / tmp);
+        aux1->vX = weaponsList[player->activeWeaponId].projectileSpeed * (Dx / tmp);
+        aux1->vY = weaponsList[player->activeWeaponId].projectileSpeed * (Dy / tmp);
         
         aux1->owner = PLAYER;
 
-        aux2 = gameData->projectileHead->next;
-        gameData->projectileHead->next = aux1;
-        gameData->projectileHead->next->next = aux2;
+        aux2 = projectileHead->next;
+        projectileHead->next = aux1;
+        projectileHead->next->next = aux2;
     }
 }
 

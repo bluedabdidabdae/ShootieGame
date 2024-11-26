@@ -104,41 +104,40 @@ int SpawnEnemy(GameDataS *gameData, EnemyType enemyType)
     return -1;
 }
 
-void EnemiesShooting(GameDataS *gameData)
+void EnemiesShooting(EnemyLL *enemiesHead, ProjectileLL *projectileHead, EnemiesS enemiesList[], Rectangle *player)
 {
     float Dx, Dy, tmp;
     ProjectileLL *aux1;
     ProjectileLL *aux2;
-    EnemyLL *currentEnemy = gameData->enemiesHead;
-    ProjectileLL *projectileHead = gameData->projectileHead;
+    EnemyLL *currentEnemy = enemiesHead;
 
     while(currentEnemy->next != NULL)
     {
         currentEnemy = currentEnemy->next;
         // tiro a caso se il nemico spara o no
-        if(rand()%1000 < 30)
+        if(rand()%1000 < enemiesList[currentEnemy->enemyType].weapon.shotsDeelay)
         {
             aux1 = (ProjectileLL*)malloc(sizeof(ProjectileLL));
             if(aux1)
             {
                 aux1->projectile = 
-                {   currentEnemy->enemy.x+currentEnemy->enemy.width/2,
-                    currentEnemy->enemy.y+currentEnemy->enemy.height/2,
-                    gameData->enemiesList[currentEnemy->enemyType].weapon.projectileSize,
-                    gameData->enemiesList[currentEnemy->enemyType].weapon.projectileSize
+                {   currentEnemy->enemy.x,
+                    currentEnemy->enemy.y,
+                    enemiesList[currentEnemy->enemyType].weapon.projectileSize,
+                    enemiesList[currentEnemy->enemyType].weapon.projectileSize
                 };
                 
-                aux1->damage = gameData->enemiesList[currentEnemy->enemyType].weapon.damage;
+                aux1->damage = enemiesList[currentEnemy->enemyType].weapon.damage;
 
-                aux1->texture = &gameData->enemiesList[currentEnemy->enemyType].weapon.projectileTexture;
+                aux1->texture = &enemiesList[currentEnemy->enemyType].weapon.projectileTexture;
 
-                Dx = aux1->projectile.x - (gameData->player->player.x + gameData->player->player.height / 2);
-                Dy = aux1->projectile.y - (gameData->player->player.y + gameData->player->player.width / 2);
+                Dx = aux1->projectile.x - player->x;
+                Dy = aux1->projectile.y - player->y;
 
                 tmp = abs(Dx) + abs(Dy);
 
-                aux1->vX = 5 * (Dx / tmp);
-                aux1->vY = 5 * (Dy / tmp);
+                aux1->vX = enemiesList[currentEnemy->enemyType].weapon.projectileSpeed * (Dx / tmp);
+                aux1->vY = enemiesList[currentEnemy->enemyType].weapon.projectileSpeed * (Dy / tmp);
 
                 aux1->owner = ENEMY;
 

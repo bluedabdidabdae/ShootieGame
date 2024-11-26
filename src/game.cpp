@@ -39,7 +39,6 @@ int GameHandler(GameDataS *gameData)
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error gathering game data - ABORTING");
-        // ignoring CloseGame ret value;
         CloseGame(gameData);
         return err;
     }
@@ -49,7 +48,6 @@ int GameHandler(GameDataS *gameData)
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error loading map - ABORTING");
-        // ignoring LoadMap ret value;
         CloseGame(gameData);
         return err;
     }
@@ -59,7 +57,6 @@ int GameHandler(GameDataS *gameData)
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error allocating game memory - ABORTING");
-        // ignoring CloseGame ret value
         CloseGame(gameData);
         return err;
     }
@@ -78,7 +75,6 @@ int GameHandler(GameDataS *gameData)
             // waiting for the drawing thread to start drawing the main menu
             pthread_mutex_lock(&gameUpdateLock);
             //if(GameMenuHandler() == 3)
-            // returns nothing
             CloseGame(gameData);
             return 0;
         }
@@ -112,7 +108,7 @@ int GameHandler(GameDataS *gameData)
                 lastFrameId = gameData->frameCounter;
                 TraceLog(LOG_DEBUG, "Player shoots");
                 pthread_mutex_lock(&projectileListLock);
-                PlayerShooting(gameData);
+                PlayerShooting(gameData->player, gameData->weaponsList, gameData->projectileHead, gameData->mousePosition);
                 pthread_mutex_unlock(&projectileListLock);
             }
             pthread_mutex_unlock(&frameCounterLock);
@@ -120,7 +116,11 @@ int GameHandler(GameDataS *gameData)
             pthread_mutex_lock(&projectileListLock);
 
             TraceLog(LOG_DEBUG, "Enemies shooting");
-            EnemiesShooting(gameData);
+            EnemiesShooting(
+                gameData->enemiesHead,
+                gameData->projectileHead,
+                gameData->enemiesList,
+                &gameData->player->player);
 
             pthread_mutex_unlock(&projectileListLock);
             pthread_mutex_unlock(&playerLock);
@@ -169,9 +169,18 @@ int InitGameData(GameDataS *gameData)
     TraceLog(LOG_DEBUG, "Allocated proejctile head memory");
     gameData->projectileHead->next = NULL;
 
-    // Spawning 10 enemies for testing purposes
-    // ignoring return values (0/-1)
-    SpawnEnemies(gameData, 50, NORMAL);
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Spawning enemies for testing purposes
+    // todo: adapt the function to only recive essential data
+    SpawnEnemies(gameData, 2000, MINION);
+    SpawnEnemies(gameData, 2000, SNIPER);
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
