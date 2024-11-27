@@ -44,7 +44,7 @@ int GameHandler(GameDataS *gameData)
     }
 
     // loading map from files
-    err = LoadMap(gameData, 0);
+    err = LoadMap(gameData, 1);
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error loading map - ABORTING");
@@ -60,6 +60,11 @@ int GameHandler(GameDataS *gameData)
         CloseGame(gameData);
         return err;
     }
+    
+    // Spawning enemies for testing purposes
+    // todo: adapt the function to only recive essential data
+    SpawnEnemies(gameData, 7, MINION);
+    SpawnEnemies(gameData, 3, SNIPER);
 
     pthread_mutex_lock(&gameUpdateLock);
     *gameData->toDraw = GAME;
@@ -169,28 +174,15 @@ int InitGameData(GameDataS *gameData)
     TraceLog(LOG_DEBUG, "Allocated proejctile head memory");
     gameData->projectileHead->next = NULL;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Spawning enemies for testing purposes
-    // todo: adapt the function to only recive essential data
-    SpawnEnemies(gameData, 2000, MINION);
-    SpawnEnemies(gameData, 2000, SNIPER);
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
     if(gameData->camera == NULL) return MALLOC_ERROR;
     TraceLog(LOG_DEBUG, "Allocated camera memory");
     *gameData->camera = { 0 };
-    (*gameData->camera).target = (Vector2){ (*gameData->player).player.x + (*gameData->player).player.width,
-                                            (*gameData->player).player.y + (*gameData->player).player.height };
-    (*gameData->camera).offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
-    (*gameData->camera).zoom = 1.7f;
+    gameData->camera->target = (Vector2){ gameData->player->player.x + gameData->player->player.width,
+                                            gameData->player->player.y + gameData->player->player.height };
+    gameData->camera->offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
+    gameData->camera->zoom = 1.7f;
 
     // Temporary map borderes
     gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4);

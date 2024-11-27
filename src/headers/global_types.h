@@ -25,7 +25,6 @@ typedef enum StatesModel{
     PLAY,       // 1
     SETTINGS,   // 2
     EXITGAME,   // 3
-    MEMERR      // 4
 } States;
 //////////////////////////////////////////////////////////
 typedef enum behaviour_model{

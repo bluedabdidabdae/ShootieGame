@@ -14,7 +14,7 @@
 #define PLAYERFILE "gameData/player.json"
 #define WEAPONFILE "gameData/weapons.json"
 #define ENEMIESFILE "gameData/enemies.json"
-#define MAPFILE "gameData/levels.json"
+#define MAPDIR "gameData/levels/level"
 
 int GatherPlayerData(GameDataS *gameData);
 int GatherWeaponData(WeaponS **weaponsList);
@@ -154,21 +154,28 @@ int LoadMapTextures(Texture2D **mapTextures)
 int LoadMap(GameDataS *gameData, int levelId)
 {
     FILE *rawFile;
-    cJSON *mapsData;
+    cJSON *levelData;
     cJSON *aux1;
     cJSON *aux2;
     cJSON *aux3;
     cJSON *aux4;
-    cJSON *aux5;
     int arrSize;
     int ret = 0;
     int i, ii;
     char buffer[MAPRAWBUFFERSIZE];
+    char mapfile[35];
+    char levelid = levelId+=48;
 
     TraceLog(LOG_DEBUG, "Entered LoadMap func");
 
+    strcpy(mapfile, MAPDIR);
+    strcat(mapfile, &levelid);
+    strcat(mapfile, ".json\0");
+
+    TraceLog(LOG_DEBUG, TextFormat("leveldir: %s", mapfile));
+
     // opening and parsing levels.json file
-    rawFile = fopen(MAPFILE, "r");
+    rawFile = fopen(mapfile, "r");
     if(!rawFile)
     {
         strcpy(buffer, "Error opening levels file");
@@ -184,8 +191,8 @@ int LoadMap(GameDataS *gameData, int levelId)
     }
     fclose(rawFile);
     TraceLog(LOG_DEBUG, "Read levels.json");
-    mapsData = cJSON_Parse(buffer);
-    if(!mapsData)
+    levelData = cJSON_Parse(buffer);
+    if(!levelData)
     {
         strcpy(buffer, cJSON_GetErrorPtr());
         ret = FILE_ERROR;
@@ -193,38 +200,9 @@ int LoadMap(GameDataS *gameData, int levelId)
     }
     TraceLog(LOG_DEBUG, "Parsed levels.json");
     
-    // loading levels array
-    aux1 = cJSON_GetObjectItemCaseSensitive(mapsData, "levels");
-    if(!aux1)
-    {
-        strcpy(buffer, "Error loading levels array - ABORTING");
-        ret = FILE_ERROR;
-        goto cleanup;
-    }
-    TraceLog(LOG_DEBUG, "Loaded levels array");
-
-    arrSize = cJSON_GetArraySize(aux1);
-    if(levelId >= arrSize)
-    {
-        strcpy(buffer, "Error, specified level is out of limit - ABORTING");
-        ret = ARRAY_ERROR;
-        goto cleanup;
-    }
-    TraceLog(LOG_DEBUG, "Loaded specified level from array");
-
-    // fetching levels data
-    aux2 = cJSON_GetArrayItem(aux1, levelId);
-    if(!aux2)
-    {
-        strcpy(buffer, TextFormat("Error loading enemies array index: %d - ABORTING", levelId));
-        ret = FILE_ERROR;
-        goto cleanup;
-    }
-    TraceLog(LOG_DEBUG, TextFormat("Loaded levels array index: %d", levelId));
-
     // fetching level matrix
-    aux3 = cJSON_GetObjectItemCaseSensitive(aux2, "map");
-    if(!aux3)
+    aux2 = cJSON_GetObjectItemCaseSensitive(levelData, "map");
+    if(!aux2)
     {
         strcpy(buffer, "Error loading level matrix - ABORTING");
         ret = FILE_ERROR;
@@ -233,8 +211,8 @@ int LoadMap(GameDataS *gameData, int levelId)
     TraceLog(LOG_DEBUG, "Loaded level matrix");
 
     // fetching level y 0
-    aux4 = cJSON_GetArrayItem(aux3, 0);
-    if(!aux4)
+    aux3 = cJSON_GetArrayItem(aux2, 0);
+    if(!aux3)
     {
         strcpy(buffer, TextFormat("Error loading level y: %d - ABORTING", 0));
         ret = FILE_ERROR;
@@ -243,8 +221,8 @@ int LoadMap(GameDataS *gameData, int levelId)
     TraceLog(LOG_DEBUG, TextFormat("Loaded level y: %d", 0));
 
     // fetching level x 0
-    aux5 = cJSON_GetArrayItem(aux4, 0);
-    if(!aux4)
+    aux4 = cJSON_GetArrayItem(aux3, 0);
+    if(!aux3)
     {
         strcpy(buffer, TextFormat("Error loading level x: %d - ABORTING", 0));
         ret = FILE_ERROR;
@@ -256,8 +234,8 @@ int LoadMap(GameDataS *gameData, int levelId)
     for(i = 0; i < MAPY; i++)
     {
         // fetching level x 0
-        aux5 = cJSON_GetArrayItem(aux4, 0);
-        if(!aux4)
+        aux4 = cJSON_GetArrayItem(aux3, 0);
+        if(!aux3)
         {
             strcpy(buffer, "Error loading map - ABORTING");
             ret = FILE_ERROR;
@@ -267,18 +245,18 @@ int LoadMap(GameDataS *gameData, int levelId)
         // loading map
         for(ii = 0; ii < MAPX; ii++)
         {
-            gameData->level[i][ii] = aux5->valueint;
-            aux5 = aux5->next;
+            gameData->level[i][ii] = aux4->valueint;
+            aux4 = aux4->next;
         }
-        aux4 = aux4->next;
+        aux3 = aux3->next;
     }
 
     cleanup:
         if(ret)
             TraceLog(LOG_ERROR, buffer);
 
-        if(mapsData)
-            cJSON_Delete(mapsData);
+        if(levelData)
+            cJSON_Delete(levelData);
 
         TraceLog(LOG_DEBUG, "Closed json files");
 

@@ -62,6 +62,9 @@ void *HandleGraphics(void* data)
                 */
                 UnloadGameTextures(gameData);
             break;
+            case SETTINGS:
+                
+            break;
             case ABORT:
                 TraceLog(LOG_DEBUG, "<< Aborting on drawing thread >>");
                 abort();
@@ -213,7 +216,8 @@ void DrawGame(GameDataS *gameData)
                     enemiesHead->enemy.x,
                     enemiesHead->enemy.y,
                     WHITE);
-                // the following code draws the hitbox and hp
+                // the following code draws the enemies hitbox and hp
+                //DrawRectangleRec(enemiesHead->enemy, RED);
                 //DrawRectangle(enemiesHead->healthBar.x,
                 //              enemiesHead->healthBar.y,
                 //              enemiesHead->hitPoint,
