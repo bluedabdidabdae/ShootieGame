@@ -1,6 +1,7 @@
 // Copyright (C) 2024  blue_dabdidabdae
 // full notice in main.cpp
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "raylib.h"
 #include "headers/global_types.h"
@@ -11,28 +12,36 @@
 #define MAINMENUBUTTONX 300
 #define MAINMENUBUTTONY 270
 
-// local functions
-States CheckCollisions(Vector2* mousePosition);
+extern pthread_mutex_t gameUpdateLock;
 
-void MainMenuHandler(States *gameStatus, Vector2 *mousePosition)
+// local functions
+States CheckMenuCollisions(Vector2* mousePosition);
+
+void MainMenuHandler(States *gameStatus, Vector2 *mousePosition, ToDraw *toDraw)
 {
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    {
-        *mousePosition = GetMousePosition();
-        *gameStatus = CheckCollisions(mousePosition);
-        return;
-    }
+    *toDraw = DRAWMAINMENU;
+    do{
+        pthread_mutex_lock(&gameUpdateLock);
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            *mousePosition = GetMousePosition();
+            *gameStatus = CheckMenuCollisions(mousePosition);
+            return;
+        }
+    }while(MENU == *gameStatus);
 }
 
-States CheckCollisions(Vector2 *mousePosition)
+States CheckMenuCollisions(Vector2 *mousePosition)
 {
     int mouseX = mousePosition->x;
     int mouseY = mousePosition->y;
     
-    // play button returns PLAY "1"
-    if(mouseX > MAINMENUBUTTONX && mouseY > MAINMENUBUTTONY && mouseX < MAINMENUBUTTONX+MAINMENUBUTTONWIDTH && mouseY < MAINMENUBUTTONY+MAINMENUBUTTONHEIGT) return PLAY;
-    //exit button returns EXITGAME "3"
-    if(mouseX > MAINMENUBUTTONX && mouseY > MAINMENUBUTTONY+100 && mouseX < MAINMENUBUTTONX+MAINMENUBUTTONWIDTH && mouseY < MAINMENUBUTTONY+100+MAINMENUBUTTONHEIGT) return EXITGAME;
+    if(mouseX > MAINMENUBUTTONX && mouseY > MAINMENUBUTTONY && mouseX < MAINMENUBUTTONX+MAINMENUBUTTONWIDTH && mouseY < MAINMENUBUTTONY+MAINMENUBUTTONHEIGT)
+        return PLAY;
+    if(mouseX > MAINMENUBUTTONX && mouseY > MAINMENUBUTTONY+100 && mouseX < MAINMENUBUTTONX+MAINMENUBUTTONWIDTH && mouseY < MAINMENUBUTTONY+100+MAINMENUBUTTONHEIGT)
+        return SETTINGS;
+    if(mouseX > MAINMENUBUTTONX && mouseY > MAINMENUBUTTONY+200 && mouseX < MAINMENUBUTTONX+MAINMENUBUTTONWIDTH && mouseY < MAINMENUBUTTONY+200+MAINMENUBUTTONHEIGT)
+        return EXITGAME;
 
     // MENU "0"
     return MENU;

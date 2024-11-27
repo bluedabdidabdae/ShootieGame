@@ -67,7 +67,7 @@ int GameHandler(GameDataS *gameData)
     SpawnEnemies(gameData, 3, SNIPER);
 
     pthread_mutex_lock(&gameUpdateLock);
-    *gameData->toDraw = GAME;
+    *gameData->toDraw = DRAWGAME;
 
     while(1)
     {
@@ -75,7 +75,7 @@ int GameHandler(GameDataS *gameData)
                 
         if(IsKeyPressed(KEY_M) || gameData->player->lives <= 0)
         {
-            *gameData->toDraw = MAINMENU;
+            *gameData->toDraw = DRAWMAINMENU;
             
             // waiting for the drawing thread to start drawing the main menu
             pthread_mutex_lock(&gameUpdateLock);

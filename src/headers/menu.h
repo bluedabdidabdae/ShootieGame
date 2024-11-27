@@ -6,6 +6,6 @@
 #include "raylib.h"
 #include "global_types.h"
 
-void MainMenuHandler(States *gameStatus, Vector2 *mousePosition);
+void MainMenuHandler(States *gameStatus, Vector2 *mousePosition, ToDraw *toDraw);
 
 #endif

@@ -28,9 +28,9 @@ typedef enum StatesModel{
 } States;
 //////////////////////////////////////////////////////////
 typedef enum behaviour_model{
-        APPROACHING,
-        BACKING,
-        STILL
+    APPROACHING,
+    BACKING,
+    STILL
 }Behaviour;
 //////////////////////////////////////////////////////////
 typedef enum enemy_type_model{
@@ -99,11 +99,16 @@ typedef struct game_skin_model{
 }GameSkinS;
 //////////////////////////////////////////////////////////
 typedef enum to_draw_status{
-    MAINMENU,
-    GAME,
-    CLOSEGAME,
-    ABORT
+    DRAWMAINMENU,
+    DRAWGAME,
+    DRAWSETTINGS,
+    DRAWCLOSEGAME,
+    DRAWABORT
 }ToDraw;
+//////////////////////////////////////////////////////////
+typedef struct settigns_flags_model{
+    bool toggleFullscreen;
+}SettingsFlags;
 //////////////////////////////////////////////////////////
 typedef struct game_data_model{
     ToDraw *toDraw;
@@ -121,6 +126,7 @@ typedef struct game_data_model{
     bool isCameraLocked;
     int level[MAPY][MAPX];
     uint score;
+    SettingsFlags settingsFlags;
 }GameDataS;
 //////////////////////////////////////////////////////////
 

@@ -38,6 +38,7 @@
 #include "headers/menu.h"
 #include "headers/graphic.h"
 #include "headers/game.h"
+#include "headers/settings.h"
 
 pthread_mutex_t enemiesListLock;
 pthread_mutex_t projectileListLock;
@@ -90,16 +91,18 @@ int main(int argc, char *argv[])
         switch(gameStatus)
         {
             case MENU:
-                pthread_mutex_lock(&gameUpdateLock);
-                *gameData.mousePosition = GetMousePosition();
-                MainMenuHandler(&gameStatus, gameData.mousePosition);
+                MainMenuHandler(&gameStatus, gameData.mousePosition, gameData.toDraw);
+            break;
+            case SETTINGS:
+                SettingsHandler(&gameStatus, gameData.mousePosition, gameData.toDraw, &gameData.settingsFlags);
+                gameStatus = MENU;
             break;
             case PLAY:
                 error = GameHandler(&gameData);
                 if (error != 0)
                 {
                     TraceLog(LOG_ERROR, "Game error, see prev. errors");
-                    *gameData.toDraw = CLOSEGAME;
+                    *gameData.toDraw = DRAWCLOSEGAME;
                     gameStatus = EXITGAME;
                 }
                 else gameStatus = MENU;
@@ -107,7 +110,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    *gameData.toDraw = CLOSEGAME;
+    *gameData.toDraw = DRAWCLOSEGAME;
     error = pthread_join(drawingThreadId, NULL);
     if (error != 0)
     {
@@ -123,7 +126,7 @@ int main(int argc, char *argv[])
             CloseWindow();
             DeleteData(&gameData);
             TraceLog(LOG_DEBUG, "Deleted game data");
-            *gameData.toDraw = ABORT;
+            *gameData.toDraw = DRAWABORT;
             abort();
         }
     }
@@ -183,7 +186,6 @@ int InitData(GameDataS *gameData)
 
     gameData->toDraw = (ToDraw*)malloc(sizeof(ToDraw));
     if(gameData->toDraw == NULL) return MALLOC_ERROR;
-    *gameData->toDraw = MAINMENU;
     
     gameData->gameSkin = (GameSkinS*)malloc(sizeof(GameSkinS));
     if(gameData->gameSkin == NULL) return MALLOC_ERROR;

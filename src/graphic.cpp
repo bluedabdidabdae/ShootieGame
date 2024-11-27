@@ -27,12 +27,14 @@ extern pthread_mutex_t mapLock;
 extern pthread_mutex_t weaponDataLock;
 
 // local functions
-void DrawMenu();
-void DrawGame(GameDataS *gameData);
 void LoadGameTextures(GameDataS *gameData);
-void DrawMenuLoop();
-void DrawGameLoop(GameDataS *gameData);
 void UnloadGameTextures(GameDataS *gameData);
+void DrawMenuLoop(ToDraw *toDraw);
+void DrawMenu();
+void DrawSettingsLoop(ToDraw *toDraw, SettingsFlags *settingsFlags);
+void DrawSettings();
+void DrawGameLoop(GameDataS *gameData);
+void DrawGame(GameDataS *gameData);
 
 void *HandleGraphics(void* data)
 {
@@ -45,14 +47,17 @@ void *HandleGraphics(void* data)
     // sending clear to update to main
     pthread_mutex_unlock(&gameUpdateLock);
 
-    while(*gameData->toDraw != CLOSEGAME)
+    while(*gameData->toDraw != DRAWCLOSEGAME)
     {
         switch(*gameData->toDraw)
         {
-            case MAINMENU:
-                DrawMenuLoop();
+            case DRAWMAINMENU:
+                DrawMenuLoop(gameData->toDraw);
             break;
-            case GAME:
+            case DRAWSETTINGS:
+                DrawSettingsLoop(gameData->toDraw, &gameData->settingsFlags);
+            break;
+            case DRAWGAME:
                 LoadGameTextures(gameData);
                 DrawGameLoop(gameData);
                 /*
@@ -62,10 +67,7 @@ void *HandleGraphics(void* data)
                 */
                 UnloadGameTextures(gameData);
             break;
-            case SETTINGS:
-                
-            break;
-            case ABORT:
+            case DRAWABORT:
                 TraceLog(LOG_DEBUG, "<< Aborting on drawing thread >>");
                 abort();
             break;
@@ -77,15 +79,31 @@ void *HandleGraphics(void* data)
     return NULL;
 }
 
-void DrawMenuLoop()
+void DrawMenuLoop(ToDraw *toDraw)
 {
-    pthread_mutex_unlock(&gameUpdateLock);
-    DrawMenu();
+    do{
+        pthread_mutex_unlock(&gameUpdateLock);
+        DrawMenu();
+    }while(DRAWMAINMENU == *toDraw);
+}
+
+void DrawSettingsLoop(ToDraw *toDraw, SettingsFlags *settingsFlags)
+{
+    do{
+        pthread_mutex_unlock(&gameUpdateLock);
+        DrawSettings();
+
+        if(settingsFlags->toggleFullscreen)
+        {
+            ToggleFullscreen();
+            settingsFlags->toggleFullscreen = false;
+        }
+    }while(DRAWSETTINGS == *toDraw);
 }
 
 void DrawGameLoop(GameDataS *gameData)
 {
-    while(GAME == *gameData->toDraw)
+    while(DRAWGAME == *gameData->toDraw)
     {
         //sending clear to update to game engine
         pthread_mutex_unlock(&gameUpdateLock);
@@ -271,7 +289,28 @@ void DrawMenu()
         DrawText(TextFormat("Play"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+5, 40, MAINMENUTEXTCOLOR);
 
         DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
-        DrawText(TextFormat("Exit"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
+        DrawText(TextFormat("Settings"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
+
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+200, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawText(TextFormat("Exit"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+205, 40, MAINMENUTEXTCOLOR);
+        DrawFPS(5, 5);
+    EndDrawing();
+}
+
+void DrawSettings()
+{
+    BeginDrawing();
+        ClearBackground(BLACK);
+        DrawText(TextFormat("Settings"), MAINMENUBUTTONX, 100, 70, MAINMENUTEXTCOLOR);
+    
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawText(TextFormat("Toggle fullscreen"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+5, 40, MAINMENUTEXTCOLOR);
+
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawText(TextFormat("N/A"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
+
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+200, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawText(TextFormat("Exit"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+205, 40, MAINMENUTEXTCOLOR);
         DrawFPS(5, 5);
     EndDrawing();
 }
