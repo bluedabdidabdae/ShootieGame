@@ -25,7 +25,7 @@ typedef enum StatesModel{
     PLAY,       // 1
     SETTINGS,   // 2
     EXITGAME,   // 3
-} States;
+}States;
 //////////////////////////////////////////////////////////
 typedef enum behaviour_model{
     APPROACHING,
@@ -44,6 +44,7 @@ typedef struct Weapon_model{
     int shotsDeelay;
     float projectileSize;
     int projectileSpeed;
+    bool isTexture;
     union{
         Texture2D projectileTexture;
         Image projectileImage;
@@ -55,6 +56,7 @@ typedef struct Enemies_model{
     int baseWeaponId;
     Vector2 enemy;
     WeaponS weapon;
+    bool isTexture;
     union{
         Texture2D enemyTexture;
         Image enemyImage;

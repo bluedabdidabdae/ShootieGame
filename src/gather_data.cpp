@@ -62,10 +62,13 @@ int LoadWeaponsTextures(GameDataS *gameData)
 
     for(i = 0; i < 8; i++)
     {
-        tmp = gameData->weaponsList[i].projectileImage;
-        ImageResize(&tmp, gameData->weaponsList[i].projectileSize, gameData->weaponsList[i].projectileSize);
-        gameData->weaponsList[i].projectileTexture = LoadTextureFromImage(tmp);
-        //UnloadImage(tmp);
+        if(!gameData->weaponsList[i].isTexture)
+        {
+            tmp = gameData->weaponsList[i].projectileImage;
+            ImageResize(&tmp, gameData->weaponsList[i].projectileSize, gameData->weaponsList[i].projectileSize);
+            gameData->weaponsList[i].projectileTexture = LoadTextureFromImage(tmp);
+            gameData->weaponsList[i].isTexture = true;
+        }
     }
 
     cleanup:
@@ -83,15 +86,22 @@ int LoadEnemiesTextures(GameDataS *gameData)
 
     for(i = 0; i < 2; i++)
     {
-        tmp = gameData->enemiesList[i].enemyImage;
-        ImageResize(&tmp, gameData->enemiesList[i].enemy.x, gameData->enemiesList[i].enemy.y);
-        gameData->enemiesList[i].enemyTexture = LoadTextureFromImage(tmp);
-        UnloadImage(tmp);
-
-        tmp = gameData->enemiesList[i].weapon.projectileImage;
-        ImageResize(&tmp, gameData->enemiesList[i].weapon.projectileSize, gameData->enemiesList[i].weapon.projectileSize);
-        gameData->enemiesList[i].weapon.projectileTexture = LoadTextureFromImage(tmp);
-        UnloadImage(tmp);
+        if(!gameData->enemiesList[i].isTexture)
+        {
+            tmp = gameData->enemiesList[i].enemyImage;
+            ImageResize(&tmp, gameData->enemiesList[i].enemy.x, gameData->enemiesList[i].enemy.y);
+            gameData->enemiesList[i].enemyTexture = LoadTextureFromImage(tmp);
+            UnloadImage(tmp);
+            gameData->enemiesList[i].isTexture = true;
+        }
+        if(!gameData->enemiesList[i].weapon.isTexture)
+        {
+            tmp = gameData->enemiesList[i].weapon.projectileImage;
+            ImageResize(&tmp, gameData->enemiesList[i].weapon.projectileSize, gameData->enemiesList[i].weapon.projectileSize);
+            gameData->enemiesList[i].weapon.projectileTexture = LoadTextureFromImage(tmp);
+            UnloadImage(tmp);
+            gameData->enemiesList[i].weapon.isTexture = true;
+        }
     }
 
     cleanup:
@@ -164,7 +174,7 @@ int LoadMap(GameDataS *gameData, int levelId)
     int i, ii;
     char buffer[MAPRAWBUFFERSIZE];
     char mapfile[35];
-    char levelid = levelId+=48;
+    char levelid = levelId+='0';
 
     TraceLog(LOG_DEBUG, "Entered LoadMap func");
 
@@ -387,6 +397,7 @@ int GatherEnemiesData(GameDataS *gameData)
             goto cleanup;
         }
         gameData->enemiesList[i].enemyImage = LoadImage(aux3->valuestring);
+        gameData->enemiesList[i].isTexture = false;
         TraceLog(LOG_DEBUG, "Loaded enemyImage");
 
         // fetching enemy weapon data
@@ -456,6 +467,7 @@ int GatherEnemiesData(GameDataS *gameData)
         }
 
         gameData->enemiesList[i].weapon.projectileImage = LoadImage(aux4->valuestring);
+        gameData->enemiesList[i].weapon.isTexture = false;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/projectileImage\n");
 
         i++;
@@ -624,6 +636,7 @@ int GatherWeaponData(WeaponS **weaponsList)
         }
 
         (*weaponsList)[i].projectileImage = LoadImage(aux3->valuestring);
+        (*weaponsList)[i].isTexture = false;
         TraceLog(LOG_DEBUG, "Loaded weapon weapon/projectileImage\n");
 
         i++;

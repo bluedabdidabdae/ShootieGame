@@ -17,15 +17,17 @@ extern pthread_mutex_t gameUpdateLock;
 // local functions
 States CheckMenuCollisions(Vector2* mousePosition);
 
-void MainMenuHandler(States *gameStatus, Vector2 *mousePosition, ToDraw *toDraw)
+void MainMenuHandler(States *gameStatus, ToDraw *toDraw)
 {
+    Vector2 mousePosition;
     *toDraw = DRAWMAINMENU;
+
     do{
         pthread_mutex_lock(&gameUpdateLock);
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            *mousePosition = GetMousePosition();
-            *gameStatus = CheckMenuCollisions(mousePosition);
+            mousePosition = GetMousePosition();
+            *gameStatus = CheckMenuCollisions(&mousePosition);
             return;
         }
     }while(MENU == *gameStatus);

@@ -3,6 +3,13 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-void SettingsHandler(States *gameStatus, Vector2 *mousePosition, ToDraw *toDraw, SettingsFlags *settingsFlags);
+typedef enum settings_status{
+    SETTINGS_TOGGLEFULLSCREEN,
+    SETTINGS_BACK,
+    SETTINGS_QUIT,
+    SETTINGS_NONE
+}SettingsStatus;
+
+SettingsStatus SettingsHandler(ToDraw *toDraw, SettingsFlags *settingsFlags);
 
 #endif

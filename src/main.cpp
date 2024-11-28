@@ -91,10 +91,10 @@ int main(int argc, char *argv[])
         switch(gameStatus)
         {
             case MENU:
-                MainMenuHandler(&gameStatus, gameData.mousePosition, gameData.toDraw);
+                MainMenuHandler(&gameStatus, gameData.toDraw);
             break;
             case SETTINGS:
-                SettingsHandler(&gameStatus, gameData.mousePosition, gameData.toDraw, &gameData.settingsFlags);
+                SettingsHandler(gameData.toDraw, &gameData.settingsFlags);
                 gameStatus = MENU;
             break;
             case PLAY:
@@ -202,6 +202,9 @@ int InitData(GameDataS *gameData)
     gameData->mapBorder = NULL;
     gameData->enemiesHead = NULL;
     gameData->projectileHead = NULL;
+    gameData->mapTextures = NULL;
+    gameData->enemiesList = NULL;
+    gameData->weaponsList = NULL;
 
     return 0;
 }

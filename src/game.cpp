@@ -14,6 +14,12 @@
 #include "headers/game.h"
 #include "headers/gather_data.h"
 #include "headers/utility.h"
+#include "headers/settings.h"
+
+typedef enum game_states{
+    GAME_PLAY,
+    GAME_EXIT
+}GameStates;
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;
@@ -34,6 +40,8 @@ int GameHandler(GameDataS *gameData)
 
     uint lastFrameId = 0;
 
+    GameStates gameStatus;
+
     // gathering data from files
     err = GatherData(gameData);
     if(err != 0)
@@ -44,7 +52,7 @@ int GameHandler(GameDataS *gameData)
     }
 
     // loading map from files
-    err = LoadMap(gameData, 1);
+    err = LoadMap(gameData, 0);
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error loading map - ABORTING");
@@ -68,88 +76,102 @@ int GameHandler(GameDataS *gameData)
 
     pthread_mutex_lock(&gameUpdateLock);
     *gameData->toDraw = DRAWGAME;
+    gameStatus = GAME_PLAY;
 
-    while(1)
+    while(GAME_EXIT != gameStatus)
     {
         pthread_mutex_lock(&gameUpdateLock);
-                
-        if(IsKeyPressed(KEY_M) || gameData->player->lives <= 0)
+
+        // handling the menu while inside the game
+        if(IsKeyPressed(KEY_M))
         {
-            *gameData->toDraw = DRAWMAINMENU;
-            
-            // waiting for the drawing thread to start drawing the main menu
-            pthread_mutex_lock(&gameUpdateLock);
-            //if(GameMenuHandler() == 3)
-            CloseGame(gameData);
-            return 0;
-        }
-        else
-        {
-            pthread_mutex_lock(&cameraLock);
-            pthread_mutex_lock(&playerLock);
-            pthread_mutex_lock(&mapLock);
-
-            TraceLog(LOG_DEBUG, "Updating player");
-            UpdatePlayer(gameData->player, gameData->level);
-            TraceLog(LOG_DEBUG, "Updating camera and mouse");
-            UpdateCameraMousePosition(gameData);
-            pthread_mutex_unlock(&cameraLock);
-            pthread_mutex_unlock(&playerLock);
-
-            pthread_mutex_lock(&enemiesListLock);
-            TraceLog(LOG_DEBUG, "Updating enemies");
-            UpdateEnemies(gameData->enemiesHead, &gameData->player->player, gameData->level);
-            pthread_mutex_unlock(&mapLock);
-            pthread_mutex_unlock(&enemiesListLock);
-
-            pthread_mutex_lock(&playerLock);
-            pthread_mutex_lock(&frameCounterLock);
-            pthread_mutex_lock(&weaponDataLock);
-            
-            if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)
-                && gameData->frameCounter >=
-                lastFrameId + gameData->weaponsList[gameData->player->activeWeaponId].shotsDeelay)
+            switch(SettingsHandler(gameData->toDraw, &gameData->settingsFlags))
             {
-                lastFrameId = gameData->frameCounter;
-                TraceLog(LOG_DEBUG, "Player shoots");
-                pthread_mutex_lock(&projectileListLock);
-                PlayerShooting(gameData->player, gameData->weaponsList, gameData->projectileHead, gameData->mousePosition);
-                pthread_mutex_unlock(&projectileListLock);
+                case SETTINGS_QUIT:
+                    gameStatus = GAME_EXIT;
+                break;
+                case SETTINGS_BACK:
+                    *gameData->toDraw = DRAWGAME;
+                break;
             }
-            pthread_mutex_unlock(&frameCounterLock);
-            
-            pthread_mutex_lock(&projectileListLock);
-
-            TraceLog(LOG_DEBUG, "Enemies shooting");
-            EnemiesShooting(
-                gameData->enemiesHead,
-                gameData->projectileHead,
-                gameData->enemiesList,
-                &gameData->player->player);
-
-            pthread_mutex_unlock(&projectileListLock);
-            pthread_mutex_unlock(&playerLock);
-            pthread_mutex_unlock(&weaponDataLock);
-
-            pthread_mutex_lock(&mapLock);
-            pthread_mutex_lock(&projectileListLock);
-
-            TraceLog(LOG_DEBUG, "Updating projectiles");
-            UpdateProjectiles(gameData->projectileHead, gameData->level);
-
-            pthread_mutex_unlock(&mapLock);
-
-            pthread_mutex_lock(&enemiesListLock);
-            pthread_mutex_lock(&playerLock);
-
-            TraceLog(LOG_DEBUG, "Checking projectiles damage");
-            CheckProjEntityDamage(gameData);
-
-            pthread_mutex_unlock(&projectileListLock);
-            pthread_mutex_unlock(&enemiesListLock);
-            pthread_mutex_unlock(&playerLock);
+            continue;
         }
+
+        // if the player is dead quit the game
+        if(gameData->player->lives <= 0)
+        {
+            gameStatus = GAME_EXIT;
+            continue;
+        }
+
+        // update the whole game logic
+        pthread_mutex_lock(&cameraLock);
+        pthread_mutex_lock(&playerLock);
+        pthread_mutex_lock(&mapLock);
+
+        TraceLog(LOG_DEBUG, "Updating player");
+        UpdatePlayer(gameData->player, gameData->level);
+        TraceLog(LOG_DEBUG, "Updating camera and mouse");
+        UpdateCameraMousePosition(gameData);
+        pthread_mutex_unlock(&cameraLock);
+        pthread_mutex_unlock(&playerLock);
+
+        pthread_mutex_lock(&enemiesListLock);
+        TraceLog(LOG_DEBUG, "Updating enemies");
+        UpdateEnemies(gameData->enemiesHead, &gameData->player->player, gameData->level);
+        pthread_mutex_unlock(&mapLock);
+        pthread_mutex_unlock(&enemiesListLock);
+
+        pthread_mutex_lock(&playerLock);
+        pthread_mutex_lock(&frameCounterLock);
+        pthread_mutex_lock(&weaponDataLock);
+        
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)
+            && gameData->frameCounter >=
+            lastFrameId + gameData->weaponsList[gameData->player->activeWeaponId].shotsDeelay)
+        {
+            lastFrameId = gameData->frameCounter;
+            TraceLog(LOG_DEBUG, "Player shoots");
+            pthread_mutex_lock(&projectileListLock);
+            PlayerShooting(gameData->player, gameData->weaponsList, gameData->projectileHead, gameData->mousePosition);
+            pthread_mutex_unlock(&projectileListLock);
+        }
+        pthread_mutex_unlock(&frameCounterLock);
+        
+        pthread_mutex_lock(&projectileListLock);
+
+        TraceLog(LOG_DEBUG, "Enemies shooting");
+        EnemiesShooting(
+            gameData->enemiesHead,
+            gameData->projectileHead,
+            gameData->enemiesList,
+            &gameData->player->player);
+
+        pthread_mutex_unlock(&projectileListLock);
+        pthread_mutex_unlock(&playerLock);
+        pthread_mutex_unlock(&weaponDataLock);
+
+        pthread_mutex_lock(&mapLock);
+        pthread_mutex_lock(&projectileListLock);
+
+        TraceLog(LOG_DEBUG, "Updating projectiles");
+        UpdateProjectiles(gameData->projectileHead, gameData->level);
+
+        pthread_mutex_unlock(&mapLock);
+
+        pthread_mutex_lock(&enemiesListLock);
+        pthread_mutex_lock(&playerLock);
+
+        TraceLog(LOG_DEBUG, "Checking projectiles damage");
+        CheckProjEntityDamage(gameData);
+
+        pthread_mutex_unlock(&projectileListLock);
+        pthread_mutex_unlock(&enemiesListLock);
+        pthread_mutex_unlock(&playerLock);
     }
+
+    CloseGame(gameData);
+    return 0;
 }
 
 int InitGameData(GameDataS *gameData)

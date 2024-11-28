@@ -258,12 +258,12 @@ void DrawGame(GameDataS *gameData)
         pthread_mutex_lock(&playerLock);
         
         TraceLog(LOG_DEBUG, "Drawing score and lives");
-        DrawText(TextFormat("SCORE: %u", gameData->score), WALLTHICKNESS, WALLTHICKNESS, 40, WHITE);
-        DrawRectangle(WALLTHICKNESS, 80, gameData->player->lives*10, 15, GREEN);
+        DrawText(TextFormat("SCORE: %u", gameData->score), 30, 30, 40, WHITE);
+        DrawRectangle(30, 80, gameData->player->lives*10, 15, GREEN);
 
         pthread_mutex_unlock(&playerLock);
 
-        DrawRectangle(WIDTH - 215, HEIGT - 85, 200, 50, Fade(WHITE, FADEVALUE));
+        DrawRectangle(1130, 590, 200, 50, Fade(WHITE, FADEVALUE));
 
         pthread_mutex_lock(&playerLock);
         pthread_mutex_lock(&weaponDataLock);
@@ -272,7 +272,7 @@ void DrawGame(GameDataS *gameData)
         DrawText(
             TextFormat("%d %s", gameData->player->activeWeaponId == gameData->player->weapons[0] ? 1 : 2,
             gameData->weaponsList[gameData->player->activeWeaponId].weaponName), 
-            WIDTH - 200, HEIGT - 70, WALLTHICKNESS, WHITE);
+            1170, 600, 30, WHITE);
             
         pthread_mutex_unlock(&playerLock);
         pthread_mutex_unlock(&weaponDataLock);
@@ -307,10 +307,10 @@ void DrawSettings()
         DrawText(TextFormat("Toggle fullscreen"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+5, 40, MAINMENUTEXTCOLOR);
 
         DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
-        DrawText(TextFormat("N/A"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
+        DrawText(TextFormat("Back"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
 
         DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+200, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
-        DrawText(TextFormat("Exit"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+205, 40, MAINMENUTEXTCOLOR);
+        DrawText(TextFormat("Quit game"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+205, 40, MAINMENUTEXTCOLOR);
         DrawFPS(5, 5);
     EndDrawing();
 }
