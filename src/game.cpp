@@ -68,6 +68,8 @@ int GameHandler(GameDataS *gameData)
         CloseGame(gameData);
         return err;
     }
+    pthread_mutex_lock(&gameUpdateLock);
+    *gameData->toDraw = DRAW_LOAD_TEXTURES;
     
     // Spawning enemies for testing purposes
     // todo: adapt the function to only recive essential data
@@ -170,6 +172,8 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_unlock(&playerLock);
     }
 
+    *gameData->toDraw = DRAW_UNLOAD_TEXTURES;
+    pthread_mutex_lock(&gameUpdateLock);
     CloseGame(gameData);
     return 0;
 }

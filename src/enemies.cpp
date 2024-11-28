@@ -57,7 +57,6 @@ int SpawnEnemy(GameDataS *gameData, float x, float y, EnemyType enemyType)
             gameData->enemiesList[enemyType].enemy.x,
             gameData->enemiesList[enemyType].enemy.y
         };
-        aux1->texture = &gameData->enemiesList[enemyType].enemyTexture;
         aux1->behaviour = BACKING;
         aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;
         aux1->healthBar = { x, y+HEALTHBAROFFSETY, (float)aux1->hitPoint, 5 };
@@ -92,7 +91,6 @@ int SpawnEnemy(GameDataS *gameData, EnemyType enemyType)
             };
         }while(CheckHitboxMap(gameData->level, &aux1->enemy));
 
-        aux1->texture = &gameData->enemiesList[enemyType].enemyTexture;
         aux1->behaviour = BACKING;
         aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;
         aux1->healthBar = { x, y+HEALTHBAROFFSETY, (float)aux1->hitPoint, 5 };

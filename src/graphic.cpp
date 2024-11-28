@@ -57,14 +57,13 @@ void *HandleGraphics(void* data)
             case DRAWSETTINGS:
                 DrawSettingsLoop(gameData->toDraw, &gameData->settingsFlags);
             break;
-            case DRAWGAME:
+            case DRAW_LOAD_TEXTURES:
                 LoadGameTextures(gameData);
+            break;
+            case DRAWGAME:
                 DrawGameLoop(gameData);
-                /*
-                 * its safe to interact with game data from this point
-                 * since the main thread is waiting for a clear to update
-                 * to deallocate all the memory relative to the game
-                */
+            break;
+            case DRAW_UNLOAD_TEXTURES:
                 UnloadGameTextures(gameData);
             break;
             case DRAWABORT:
@@ -120,19 +119,28 @@ void UnloadGameTextures(GameDataS *gameData)
 {
     int i;
 
-    pthread_mutex_lock(&mapLock);
+    TraceLog(LOG_DEBUG, "Unloading projectile textures from weapons list");
+    pthread_mutex_lock(&weaponDataLock);
+    for(i = 0; i < 7; i++)
+        UnloadTexture(gameData->weaponsList[i].projectileTexture);
+    pthread_mutex_unlock(&weaponDataLock);
 
+    TraceLog(LOG_DEBUG, "Unloading textures from enemies list");
+    pthread_mutex_lock(&enemiesListLock);
+    for(i = 0; i < 2; i++)
+    {
+        UnloadTexture(gameData->enemiesList[i].weapon.projectileTexture);
+        UnloadTexture(gameData->enemiesList[i].enemyTexture);
+    }
+    pthread_mutex_unlock(&enemiesListLock);
+
+    TraceLog(LOG_DEBUG, "Unloading tiles textures from map list");
+    pthread_mutex_lock(&mapLock);
     for(i = 1; i < 5; i++)
         UnloadTexture(gameData->mapTextures[i]);
-
     pthread_mutex_unlock(&mapLock);
 
-    pthread_mutex_lock(&enemiesListLock);
-
-    for(i = 0; i < 1; i++)
-        UnloadTexture(gameData->enemiesList[i].enemyTexture);
-
-    pthread_mutex_unlock(&enemiesListLock);
+    pthread_mutex_unlock(&gameUpdateLock);
 }
 
 void LoadGameTextures(GameDataS *gameData)
@@ -156,6 +164,8 @@ void LoadGameTextures(GameDataS *gameData)
     if(ret) TraceLog(LOG_INFO, "WeaponsTextures not loaded");
     else TraceLog(LOG_DEBUG, "WeaponsTextures loaded");
     pthread_mutex_unlock(&weaponDataLock);
+
+    pthread_mutex_unlock(&gameUpdateLock);
 }
 
 void DrawGame(GameDataS *gameData)

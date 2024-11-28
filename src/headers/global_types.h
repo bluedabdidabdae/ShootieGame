@@ -69,7 +69,6 @@ typedef struct Enemy_Linked_List{
     Behaviour behaviour;
     Rectangle healthBar;
     int hitPoint;
-    Texture2D *texture;
     Enemy_Linked_List *next;
 }EnemyLL;
 //////////////////////////////////////////////////////////
@@ -105,6 +104,8 @@ typedef enum to_draw_status{
     DRAWGAME,
     DRAWSETTINGS,
     DRAWCLOSEGAME,
+    DRAW_LOAD_TEXTURES,
+    DRAW_UNLOAD_TEXTURES,
     DRAWABORT
 }ToDraw;
 //////////////////////////////////////////////////////////
