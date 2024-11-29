@@ -3,7 +3,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
-// #include <time.h> // FOR WINDOWS
 
 #include "raylib.h"
 #include "headers/global_types.h"
@@ -28,6 +27,8 @@ void CheckProjEntityDamage(GameDataS *gameData)
         switch(currentProjectile->owner)
         {
             case ENEMY:
+                if(gameData->player->flags.isInvulnerable)
+                    continue;
                 if(CheckHitboxRec(currentProjectile->projectile, gameData->player->player))
                 {
                     gameData->player->lives -= currentProjectile->damage;
@@ -44,6 +45,7 @@ void CheckProjEntityDamage(GameDataS *gameData)
                         currentEnemy->hitPoint -= currentProjectile->damage;
                         ProjectilePop(previousProjectile, &currentProjectile);
                         break;
+                        // this break IS NECESSARY
                     }
                 }
             break;

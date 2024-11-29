@@ -1,5 +1,4 @@
 /*
-
     2d game, still working on its identity
     Copyright (C) 2024  blue_dabdidabdae
 
@@ -40,6 +39,8 @@
 #include "headers/game.h"
 #include "headers/settings.h"
 
+
+
 pthread_mutex_t enemiesListLock;
 pthread_mutex_t projectileListLock;
 pthread_mutex_t playerLock;
@@ -52,6 +53,7 @@ pthread_mutex_t weaponDataLock;
 int InitData(GameDataS *gameData);
 int DeleteData(GameDataS *gameData);
 int ForceThreadKill(pthread_t *thread);
+
 
 int main(int argc, char *argv[])
 {

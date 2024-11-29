@@ -110,13 +110,17 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&cameraLock);
         pthread_mutex_lock(&playerLock);
         pthread_mutex_lock(&mapLock);
+        pthread_mutex_lock(&frameCounterLock);
 
         TraceLog(LOG_DEBUG, "Updating player");
-        UpdatePlayer(gameData->player, gameData->level);
+        if(!gameData->player->flags.isStunned)
+            UpdatePlayer(gameData->player, gameData->level, gameData->frameCounter);
+
         TraceLog(LOG_DEBUG, "Updating camera and mouse");
         UpdateCameraMousePosition(gameData);
         pthread_mutex_unlock(&cameraLock);
         pthread_mutex_unlock(&playerLock);
+        pthread_mutex_unlock(&frameCounterLock);
 
         pthread_mutex_lock(&enemiesListLock);
         TraceLog(LOG_DEBUG, "Updating enemies");
@@ -135,7 +139,8 @@ int GameHandler(GameDataS *gameData)
             lastFrameId = gameData->frameCounter;
             TraceLog(LOG_DEBUG, "Player shoots");
             pthread_mutex_lock(&projectileListLock);
-            PlayerShooting(gameData->player, gameData->weaponsList, gameData->projectileHead, gameData->mousePosition);
+            if(!gameData->player->flags.isStunned)
+                PlayerShooting(gameData->player, gameData->weaponsList, gameData->projectileHead, gameData->mousePosition);
             pthread_mutex_unlock(&projectileListLock);
         }
         pthread_mutex_unlock(&frameCounterLock);
@@ -182,9 +187,14 @@ int InitGameData(GameDataS *gameData)
 {
     gameData->score = 104;
 
-    // Init player position (other par inited from json file)
-    (*gameData->player).player.x = 170;
-    (*gameData->player).player.y = 170;
+    // Init player position and flags (other par inited from json file)
+    gameData->player->player.x = 170;
+    gameData->player->player.y = 170;
+    gameData->player->flags.isDodging = false;
+    gameData->player->flags.isWalking = false;
+    gameData->player->flags.canDodge = true;
+    gameData->player->flags.isInvulnerable = false;
+    gameData->player->flags.isStunned = false;
 
     gameData->isCameraLocked = true;
 

@@ -90,8 +90,24 @@ typedef struct Projectile_linked_List{
 typedef struct player_model{
     Rectangle player;
     int lives;
+    float speed;
+    // weapon variables
     int weapons[2];
     int activeWeaponId;
+    // dodge variables
+    float dodgeSpeed;
+    int nextDodgeFrame;
+    int dodgeDeelayFrames;
+    int dodgeEndFrame;
+    int dodgeDurationFrames;
+    struct{
+        bool isWalking;
+        bool canDodge;
+        bool isDodging;
+        bool dodgeInvulnFrame;
+        bool isInvulnerable;
+        bool isStunned;
+    }flags;
 }PlayerS;
 //////////////////////////////////////////////////////////
 typedef struct game_skin_model{
@@ -100,6 +116,7 @@ typedef struct game_skin_model{
 }GameSkinS;
 //////////////////////////////////////////////////////////
 typedef enum to_draw_status{
+    DRAW_WAIT,
     DRAWMAINMENU,
     DRAWGAME,
     DRAWSETTINGS,

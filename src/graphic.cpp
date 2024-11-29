@@ -51,6 +51,7 @@ void *HandleGraphics(void* data)
     {
         switch(*gameData->toDraw)
         {
+            case DRAW_WAIT: break;
             case DRAWMAINMENU:
                 DrawMenuLoop(gameData->toDraw);
             break;
@@ -59,12 +60,14 @@ void *HandleGraphics(void* data)
             break;
             case DRAW_LOAD_TEXTURES:
                 LoadGameTextures(gameData);
+                *gameData->toDraw = DRAW_WAIT;
             break;
             case DRAWGAME:
                 DrawGameLoop(gameData);
             break;
             case DRAW_UNLOAD_TEXTURES:
                 UnloadGameTextures(gameData);
+                *gameData->toDraw = DRAW_WAIT;
             break;
             case DRAWABORT:
                 TraceLog(LOG_DEBUG, "<< Aborting on drawing thread >>");
@@ -214,7 +217,10 @@ void DrawGame(GameDataS *gameData)
                         
             // drawing player
             TraceLog(LOG_DEBUG, "Drawing player");
-            DrawRectangleRec(gameData->player->player, gameData->gameSkin->primaryColor);
+            if(!gameData->player->flags.isDodging)
+                DrawRectangleRec(gameData->player->player, gameData->gameSkin->primaryColor);
+            else
+                DrawRectangleRec(gameData->player->player, RED);
             pthread_mutex_unlock(&playerLock);
 
             // drawing projectiles

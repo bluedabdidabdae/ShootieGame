@@ -174,7 +174,7 @@ int LoadMap(GameDataS *gameData, int levelId)
     int i, ii;
     char buffer[MAPRAWBUFFERSIZE];
     char mapfile[35];
-    char levelid = levelId+='0';
+    char levelid = levelId += '0';
 
     TraceLog(LOG_DEBUG, "Entered LoadMap func");
 
@@ -713,6 +713,60 @@ int GatherPlayerData(GameDataS *gameData)
     gameData->player->lives = aux1->valueint;
     TraceLog(LOG_DEBUG, "Loaded player base health");
 
+    // gathering player speed
+    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "speed");
+    if(!cJSON_IsNumber(aux1) || !aux1->valueint)
+    {
+        strcpy(buffer, "Error loading player speed - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    gameData->player->speed = aux1->valueint;
+    TraceLog(LOG_DEBUG, "Loaded player speed");
+
+    // gathering player dodge speed
+    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "dodgeSpeed");
+    if(!cJSON_IsNumber(aux1) || !aux1->valueint)
+    {
+        strcpy(buffer, "Error loading player dodge speed - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    gameData->player->dodgeSpeed = aux1->valueint;
+    TraceLog(LOG_DEBUG, "Loaded player dodge speed");
+
+    // gathering player dodge deelay frames
+    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "dodgeDeelayFrames");
+    if(!cJSON_IsNumber(aux1) || !aux1->valueint)
+    {
+        strcpy(buffer, "Error loading player dodge deelay frames - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    gameData->player->dodgeDeelayFrames = aux1->valueint;
+    TraceLog(LOG_DEBUG, "Loaded player dodge deelay frames");
+
+    // gathering player dodge duration frames
+    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "dodgeDurationFrames");
+    if(!cJSON_IsNumber(aux1) || !aux1->valueint)
+    {
+        strcpy(buffer, "Error loading player dodge duration frames - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    gameData->player->dodgeDurationFrames = aux1->valueint;
+    TraceLog(LOG_DEBUG, "Loaded player dodge duration frames");
+
+    // gathering player dodge invuln frame flag
+    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "dodgeInvulnFrame");
+    if(!cJSON_IsBool(aux1))
+    {
+        strcpy(buffer, "Error loading player dodge invuln frame flag - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    gameData->player->flags.dodgeInvulnFrame = cJSON_IsTrue(aux1);
+    TraceLog(LOG_DEBUG, "Loaded player dodge invul frame flag");
 
     // gathering player width and height
     aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "size");

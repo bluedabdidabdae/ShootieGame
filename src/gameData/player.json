@@ -4,5 +4,10 @@
         "x": 20,
         "y": 20
     },
-    "defaultWeaponId": 5
+    "speed": 3.5,
+    "dodgeSpeed": 4,
+    "dodgeDeelayFrames": 90,
+    "dodgeDurationFrames": 35,
+    "dodgeInvulnFrame": true,
+    "defaultWeaponId": 1
 }
