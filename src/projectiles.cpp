@@ -67,7 +67,7 @@ void UpdateProjectiles(ProjectileLL *projectileHead, int level[MAPY][MAPX])
         currentProjectile->projectile.y -= currentProjectile->vY;
 
         // if it collides with the map i explode it
-        if(CheckHitboxMap(level, &currentProjectile->projectile))
+        if(CheckHitboxMap(level, currentProjectile->projectile))
         {
             ProjectilePop(previousProjectile, &currentProjectile);
             

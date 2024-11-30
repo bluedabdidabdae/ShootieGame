@@ -89,7 +89,7 @@ int SpawnEnemy(GameDataS *gameData, EnemyType enemyType)
                 gameData->enemiesList[enemyType].enemy.x,
                 gameData->enemiesList[enemyType].enemy.y
             };
-        }while(CheckHitboxMap(gameData->level, &aux1->enemy));
+        }while(CheckHitboxMap(gameData->level, aux1->enemy));
 
         aux1->behaviour = BACKING;
         aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;
@@ -193,18 +193,18 @@ void UpdateEnemies(EnemyLL *enemiesHead, Rectangle *player, int level[MAPY][MAPX
         {
             case BACKING:
                 currentEnemy->enemy.x += Dx;
-                if (CheckHitboxMap(level, &currentEnemy->enemy))
+                if (CheckHitboxMap(level, currentEnemy->enemy))
                     currentEnemy->enemy.x -= Dx;
                 currentEnemy->enemy.y += Dy;
-                if (CheckHitboxMap(level, &currentEnemy->enemy))
+                if (CheckHitboxMap(level, currentEnemy->enemy))
                     currentEnemy->enemy.y -= Dy;
             break;
             case APPROACHING:
                 currentEnemy->enemy.x -= Dx;
-                if (CheckHitboxMap(level, &currentEnemy->enemy))
+                if (CheckHitboxMap(level, currentEnemy->enemy))
                     currentEnemy->enemy.x += Dx;
                 currentEnemy->enemy.y -= Dy;
-                if (CheckHitboxMap(level, &currentEnemy->enemy))
+                if (CheckHitboxMap(level, currentEnemy->enemy))
                     currentEnemy->enemy.y += Dy;
             break;
         }

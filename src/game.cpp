@@ -113,8 +113,7 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&frameCounterLock);
 
         TraceLog(LOG_DEBUG, "Updating player");
-        if(!gameData->player->flags.isStunned)
-            UpdatePlayer(gameData->player, gameData->level, gameData->frameCounter);
+        UpdatePlayer(gameData->player, gameData->level, gameData->frameCounter);
 
         TraceLog(LOG_DEBUG, "Updating camera and mouse");
         UpdateCameraMousePosition(gameData);

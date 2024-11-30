@@ -1,5 +1,5 @@
 {
-    "baseHealth": 60,
+    "baseHealth": 6000,
     "size":{
         "x": 20,
         "y": 20

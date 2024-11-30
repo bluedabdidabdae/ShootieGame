@@ -53,8 +53,13 @@ void UpdatePlayer(PlayerS *player, int level[MAPY][MAPX], uint currentFrame)
     float tmp;
     float dX = 0;
     float dY = 0;
+    int vX;
+    int vY;
 
-    if(!player->flags.isStunned && currentFrame >= player->nextDodgeFrame && IsKeyDown(KEY_SPACE))
+    if(player->flags.isStunned)
+        return;
+
+    if(currentFrame >= player->nextDodgeFrame && IsKeyDown(KEY_SPACE))
     {
         player->flags.isDodging = true;
         
@@ -73,46 +78,68 @@ void UpdatePlayer(PlayerS *player, int level[MAPY][MAPX], uint currentFrame)
     if (IsKeyDown(KEY_W))
     {
         if(player->flags.isDodging)
-            player->player.y -= player->dodgeSpeed;
+            dY -= player->dodgeSpeed;
         else
-            player->player.y -= player->speed;
-        if (CheckHitboxMap(level, &player->player))
-        player->player.y = WALLTHICKNESS*(int)(player->player.y/WALLTHICKNESS)+WALLTHICKNESS;
+            dY -= player->speed;
+        if (CheckHitboxMap(level, {player->player.x, player->player.y+dY,
+                                    player->player.width, player->player.height}))
+        {
+            player->player.y = WALLTHICKNESS*(int)(player->player.y/WALLTHICKNESS);
+            dY = 0;
+        }
     }
 
     if (IsKeyDown(KEY_A))
     {
         if(player->flags.isDodging)
-            player->player.x -= player->dodgeSpeed;
+            dX -= player->dodgeSpeed;
         else
-            player->player.x -= player->speed;
-        if (CheckHitboxMap(level, &player->player))
-        player->player.x = WALLTHICKNESS*(int)(player->player.x/WALLTHICKNESS)+WALLTHICKNESS;
+            dX -= player->speed;
+        if (CheckHitboxMap(level, {player->player.x+dX, player->player.y,
+                                    player->player.width, player->player.height}))
+        {
+            player->player.x = WALLTHICKNESS*(int)(player->player.x/WALLTHICKNESS);
+            dX = 0;
+        }
     }
 
     if (IsKeyDown(KEY_S))
     {
         if(player->flags.isDodging)
-            player->player.y += player->dodgeSpeed;
+            dY += player->dodgeSpeed;
         else
-            player->player.y += player->speed;
-        if (CheckHitboxMap(level, &player->player))
+            dY += player->speed;
+        if (CheckHitboxMap(level, {player->player.x, player->player.y+dY,
+                                    player->player.width, player->player.height}))
         {
             player->player.y = WALLTHICKNESS*(int)(player->player.y/WALLTHICKNESS);
             player->player.y += WALLTHICKNESS-player->player.height-1;
+            dY = 0;
         }
     }
 
     if (IsKeyDown(KEY_D))
     {
         if(player->flags.isDodging)
-            player->player.x += player->dodgeSpeed;
+            dX += player->dodgeSpeed;
         else
-            player->player.x += player->speed;
-        if (CheckHitboxMap(level, &player->player))
+            dX += player->speed;
+        if (CheckHitboxMap(level, {player->player.x+dX, player->player.y,
+                                    player->player.width, player->player.height}))
         {
             player->player.x = WALLTHICKNESS*(int)(player->player.x/WALLTHICKNESS);
             player->player.x += WALLTHICKNESS-player->player.width-1;
+            dX = 0;
         }
     }
+
+    // VI : VItot = VR : VRtot
+    if(dX && dY)
+    {
+        dX /= 1.3;
+        dY /= 1.3;
+    }
+
+    player->player.x += dX;
+    player->player.y += dY;
 }
