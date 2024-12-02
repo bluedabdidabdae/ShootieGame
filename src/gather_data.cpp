@@ -8,6 +8,7 @@
 #include "raylib.h"
 #include "headers/cJSON.h"
 #include "headers/global_types.h"
+#include "headers/gather_data.h"
 
 #define RAWBUFFERSIZE 4096
 #define MAPRAWBUFFERSIZE 16384
@@ -127,7 +128,7 @@ int LoadMapTextures(Texture2D **mapTextures)
     if(!*mapTextures)
     {
         strcpy(buffer, "Error allocating mapTextures memory - ABORTING");
-        ret = FILE_ERROR;
+        ret = MALLOC_ERROR;
         goto cleanup;
     }
 
@@ -161,31 +162,23 @@ int LoadMapTextures(Texture2D **mapTextures)
         return ret;
 }
 
-int LoadMap(GameDataS *gameData, int levelId)
+int LoadLevel(LevelS *level, int levelId)
 {
     FILE *rawFile;
     cJSON *levelData;
-    cJSON *aux1;
-    cJSON *aux2;
-    cJSON *aux3;
-    cJSON *aux4;
-    int arrSize;
     int ret = 0;
-    int i, ii;
+    char levelFile[35];
     char buffer[MAPRAWBUFFERSIZE];
-    char mapfile[35];
     char levelid = levelId += '0';
 
-    TraceLog(LOG_DEBUG, "Entered LoadMap func");
+    strcpy(levelFile, MAPDIR);
+    strcat(levelFile, &levelid);
+    strcat(levelFile, ".json\0");
 
-    strcpy(mapfile, MAPDIR);
-    strcat(mapfile, &levelid);
-    strcat(mapfile, ".json\0");
-
-    TraceLog(LOG_DEBUG, TextFormat("leveldir: %s", mapfile));
+    TraceLog(LOG_DEBUG, TextFormat("leveldir: %s", levelFile));
 
     // opening and parsing levels.json file
-    rawFile = fopen(mapfile, "r");
+    rawFile = fopen(levelFile, "r");
     if(!rawFile)
     {
         strcpy(buffer, "Error opening levels file");
@@ -210,6 +203,103 @@ int LoadMap(GameDataS *gameData, int levelId)
     }
     TraceLog(LOG_DEBUG, "Parsed levels.json");
     
+    // TODO: CHECK IF IT FAILS
+    LoadMap(level->bitmap, levelData);
+
+    // TODO: CHECK IF IT FAILS
+    LoadWaves(level->currentWave, levelData);
+
+    cleanup:
+        return ret;
+}
+
+int LoadWaves(WaveLL *currentWave, cJSON *levelData)
+{
+    cJSON *aux1;
+    cJSON *aux2;
+    cJSON *aux3;
+    char buffer[RAWBUFFERSIZE];
+    int i;
+    int ret = 0;
+
+    // fetching level waves
+    aux1 = cJSON_GetObjectItemCaseSensitive(levelData, "waves");
+    if(!aux1)
+    {
+        strcpy(buffer, "Error loading level waves - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    TraceLog(LOG_DEBUG, "Loaded level waves");
+
+    // load enemies
+    i = 0;
+    while(aux2)
+    {
+        aux2 = cJSON_GetArrayItem(aux1, i);
+        if(!aux2)
+        {
+            TraceLog(LOG_DEBUG, "Loaded all waves");
+            continue;
+        }
+        i++;
+        
+        // adding a wave
+        currentWave->next = (WaveLL*)malloc(sizeof(WaveLL));
+        currentWave = currentWave->next;
+        currentWave->next = NULL;
+        
+        LoadWaveEnemies(&currentWave->enemies, aux1);        
+    }
+
+    cleanup:
+    if(ret)
+        TraceLog(LOG_ERROR, buffer);
+    return ret;
+}
+
+int LoadWaveEnemies(WaveEnemiesLL *currentWaveEnemy, cJSON *currentWaveData)
+{
+    cJSON *aux1;
+    int ret = 0;
+
+    aux1 = cJSON_GetObjectItemCaseSensitive(currentWaveData, "minion");
+    if(aux1 && cJSON_IsNumber(aux1))
+    {
+        currentWaveEnemy->next = (WaveEnemiesLL*)malloc(sizeof(WaveEnemiesLL));
+        currentWaveEnemy = currentWaveEnemy->next;
+        currentWaveEnemy->next = NULL;
+
+        currentWaveEnemy->enemyType = MINION;
+        currentWaveEnemy->nOfEnemies = aux1->valueint;
+    }
+    aux1 = cJSON_GetObjectItemCaseSensitive(currentWaveData, "sniper");
+    if(aux1 && cJSON_IsNumber(aux1))
+    {
+        currentWaveEnemy->next = (WaveEnemiesLL*)malloc(sizeof(WaveEnemiesLL));
+        currentWaveEnemy = currentWaveEnemy->next;
+        currentWaveEnemy->next = NULL;
+
+        currentWaveEnemy->enemyType = SNIPER;
+        currentWaveEnemy->nOfEnemies = aux1->valueint;
+    }
+
+    return ret;
+}
+
+int LoadMap(int bitmap[MAPX][MAPY], cJSON *levelData)
+{
+    cJSON *aux1;
+    cJSON *aux2;
+    cJSON *aux3;
+    cJSON *aux4;
+    int arrSize;
+    char buffer[RAWBUFFERSIZE];
+    int i, ii;
+    int ret = 0;
+
+    TraceLog(LOG_DEBUG, "Entered LoadMap func");
+
     // fetching level matrix
     aux2 = cJSON_GetObjectItemCaseSensitive(levelData, "map");
     if(!aux2)
@@ -245,7 +335,7 @@ int LoadMap(GameDataS *gameData, int levelId)
     {
         // fetching level x 0
         aux4 = cJSON_GetArrayItem(aux3, 0);
-        if(!aux3)
+        if(!aux4)
         {
             strcpy(buffer, "Error loading map - ABORTING");
             ret = FILE_ERROR;
@@ -255,7 +345,7 @@ int LoadMap(GameDataS *gameData, int levelId)
         // loading map
         for(ii = 0; ii < MAPX; ii++)
         {
-            gameData->level[i][ii] = aux4->valueint;
+            bitmap[i][ii] = aux4->valueint;
             aux4 = aux4->next;
         }
         aux3 = aux3->next;
@@ -264,11 +354,6 @@ int LoadMap(GameDataS *gameData, int levelId)
     cleanup:
         if(ret)
             TraceLog(LOG_ERROR, buffer);
-
-        if(levelData)
-            cJSON_Delete(levelData);
-
-        TraceLog(LOG_DEBUG, "Closed json files");
 
         return ret;
 }
@@ -724,48 +809,57 @@ int GatherPlayerData(GameDataS *gameData)
     gameData->player->speed = aux1->valueint;
     TraceLog(LOG_DEBUG, "Loaded player speed");
 
+    // gathering player dodge data
+    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "dodge");
+    if(!aux1)
+    {
+        strcpy(buffer, "Error loading player dodge data - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+
     // gathering player dodge speed
-    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "dodgeSpeed");
-    if(!cJSON_IsNumber(aux1) || !aux1->valueint)
+    aux2 = cJSON_GetObjectItemCaseSensitive(aux1, "dodgeSpeed");
+    if(!cJSON_IsNumber(aux2) || !aux2->valueint)
     {
         strcpy(buffer, "Error loading player dodge speed - ABORTING");
         ret = FILE_ERROR;
         goto cleanup;
     }
-    gameData->player->dodgeSpeed = aux1->valueint;
+    gameData->player->dodgeSpeed = aux2->valueint;
     TraceLog(LOG_DEBUG, "Loaded player dodge speed");
 
     // gathering player dodge deelay frames
-    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "dodgeDeelayFrames");
-    if(!cJSON_IsNumber(aux1) || !aux1->valueint)
+    aux2 = cJSON_GetObjectItemCaseSensitive(aux1, "dodgeDeelayFrames");
+    if(!cJSON_IsNumber(aux2) || !aux2->valueint)
     {
         strcpy(buffer, "Error loading player dodge deelay frames - ABORTING");
         ret = FILE_ERROR;
         goto cleanup;
     }
-    gameData->player->dodgeDeelayFrames = aux1->valueint;
+    gameData->player->dodgeDeelayFrames = aux2->valueint;
     TraceLog(LOG_DEBUG, "Loaded player dodge deelay frames");
 
     // gathering player dodge duration frames
-    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "dodgeDurationFrames");
-    if(!cJSON_IsNumber(aux1) || !aux1->valueint)
+    aux2 = cJSON_GetObjectItemCaseSensitive(aux1, "dodgeDurationFrames");
+    if(!cJSON_IsNumber(aux2) || !aux2->valueint)
     {
         strcpy(buffer, "Error loading player dodge duration frames - ABORTING");
         ret = FILE_ERROR;
         goto cleanup;
     }
-    gameData->player->dodgeDurationFrames = aux1->valueint;
+    gameData->player->dodgeDurationFrames = aux2->valueint;
     TraceLog(LOG_DEBUG, "Loaded player dodge duration frames");
 
     // gathering player dodge invuln frame flag
-    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "dodgeInvulnFrame");
-    if(!cJSON_IsBool(aux1))
+    aux2 = cJSON_GetObjectItemCaseSensitive(aux1, "dodgeInvulnFrame");
+    if(!cJSON_IsBool(aux2))
     {
         strcpy(buffer, "Error loading player dodge invuln frame flag - ABORTING");
         ret = FILE_ERROR;
         goto cleanup;
     }
-    gameData->player->flags.dodgeInvulnFrame = cJSON_IsTrue(aux1);
+    gameData->player->flags.dodgeInvulnFrame = cJSON_IsTrue(aux2);
     TraceLog(LOG_DEBUG, "Loaded player dodge invul frame flag");
 
     // gathering player width and height

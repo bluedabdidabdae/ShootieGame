@@ -1,13 +1,15 @@
 {
     "baseHealth": 6000,
+    "speed": 3.5,
+    "defaultWeaponId": 1,
     "size":{
         "x": 20,
         "y": 20
     },
-    "speed": 3.5,
-    "dodgeSpeed": 4,
-    "dodgeDeelayFrames": 90,
-    "dodgeDurationFrames": 35,
-    "dodgeInvulnFrame": true,
-    "defaultWeaponId": 1
+    "dodge":{
+        "dodgeSpeed": 4,
+        "dodgeDeelayFrames": 90,
+        "dodgeDurationFrames": 35,
+        "dodgeInvulnFrame": true
+    }
 }

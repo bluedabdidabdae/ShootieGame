@@ -52,7 +52,7 @@ int GameHandler(GameDataS *gameData)
     }
 
     // loading map from files
-    err = LoadMap(gameData, 0);
+    err = LoadMap(gameData, 2);
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error loading map - ABORTING");
