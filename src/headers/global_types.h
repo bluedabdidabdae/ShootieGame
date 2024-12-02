@@ -146,7 +146,7 @@ typedef struct wave_data_model{
 }WaveLL;
 //////////////////////////////////////////////////////////
 typedef struct level_data_model{
-    int bitmap[MAPX][MAPY];
+    int bitmap[MAPY][MAPX];
     WaveLL currentWave;
 }LevelS;
 //////////////////////////////////////////////////////////

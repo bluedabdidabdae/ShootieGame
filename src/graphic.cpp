@@ -197,16 +197,16 @@ void DrawGame(GameDataS *gameData)
                 for(int ii = MAPX-1; ii >= 0; ii--)
                 {
                     // separating walls from floor tiles
-                    if(gameData->level[i][ii] > 1)
+                    if(gameData->level.bitmap[i][ii] > 1)
                         DrawTexture(
-                            gameData->mapTextures[gameData->level[i][ii]],
+                            gameData->mapTextures[gameData->level.bitmap[i][ii]],
                             WALLTHICKNESS*ii,
                             WALLTHICKNESS*i,
                             WHITE
                             );
                     else
                         DrawTexture(
-                            gameData->mapTextures[gameData->level[i][ii]],
+                            gameData->mapTextures[gameData->level.bitmap[i][ii]],
                             WALLTHICKNESS*ii,
                             WALLTHICKNESS*i+12,
                             WHITE

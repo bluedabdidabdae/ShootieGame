@@ -52,7 +52,7 @@ int GameHandler(GameDataS *gameData)
     }
 
     // loading map from files
-    err = LoadMap(gameData, 2);
+    err = LoadLevel(&gameData->level, 0);
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error loading map - ABORTING");
@@ -113,7 +113,7 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&frameCounterLock);
 
         TraceLog(LOG_DEBUG, "Updating player");
-        UpdatePlayer(gameData->player, gameData->level, gameData->frameCounter);
+        UpdatePlayer(gameData->player, gameData->level.bitmap, gameData->frameCounter);
 
         TraceLog(LOG_DEBUG, "Updating camera and mouse");
         UpdateCameraMousePosition(gameData);
@@ -123,7 +123,7 @@ int GameHandler(GameDataS *gameData)
 
         pthread_mutex_lock(&enemiesListLock);
         TraceLog(LOG_DEBUG, "Updating enemies");
-        UpdateEnemies(gameData->enemiesHead, &gameData->player->player, gameData->level);
+        UpdateEnemies(gameData->enemiesHead, &gameData->player->player, gameData->level.bitmap);
         pthread_mutex_unlock(&mapLock);
         pthread_mutex_unlock(&enemiesListLock);
 
@@ -161,7 +161,7 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&projectileListLock);
 
         TraceLog(LOG_DEBUG, "Updating projectiles");
-        UpdateProjectiles(gameData->projectileHead, gameData->level);
+        UpdateProjectiles(gameData->projectileHead, gameData->level.bitmap);
 
         pthread_mutex_unlock(&mapLock);
 

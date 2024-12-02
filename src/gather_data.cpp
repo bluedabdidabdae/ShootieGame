@@ -207,7 +207,7 @@ int LoadLevel(LevelS *level, int levelId)
     LoadMap(level->bitmap, levelData);
 
     // TODO: CHECK IF IT FAILS
-    LoadWaves(level->currentWave, levelData);
+    LoadWaves(&level->currentWave, levelData);
 
     cleanup:
         return ret;
@@ -287,7 +287,7 @@ int LoadWaveEnemies(WaveEnemiesLL *currentWaveEnemy, cJSON *currentWaveData)
     return ret;
 }
 
-int LoadMap(int bitmap[MAPX][MAPY], cJSON *levelData)
+int LoadMap(int bitmap[MAPY][MAPX], cJSON *levelData)
 {
     cJSON *aux1;
     cJSON *aux2;
