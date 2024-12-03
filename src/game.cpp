@@ -33,6 +33,7 @@ extern pthread_mutex_t weaponDataLock;
 void UpdateCameraMousePosition(GameDataS *gameData);
 void CloseGame(GameDataS *gameData);
 int InitGameData(GameDataS *gameData);
+void SpawnWave(WaveLL *wave);
 
 int GameHandler(GameDataS *gameData)
 {
@@ -42,7 +43,8 @@ int GameHandler(GameDataS *gameData)
 
     GameStates gameStatus;
 
-    // gathering data from files
+    // loading weapon, player
+    // and enemies models from file
     err = GatherData(gameData);
     if(err != 0)
     {
@@ -51,8 +53,8 @@ int GameHandler(GameDataS *gameData)
         return err;
     }
 
-    // loading map from files
-    err = LoadLevel(&gameData->level, 0);
+    // loading level bitmap and waves from files
+    err = LoadLevel(&(gameData->level), 0);
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error loading map - ABORTING");
@@ -68,13 +70,9 @@ int GameHandler(GameDataS *gameData)
         CloseGame(gameData);
         return err;
     }
+
     pthread_mutex_lock(&gameUpdateLock);
     *gameData->toDraw = DRAW_LOAD_TEXTURES;
-    
-    // Spawning enemies for testing purposes
-    // todo: adapt the function to only recive essential data
-    SpawnEnemies(gameData, 7, MINION);
-    SpawnEnemies(gameData, 3, SNIPER);
 
     pthread_mutex_lock(&gameUpdateLock);
     *gameData->toDraw = DRAWGAME;
@@ -113,7 +111,7 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&frameCounterLock);
 
         TraceLog(LOG_DEBUG, "Updating player");
-        UpdatePlayer(gameData->player, gameData->level.bitmap, gameData->frameCounter);
+        UpdatePlayer(gameData->player, gameData->level->bitmap, gameData->frameCounter);
 
         TraceLog(LOG_DEBUG, "Updating camera and mouse");
         UpdateCameraMousePosition(gameData);
@@ -123,7 +121,7 @@ int GameHandler(GameDataS *gameData)
 
         pthread_mutex_lock(&enemiesListLock);
         TraceLog(LOG_DEBUG, "Updating enemies");
-        UpdateEnemies(gameData->enemiesHead, &gameData->player->player, gameData->level.bitmap);
+        UpdateEnemies(gameData->enemiesHead, &gameData->player->player, gameData->level->bitmap);
         pthread_mutex_unlock(&mapLock);
         pthread_mutex_unlock(&enemiesListLock);
 
@@ -161,7 +159,7 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&projectileListLock);
 
         TraceLog(LOG_DEBUG, "Updating projectiles");
-        UpdateProjectiles(gameData->projectileHead, gameData->level.bitmap);
+        UpdateProjectiles(gameData->projectileHead, gameData->level->bitmap);
 
         pthread_mutex_unlock(&mapLock);
 
@@ -195,8 +193,6 @@ int InitGameData(GameDataS *gameData)
     gameData->player->flags.isInvulnerable = false;
     gameData->player->flags.isStunned = false;
 
-    gameData->isCameraLocked = true;
-
     // Init enemies linked list
     gameData->enemiesHead = (EnemyLL*)malloc(sizeof(EnemyLL));
     if(gameData->enemiesHead == NULL) return MALLOC_ERROR;
@@ -218,15 +214,6 @@ int InitGameData(GameDataS *gameData)
                                             gameData->player->player.y + gameData->player->player.height };
     gameData->camera->offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
     gameData->camera->zoom = 1.7f;
-
-    // Temporary map borderes
-    gameData->mapBorder = (Rectangle*)malloc(sizeof(Rectangle)*4);
-    if(gameData->mapBorder == NULL) return MALLOC_ERROR;
-    TraceLog(LOG_DEBUG, "Allocated map border memory");
-    gameData->mapBorder[0] = {0, 0, WIDTH, WALLTHICKNESS};
-    gameData->mapBorder[1] = {0, 0, WALLTHICKNESS, HEIGT};
-    gameData->mapBorder[2] = {0, HEIGT-WALLTHICKNESS, WIDTH, WALLTHICKNESS};
-    gameData->mapBorder[3] = {WIDTH-WALLTHICKNESS, 0, WALLTHICKNESS, HEIGT};
 
     return 0;
 }
@@ -262,15 +249,6 @@ void CloseGame(GameDataS *gameData)
         TraceLog(LOG_DEBUG, "Deallocated projectile ll");
     }
     else TraceLog(LOG_DEBUG, "Projectile ll was not allocated");
-/////////////////////////////////////////////////////////////////////////////////
-    if(gameData->mapBorder != NULL)
-    {
-        // delete map border
-        free(gameData->mapBorder);
-        gameData->mapBorder = NULL;
-        TraceLog(LOG_DEBUG, "Deallocated mapBorder ll");
-    }
-    else TraceLog(LOG_DEBUG, "Map border ll was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
     if(gameData->player != NULL)
     {
@@ -316,4 +294,13 @@ void CloseGame(GameDataS *gameData)
         TraceLog(LOG_DEBUG, "Deallocated mapTextures memory");
     }
     else TraceLog(LOG_DEBUG, "MapTextures was not allocated");
+/////////////////////////////////////////////////////////////////////////////////
+    if(gameData->level != NULL)
+    {
+        // delete level
+        free(gameData->level);
+        gameData->level = NULL;
+        TraceLog(LOG_DEBUG, "Deallocated level memory");
+    }
+    else TraceLog(LOG_DEBUG, "level was not allocated");
 }

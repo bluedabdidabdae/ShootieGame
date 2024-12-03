@@ -157,13 +157,6 @@ int DeleteData(GameDataS *gameData)
     }
     else TraceLog(LOG_DEBUG, "ToDraw memory was not allocated");
 
-    if(gameData->gameSkin != NULL)
-    {
-        free(gameData->gameSkin);
-        TraceLog(LOG_DEBUG, "Deallocated gameSkin memory");
-    }
-    else TraceLog(LOG_DEBUG, "GameSkin memory was not allocated");
-
     if(gameData->mousePosition != NULL)
     {
         free(gameData->mousePosition);
@@ -189,11 +182,6 @@ int InitData(GameDataS *gameData)
     gameData->toDraw = (ToDraw*)malloc(sizeof(ToDraw));
     if(gameData->toDraw == NULL) return MALLOC_ERROR;
     
-    gameData->gameSkin = (GameSkinS*)malloc(sizeof(GameSkinS));
-    if(gameData->gameSkin == NULL) return MALLOC_ERROR;
-    (*gameData->gameSkin).primaryColor = BLUE;
-    (*gameData->gameSkin).secondaryColor = WHITE;
-    
     gameData->mousePosition = (Vector2*)malloc(sizeof(Vector2));
     if(gameData->mousePosition == NULL) return MALLOC_ERROR;
     *gameData->mousePosition = GetMousePosition();
@@ -201,12 +189,12 @@ int InitData(GameDataS *gameData)
     gameData->frameCounter = 0;
     gameData->camera = NULL;
     gameData->player = NULL;
-    gameData->mapBorder = NULL;
     gameData->enemiesHead = NULL;
     gameData->projectileHead = NULL;
     gameData->mapTextures = NULL;
     gameData->enemiesList = NULL;
     gameData->weaponsList = NULL;
+    gameData->level = NULL;
 
     return 0;
 }

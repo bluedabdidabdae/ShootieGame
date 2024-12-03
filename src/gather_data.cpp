@@ -162,7 +162,7 @@ int LoadMapTextures(Texture2D **mapTextures)
         return ret;
 }
 
-int LoadLevel(LevelS *level, int levelId)
+int LoadLevel(LevelS *(*level), int levelId)
 {
     FILE *rawFile;
     cJSON *levelData;
@@ -203,17 +203,31 @@ int LoadLevel(LevelS *level, int levelId)
     }
     TraceLog(LOG_DEBUG, "Parsed levels.json");
     
-    // TODO: CHECK IF IT FAILS
-    LoadMap(level->bitmap, levelData);
+    *level = (LevelS*)malloc(sizeof(LevelS));
+    if(!*level)
+    {
+        strcpy(buffer, "Failed to allocate level data");
+        ret = MALLOC_ERROR;
+        goto cleanup;
+    }
 
     // TODO: CHECK IF IT FAILS
-    LoadWaves(&level->currentWave, levelData);
+    LoadMap((*level)->bitmap, levelData);
+
+    // TODO: CHECK IF IT FAILS
+    LoadWaves(&((*level)->currentWave), levelData);
 
     cleanup:
+        if(ret)
+        {
+            TraceLog(LOG_ERROR, buffer);
+            if(level)
+                free(level);
+        }
         return ret;
 }
 
-int LoadWaves(WaveLL *currentWave, cJSON *levelData)
+int LoadWaves(WaveLL **waveHead, cJSON *levelData)
 {
     cJSON *aux1;
     cJSON *aux2;
@@ -221,6 +235,7 @@ int LoadWaves(WaveLL *currentWave, cJSON *levelData)
     char buffer[RAWBUFFERSIZE];
     int i;
     int ret = 0;
+    WaveLL *currentWave;
 
     // fetching level waves
     aux1 = cJSON_GetObjectItemCaseSensitive(levelData, "waves");
@@ -231,6 +246,11 @@ int LoadWaves(WaveLL *currentWave, cJSON *levelData)
         goto cleanup;
     }
     TraceLog(LOG_DEBUG, "Loaded level waves");
+
+    // adding a waves head
+    *waveHead = (WaveLL*)malloc(sizeof(WaveLL));
+    (*waveHead)->next = NULL;
+    currentWave = *waveHead;
 
     // load enemies
     i = 0;
@@ -251,17 +271,22 @@ int LoadWaves(WaveLL *currentWave, cJSON *levelData)
         
         LoadWaveEnemies(&currentWave->enemies, aux1);        
     }
-
+    
     cleanup:
     if(ret)
         TraceLog(LOG_ERROR, buffer);
     return ret;
 }
 
-int LoadWaveEnemies(WaveEnemiesLL *currentWaveEnemy, cJSON *currentWaveData)
+int LoadWaveEnemies(WaveEnemiesLL **currentWaveEnemyHead, cJSON *currentWaveData)
 {
     cJSON *aux1;
     int ret = 0;
+    WaveEnemiesLL *currentWaveEnemy;
+
+    *currentWaveEnemyHead = (WaveEnemiesLL*)malloc(sizeof(WaveEnemiesLL));
+    (*currentWaveEnemyHead)->next = NULL;
+    currentWaveEnemy = *currentWaveEnemyHead;
 
     aux1 = cJSON_GetObjectItemCaseSensitive(currentWaveData, "minion");
     if(aux1 && cJSON_IsNumber(aux1))

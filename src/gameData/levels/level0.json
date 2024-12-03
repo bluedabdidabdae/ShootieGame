@@ -34,16 +34,14 @@
             "sniper": 2
         },
         {
-            "base": 5,
-            "sniper": 2
+            "minion": 5
         },
         {
-            "base": 3,
             "sniper": 7
         },
         {
-            "base": 7,
-            "sniper": 3
+            "sniper": 3,
+            "minion": 7
         }
     ]
 }

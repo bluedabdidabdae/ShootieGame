@@ -89,7 +89,7 @@ int SpawnEnemy(GameDataS *gameData, EnemyType enemyType)
                 gameData->enemiesList[enemyType].enemy.x,
                 gameData->enemiesList[enemyType].enemy.y
             };
-        }while(CheckHitboxMap(gameData->level.bitmap, aux1->enemy));
+        }while(CheckHitboxMap(gameData->level->bitmap, aux1->enemy));
 
         aux1->behaviour = BACKING;
         aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;

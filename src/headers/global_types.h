@@ -110,11 +110,6 @@ typedef struct player_model{
     }flags;
 }PlayerS;
 //////////////////////////////////////////////////////////
-typedef struct game_skin_model{
-    Color primaryColor;
-    Color secondaryColor;
-}GameSkinS;
-//////////////////////////////////////////////////////////
 typedef enum to_draw_status{
     DRAW_WAIT,
     DRAWMAINMENU,
@@ -141,13 +136,13 @@ typedef struct wave_enemies_model{
 }WaveEnemiesLL;
 //////////////////////////////////////////////////////////
 typedef struct wave_data_model{
-    WaveEnemiesLL enemies;
+    WaveEnemiesLL *enemies;
     wave_data_model *next;
 }WaveLL;
 //////////////////////////////////////////////////////////
 typedef struct level_data_model{
     int bitmap[MAPY][MAPX];
-    WaveLL currentWave;
+    WaveLL *currentWave;
 }LevelS;
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -156,19 +151,16 @@ typedef struct level_data_model{
 //////////////////////////////////////////////////////////
 typedef struct game_data_model{
     ToDraw *toDraw;
-    GameSkinS *gameSkin;
     uint frameCounter;
     Vector2 *mousePosition;
     Camera2D *camera;
     PlayerS *player;
-    Rectangle *mapBorder;
     EnemyLL *enemiesHead;
     ProjectileLL *projectileHead;
     WeaponS *weaponsList;
     EnemiesS *enemiesList;
     Texture2D *mapTextures;
-    bool isCameraLocked;
-    LevelS level;
+    LevelS *level;
     uint score;
     SettingsFlags settingsFlags;
 }GameDataS;
