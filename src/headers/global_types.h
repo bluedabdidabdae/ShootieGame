@@ -29,16 +29,16 @@ typedef enum StatesModel{
     EXITGAME,   // 3
 }States;
 //////////////////////////////////////////////////////////
-typedef enum behaviour_model{
-    APPROACHING,
-    BACKING,
-    STILL
-}Behaviour;
-//////////////////////////////////////////////////////////
-typedef enum enemy_type_model{
-    MINION,
-    SNIPER
-}EnemyType;
+typedef enum to_draw_status{
+    DRAW_WAIT,
+    DRAWMAINMENU,
+    DRAWGAME,
+    DRAWSETTINGS,
+    DRAWCLOSEGAME,
+    DRAW_LOAD_TEXTURES,
+    DRAW_UNLOAD_TEXTURES,
+    DRAWABORT
+}ToDraw;
 //////////////////////////////////////////////////////////
 typedef struct Weapon_model{
     char weaponName[WEAPONNAMEBUFFER];
@@ -53,6 +53,25 @@ typedef struct Weapon_model{
     };
 }WeaponS;
 //////////////////////////////////////////////////////////
+typedef enum behaviour_model{
+    APPROACHING,
+    BACKING,
+    STILL
+}Behaviour;
+//////////////////////////////////////////////////////////
+typedef enum enemy_type_model{
+    MINION,
+    SNIPER
+}EnemyType;
+//////////////////////////////////////////////////////////
+typedef struct Enemy_Linked_List{
+    Rectangle enemy;
+    EnemyType enemyType;
+    Behaviour behaviour;
+    Rectangle healthBar;
+    int hitPoint;
+}EnemyL;
+//////////////////////////////////////////////////////////
 typedef struct Enemies_model{
     int baseHealth;
     int baseWeaponId;
@@ -64,15 +83,6 @@ typedef struct Enemies_model{
         Image enemyImage;
     };
 }EnemiesS;
-//////////////////////////////////////////////////////////
-typedef struct Enemy_Linked_List{
-    Rectangle enemy;
-    EnemyType enemyType;
-    Behaviour behaviour;
-    Rectangle healthBar;
-    int hitPoint;
-    Enemy_Linked_List *next;
-}EnemyL;
 //////////////////////////////////////////////////////////
 typedef enum projectile_owner_model{
     ENEMY,
@@ -111,17 +121,6 @@ typedef struct player_model{
     }flags;
 }PlayerS;
 //////////////////////////////////////////////////////////
-typedef enum to_draw_status{
-    DRAW_WAIT,
-    DRAWMAINMENU,
-    DRAWGAME,
-    DRAWSETTINGS,
-    DRAWCLOSEGAME,
-    DRAW_LOAD_TEXTURES,
-    DRAW_UNLOAD_TEXTURES,
-    DRAWABORT
-}ToDraw;
-//////////////////////////////////////////////////////////
 typedef struct settigns_flags_model{
     bool toggleFullscreen;
 }SettingsFlags;
@@ -156,8 +155,8 @@ typedef struct game_data_model{
     Vector2 *mousePosition;
     Camera2D *camera;
     PlayerS *player;
-    std::list<EnemyL> *enemiesList;
-    std::list<ProjectileL> *projectileList;
+    std::list<EnemyL> enemiesList;
+    std::list<ProjectileL> projectileList;
     WeaponS *weaponsList;
     EnemiesS *enemiesTemplateList;
     Texture2D *mapTextures;

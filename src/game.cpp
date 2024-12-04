@@ -74,8 +74,8 @@ int GameHandler(GameDataS *gameData)
     pthread_mutex_lock(&gameUpdateLock);
     *gameData->toDraw = DRAW_LOAD_TEXTURES;
 
-    SpawnEnemies(gameData, 5, MINION);
-    SpawnEnemies(gameData, 5, SNIPER);
+    SpawnEnemies(5, MINION, gameData->enemiesList, gameData->enemiesTemplateList, gameData->level->bitmap);
+    SpawnEnemies(5, SNIPER, gameData->enemiesList, gameData->enemiesTemplateList, gameData->level->bitmap);
 
     pthread_mutex_lock(&gameUpdateLock);
     *gameData->toDraw = DRAWGAME;
@@ -124,7 +124,7 @@ int GameHandler(GameDataS *gameData)
 
         pthread_mutex_lock(&enemiesListLock);
         TraceLog(LOG_DEBUG, "Updating enemies");
-        UpdateEnemies(*gameData->enemiesList, &gameData->player->player, gameData->level->bitmap);
+        UpdateEnemies(gameData->enemiesList, &gameData->player->player, gameData->level->bitmap);
         pthread_mutex_unlock(&mapLock);
         pthread_mutex_unlock(&enemiesListLock);
 
@@ -140,7 +140,7 @@ int GameHandler(GameDataS *gameData)
             TraceLog(LOG_DEBUG, "Player shoots");
             pthread_mutex_lock(&projectileListLock);
             if(!gameData->player->flags.isStunned)
-                PlayerShooting(gameData->player, gameData->weaponsList, *gameData->projectileList, gameData->mousePosition);
+                PlayerShooting(gameData->player, gameData->weaponsList, gameData->projectileList, gameData->mousePosition);
             pthread_mutex_unlock(&projectileListLock);
         }
         pthread_mutex_unlock(&frameCounterLock);
@@ -149,8 +149,8 @@ int GameHandler(GameDataS *gameData)
         
         TraceLog(LOG_DEBUG, "Enemies shooting");
         EnemiesShooting(
-            *gameData->enemiesList,
-            *gameData->projectileList,
+            gameData->enemiesList,
+            gameData->projectileList,
             gameData->enemiesTemplateList,
             &gameData->player->player);
 
@@ -162,7 +162,7 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&projectileListLock);
 
         TraceLog(LOG_DEBUG, "Updating projectiles");
-        UpdateProjectiles(*gameData->projectileList, gameData->level->bitmap);
+        UpdateProjectiles(gameData->projectileList, gameData->level->bitmap);
 
         pthread_mutex_unlock(&mapLock);
 
@@ -196,14 +196,6 @@ int InitGameData(GameDataS *gameData)
     gameData->player->flags.isInvulnerable = false;
     gameData->player->flags.isStunned = false;
 
-    // Init enemies list
-    gameData->enemiesList = new std::list<EnemyL>;
-    TraceLog(LOG_DEBUG, "Created enemies list");
-
-    // Init projectiles list
-    gameData->projectileList = new std::list<ProjectileL>;
-    TraceLog(LOG_DEBUG, "Created projectile list");
-
     // Setting up camera to 2d mode and centering it to the player
     gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
     if(gameData->camera == NULL) return MALLOC_ERROR;
@@ -230,14 +222,6 @@ void UpdateCameraMousePosition(GameDataS *gameData)
 
 void CloseGame(GameDataS *gameData)
 {
-/////////////////////////////////////////////////////////////////////////////////
-    if(gameData->projectileList != NULL)
-    {
-        // delete all projectiles
-        gameData->projectileList->clear();
-        TraceLog(LOG_DEBUG, "Cleared projectile ll");
-    }
-    else TraceLog(LOG_DEBUG, "Projectile ll was not created");
 /////////////////////////////////////////////////////////////////////////////////
     if(gameData->player != NULL)
     {
@@ -266,14 +250,14 @@ void CloseGame(GameDataS *gameData)
     }
     else TraceLog(LOG_DEBUG, "WeaponList was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
-    if(gameData->enemiesList != NULL)
+    if(gameData->enemiesTemplateList != NULL)
     {
         // delete enemiesList
-        free(gameData->enemiesList);
-        gameData->enemiesList = NULL;
-        TraceLog(LOG_DEBUG, "Deallocated enemiesList memory");
+        free(gameData->enemiesTemplateList);
+        gameData->enemiesTemplateList = NULL;
+        TraceLog(LOG_DEBUG, "Deallocated enemiesTemplateList memory");
     }
-    else TraceLog(LOG_DEBUG, "EnemiesList was not allocated");
+    else TraceLog(LOG_DEBUG, "EnemiesTemplateList was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
     if(gameData->mapTextures != NULL)
     {

@@ -189,8 +189,6 @@ int InitData(GameDataS &gameData)
     gameData.frameCounter = 0;
     gameData.camera = NULL;
     gameData.player = NULL;
-    gameData.enemiesList = NULL;
-    gameData.projectileList = NULL;
     gameData.mapTextures = NULL;
     gameData.enemiesTemplateList = NULL;
     gameData.weaponsList = NULL;

@@ -18,40 +18,33 @@
 #define ENEMYMINPDISTANCE 250
 #define HEALTHBAROFFSETY -10
 
-int SpawnEnemies(GameDataS *gameData, int number, EnemyType enemyType)
+int SpawnEnemies(int number, EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, int level[MAPY][MAPX])
 {
     int i;
     int ret = 0;
 
     for(i = 0; i < number; i++)
     {
-        ret = SpawnEnemy(*gameData, enemyType);
+        ret = SpawnEnemy(enemyType, enemiesList, enemiesTemplateList, level);
         if(ret) return ret;
     }
     return ret;
 }
 
-int SpawnEnemy(GameDataS &gameData, float x, float y, EnemyType enemyType)
+int SpawnEnemiesPos(int number, EnemyType enemyType, float x, float y, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList)
 {
-    EnemyL tmpEnemy;
+    int i;
+    int ret = 0;
 
-    tmpEnemy.enemy = {
-        x,
-        y,
-        gameData.enemiesTemplateList[enemyType].enemy.x,
-        gameData.enemiesTemplateList[enemyType].enemy.y
-    };
-    tmpEnemy.enemyType = enemyType;
-    tmpEnemy.behaviour = BACKING;
-    tmpEnemy.hitPoint = gameData.enemiesTemplateList[enemyType].baseHealth;
-    tmpEnemy.healthBar = { x, y+HEALTHBAROFFSETY, (float)tmpEnemy.hitPoint, 5 };
-    
-    gameData.enemiesList->push_front(tmpEnemy);
-
-    return 0;
+    for(i = 0; i < number; i++)
+    {
+        ret = SpawnEnemyPos(enemyType, x, y, enemiesList, enemiesTemplateList);
+        if(ret) return ret;
+    }
+    return ret;
 }
 
-int SpawnEnemy(GameDataS &gameData, EnemyType enemyType)
+int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, int level[MAPY][MAPX])
 {
     float x, y;
 
@@ -63,17 +56,37 @@ int SpawnEnemy(GameDataS &gameData, EnemyType enemyType)
         tmpEnemy.enemy = {
             x,
             y,
-            gameData.enemiesTemplateList[enemyType].enemy.x,
-            gameData.enemiesTemplateList[enemyType].enemy.y
+            enemiesTemplateList[enemyType].enemy.x,
+            enemiesTemplateList[enemyType].enemy.y
         };
-    }while(CheckHitboxMap(gameData.level->bitmap, tmpEnemy.enemy));
+    }while(CheckHitboxMap(level, tmpEnemy.enemy));
 
     tmpEnemy.enemyType = enemyType;
     tmpEnemy.behaviour = BACKING;
-    tmpEnemy.hitPoint = gameData.enemiesTemplateList[enemyType].baseHealth;
+    tmpEnemy.hitPoint = enemiesTemplateList[enemyType].baseHealth;
     tmpEnemy.healthBar = { x, y+HEALTHBAROFFSETY, (float)tmpEnemy.hitPoint, 5 };
     
-    gameData.enemiesList->push_front(tmpEnemy);
+    enemiesList.push_front(tmpEnemy);
+
+    return 0;
+}
+
+int SpawnEnemyPos(EnemyType enemyType, float x, float y, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList)
+{
+    EnemyL tmpEnemy;
+
+    tmpEnemy.enemy = {
+        x,
+        y,
+        enemiesTemplateList[enemyType].enemy.x,
+        enemiesTemplateList[enemyType].enemy.y
+    };
+    tmpEnemy.enemyType = enemyType;
+    tmpEnemy.behaviour = BACKING;
+    tmpEnemy.hitPoint = enemiesTemplateList[enemyType].baseHealth;
+    tmpEnemy.healthBar = { x, y+HEALTHBAROFFSETY, (float)tmpEnemy.hitPoint, 5 };
+    
+    enemiesList.push_front(tmpEnemy);
 
     return 0;
 }

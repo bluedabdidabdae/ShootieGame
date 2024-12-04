@@ -13,8 +13,8 @@
 
 void CheckProjEntityDamage(GameDataS &gameData)
 {
-    std::list<ProjectileL>::iterator currentProjectile = gameData.projectileList->begin();
-    while(gameData.projectileList->end() != currentProjectile)
+    std::list<ProjectileL>::iterator currentProjectile = gameData.projectileList.begin();
+    while(gameData.projectileList.end() != currentProjectile)
     {
         switch(currentProjectile->owner)
         {
@@ -22,18 +22,18 @@ void CheckProjEntityDamage(GameDataS &gameData)
                 if(!gameData.player->flags.isInvulnerable && CheckHitboxRec(currentProjectile->projectile, gameData.player->player))
                 {
                     gameData.player->lives -= currentProjectile->damage;
-                    currentProjectile = gameData.projectileList->erase(currentProjectile);
+                    currentProjectile = gameData.projectileList.erase(currentProjectile);
                     currentProjectile--;
                 }
             break;
             case PLAYER:
-                std::list<EnemyL>::iterator currentEnemy = gameData.enemiesList->begin();
-                while(gameData.enemiesList->end() != currentEnemy)
+                std::list<EnemyL>::iterator currentEnemy = gameData.enemiesList.begin();
+                while(gameData.enemiesList.end() != currentEnemy)
                 {
                     if(CheckHitboxRec(currentProjectile->projectile, currentEnemy->enemy))
                     {
                         currentEnemy->hitPoint -= currentProjectile->damage;
-                        currentProjectile = gameData.projectileList->erase(currentProjectile);
+                        currentProjectile = gameData.projectileList.erase(currentProjectile);
                         currentProjectile--;
                         break;
                         // this break IS NECESSARY

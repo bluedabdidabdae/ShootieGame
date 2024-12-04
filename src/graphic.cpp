@@ -219,7 +219,7 @@ void DrawGame(GameDataS &gameData)
             TraceLog(LOG_DEBUG, "Drawing projectiles");
             pthread_mutex_lock(&weaponDataLock);
             pthread_mutex_lock(&projectileListLock);
-            for(auto const& currentProjectile : *gameData.projectileList)
+            for(auto const& currentProjectile : gameData.projectileList)
             {
                 DrawTexture(
                     *currentProjectile.texture,
@@ -233,7 +233,7 @@ void DrawGame(GameDataS &gameData)
             // drawing enemies
             TraceLog(LOG_DEBUG, "Drawing enemies");
             pthread_mutex_lock(&enemiesListLock);
-            for(auto const& currentEnemy : *gameData.enemiesList)
+            for(auto const& currentEnemy : gameData.enemiesList)
             {
                 DrawTexture(
                     gameData.enemiesTemplateList[currentEnemy.enemyType].enemyTexture,
