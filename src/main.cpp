@@ -50,8 +50,8 @@ pthread_mutex_t frameCounterLock;
 pthread_mutex_t mapLock;
 pthread_mutex_t weaponDataLock;
 
-int InitData(GameDataS *gameData);
-int DeleteData(GameDataS *gameData);
+int InitData(GameDataS &gameData);
+int DeleteData(GameDataS &gameData);
 int ForceThreadKill(pthread_t *thread);
 
 
@@ -68,11 +68,11 @@ int main(int argc, char *argv[])
     pthread_t drawingThreadId = { 0 };
 
     // initializing game data
-    error = InitData(&gameData);
+    error = InitData(gameData);
     if(error != 0)
     {
         TraceLog(LOG_ERROR, "Error allocating game data");
-        DeleteData(&gameData);
+        DeleteData(gameData);
         return 0;
     }
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     if (error != 0)
     {
         TraceLog(LOG_ERROR, "Error creating thread");
-        DeleteData(&gameData);
+        DeleteData(gameData);
         return 0;
     }
 
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
             TraceLog(LOG_ERROR, "<< ABORTING >>");
             TraceLog(LOG_ERROR, "Trying to make drawing thread to close the window");
             CloseWindow();
-            DeleteData(&gameData);
+            DeleteData(gameData);
             TraceLog(LOG_DEBUG, "Deleted game data");
             *gameData.toDraw = DRAWABORT;
             abort();
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
     }
     
     // normal game exit
-    DeleteData(&gameData);
+    DeleteData(gameData);
     TraceLog(LOG_INFO, "Game terminated succesfully");
     return 0;
 }
@@ -148,18 +148,18 @@ int ForceThreadKill(pthread_t *thread)
     return 0;
 }
 
-int DeleteData(GameDataS *gameData)
+int DeleteData(GameDataS &gameData)
 {
-    if(gameData->toDraw != NULL)
+    if(gameData.toDraw != NULL)
     {
-        free(gameData->toDraw);
+        free(gameData.toDraw);
         TraceLog(LOG_DEBUG, "Deallocated toDraw memory");
     }
     else TraceLog(LOG_DEBUG, "ToDraw memory was not allocated");
 
-    if(gameData->mousePosition != NULL)
+    if(gameData.mousePosition != NULL)
     {
-        free(gameData->mousePosition);
+        free(gameData.mousePosition);
         TraceLog(LOG_DEBUG, "Deallocated mousePosition memory");
     }
     else TraceLog(LOG_DEBUG, "To mouseposition memory was not allocated");
@@ -167,7 +167,7 @@ int DeleteData(GameDataS *gameData)
     return 0;
 }
 
-int InitData(GameDataS *gameData)
+int InitData(GameDataS &gameData)
 {
     pthread_mutex_init(&enemiesListLock, NULL);
     pthread_mutex_init(&projectileListLock, NULL);
@@ -179,22 +179,22 @@ int InitData(GameDataS *gameData)
     pthread_mutex_init(&mapLock, NULL);
     pthread_mutex_init(&weaponDataLock, NULL);
 
-    gameData->toDraw = (ToDraw*)malloc(sizeof(ToDraw));
-    if(gameData->toDraw == NULL) return MALLOC_ERROR;
+    gameData.toDraw = (ToDraw*)malloc(sizeof(ToDraw));
+    if(gameData.toDraw == NULL) return MALLOC_ERROR;
     
-    gameData->mousePosition = (Vector2*)malloc(sizeof(Vector2));
-    if(gameData->mousePosition == NULL) return MALLOC_ERROR;
-    *gameData->mousePosition = GetMousePosition();
+    gameData.mousePosition = (Vector2*)malloc(sizeof(Vector2));
+    if(gameData.mousePosition == NULL) return MALLOC_ERROR;
+    *gameData.mousePosition = GetMousePosition();
 
-    gameData->frameCounter = 0;
-    gameData->camera = NULL;
-    gameData->player = NULL;
-    gameData->enemiesHead = NULL;
-    gameData->projectileHead = NULL;
-    gameData->mapTextures = NULL;
-    gameData->enemiesList = NULL;
-    gameData->weaponsList = NULL;
-    gameData->level = NULL;
+    gameData.frameCounter = 0;
+    gameData.camera = NULL;
+    gameData.player = NULL;
+    gameData.enemiesList = NULL;
+    gameData.projectileList = NULL;
+    gameData.mapTextures = NULL;
+    gameData.enemiesTemplateList = NULL;
+    gameData.weaponsList = NULL;
+    gameData.level = NULL;
 
     return 0;
 }

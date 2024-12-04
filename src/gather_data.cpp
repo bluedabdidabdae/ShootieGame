@@ -87,21 +87,21 @@ int LoadEnemiesTextures(GameDataS *gameData)
 
     for(i = 0; i < 2; i++)
     {
-        if(!gameData->enemiesList[i].isTexture)
+        if(!gameData->enemiesTemplateList[i].isTexture)
         {
-            tmp = gameData->enemiesList[i].enemyImage;
-            ImageResize(&tmp, gameData->enemiesList[i].enemy.x, gameData->enemiesList[i].enemy.y);
-            gameData->enemiesList[i].enemyTexture = LoadTextureFromImage(tmp);
+            tmp = gameData->enemiesTemplateList[i].enemyImage;
+            ImageResize(&tmp, gameData->enemiesTemplateList[i].enemy.x, gameData->enemiesTemplateList[i].enemy.y);
+            gameData->enemiesTemplateList[i].enemyTexture = LoadTextureFromImage(tmp);
             UnloadImage(tmp);
-            gameData->enemiesList[i].isTexture = true;
+            gameData->enemiesTemplateList[i].isTexture = true;
         }
-        if(!gameData->enemiesList[i].weapon.isTexture)
+        if(!gameData->enemiesTemplateList[i].weapon.isTexture)
         {
-            tmp = gameData->enemiesList[i].weapon.projectileImage;
-            ImageResize(&tmp, gameData->enemiesList[i].weapon.projectileSize, gameData->enemiesList[i].weapon.projectileSize);
-            gameData->enemiesList[i].weapon.projectileTexture = LoadTextureFromImage(tmp);
+            tmp = gameData->enemiesTemplateList[i].weapon.projectileImage;
+            ImageResize(&tmp, gameData->enemiesTemplateList[i].weapon.projectileSize, gameData->enemiesTemplateList[i].weapon.projectileSize);
+            gameData->enemiesTemplateList[i].weapon.projectileTexture = LoadTextureFromImage(tmp);
             UnloadImage(tmp);
-            gameData->enemiesList[i].weapon.isTexture = true;
+            gameData->enemiesTemplateList[i].weapon.isTexture = true;
         }
     }
 
@@ -433,8 +433,8 @@ int GatherEnemiesData(GameDataS *gameData)
     arrSize = cJSON_GetArraySize(aux1);
 
     // allocating weapons memory
-    gameData->enemiesList = (EnemiesS*)malloc(sizeof(EnemiesS)*arrSize);
-    if(!gameData->enemiesList)
+    gameData->enemiesTemplateList = (EnemiesS*)malloc(sizeof(EnemiesS)*arrSize);
+    if(!gameData->enemiesTemplateList)
     {
         strcpy(buffer, "Error allocating initial enemiesList memory - ABORTING");
         ret = MALLOC_ERROR;
@@ -474,7 +474,7 @@ int GatherEnemiesData(GameDataS *gameData)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        gameData->enemiesList[i].enemy.x = (float)aux4->valueint;
+        gameData->enemiesTemplateList[i].enemy.x = (float)aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy size x");
         
         aux4 = cJSON_GetObjectItemCaseSensitive(aux3, "y");
@@ -484,7 +484,7 @@ int GatherEnemiesData(GameDataS *gameData)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        gameData->enemiesList[i].enemy.y = (float)aux4->valueint;
+        gameData->enemiesTemplateList[i].enemy.y = (float)aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy size y");
 
         // gathering enemy baseHealth
@@ -495,7 +495,7 @@ int GatherEnemiesData(GameDataS *gameData)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        gameData->enemiesList[i].baseHealth = aux3->valueint;
+        gameData->enemiesTemplateList[i].baseHealth = aux3->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy baseHealth");
         
         // gathering enemy image
@@ -506,8 +506,8 @@ int GatherEnemiesData(GameDataS *gameData)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        gameData->enemiesList[i].enemyImage = LoadImage(aux3->valuestring);
-        gameData->enemiesList[i].isTexture = false;
+        gameData->enemiesTemplateList[i].enemyImage = LoadImage(aux3->valuestring);
+        gameData->enemiesTemplateList[i].isTexture = false;
         TraceLog(LOG_DEBUG, "Loaded enemyImage");
 
         // fetching enemy weapon data
@@ -528,7 +528,7 @@ int GatherEnemiesData(GameDataS *gameData)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        gameData->enemiesList[i].weapon.damage = aux4->valueint;
+        gameData->enemiesTemplateList[i].weapon.damage = aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/damage");
 
         // gathering enemy weapon shotsDeelay
@@ -540,7 +540,7 @@ int GatherEnemiesData(GameDataS *gameData)
             goto cleanup;
         }
 
-        gameData->enemiesList[i].weapon.shotsDeelay = aux4->valueint;
+        gameData->enemiesTemplateList[i].weapon.shotsDeelay = aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/shotsDeelay");
         
         // gathering enemy weapon projectileSize
@@ -552,7 +552,7 @@ int GatherEnemiesData(GameDataS *gameData)
             goto cleanup;
         }
 
-        gameData->enemiesList[i].weapon.projectileSize = aux4->valueint;
+        gameData->enemiesTemplateList[i].weapon.projectileSize = aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/projectileSize");
 
         // gathering enemy weapon projectileSpeed
@@ -564,7 +564,7 @@ int GatherEnemiesData(GameDataS *gameData)
             goto cleanup;
         }
 
-        gameData->enemiesList[i].weapon.projectileSpeed = aux4->valueint;
+        gameData->enemiesTemplateList[i].weapon.projectileSpeed = aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/projectileSpeed");
 
         // gathering enemy projectileImage
@@ -576,8 +576,8 @@ int GatherEnemiesData(GameDataS *gameData)
             goto cleanup;
         }
 
-        gameData->enemiesList[i].weapon.projectileImage = LoadImage(aux4->valuestring);
-        gameData->enemiesList[i].weapon.isTexture = false;
+        gameData->enemiesTemplateList[i].weapon.projectileImage = LoadImage(aux4->valuestring);
+        gameData->enemiesTemplateList[i].weapon.isTexture = false;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/projectileImage\n");
 
         i++;

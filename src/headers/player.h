@@ -8,7 +8,7 @@
 #include "raylib.h"
 #include "global_types.h"
 
-void PlayerShooting(PlayerS *player, WeaponS weaponsList[], ProjectileLL *projectileHead, Vector2 *mousePosition);
+void PlayerShooting(PlayerS *player, WeaponS weaponsList[], std::list<ProjectileL> &projectileList, Vector2 *mousePosition);
 void UpdatePlayer(PlayerS *player, int level[MAPY][MAPX], uint currentFrame);
 
 #endif

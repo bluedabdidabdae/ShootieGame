@@ -18,16 +18,6 @@
 #define ENEMYMINPDISTANCE 250
 #define HEALTHBAROFFSETY -10
 
-// local functions
-void EnemyPop(EnemyLL *prePop, EnemyLL **toPop);
-
-void EnemyPop(EnemyLL *prePop, EnemyLL **toPop)
-{
-    prePop->next = (*toPop)->next;
-    free(*toPop);
-    *toPop = prePop;
-}
-
 int SpawnEnemies(GameDataS *gameData, int number, EnemyType enemyType)
 {
     int i;
@@ -35,138 +25,117 @@ int SpawnEnemies(GameDataS *gameData, int number, EnemyType enemyType)
 
     for(i = 0; i < number; i++)
     {
-        ret = SpawnEnemy(gameData, enemyType);
+        ret = SpawnEnemy(*gameData, enemyType);
         if(ret) return ret;
     }
     return ret;
 }
 
-int SpawnEnemy(GameDataS *gameData, float x, float y, EnemyType enemyType)
+int SpawnEnemy(GameDataS &gameData, float x, float y, EnemyType enemyType)
 {
-    EnemyLL *aux1;
-    EnemyLL *aux2;
+    EnemyL tmpEnemy;
 
-    aux1 = (EnemyLL*)malloc(sizeof(EnemyLL));
-    // if memory is allocated correctly
-    if(aux1)
-    {
-        aux1->enemyType = enemyType;
-        aux1->enemy = {
-            x,
-            y,
-            gameData->enemiesList[enemyType].enemy.x,
-            gameData->enemiesList[enemyType].enemy.y
-        };
-        aux1->behaviour = BACKING;
-        aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;
-        aux1->healthBar = { x, y+HEALTHBAROFFSETY, (float)aux1->hitPoint, 5 };
-        aux2 = gameData->enemiesHead->next;
-        gameData->enemiesHead->next = aux1;
-        gameData->enemiesHead->next->next = aux2;
-        return 0;
-    }
-    return -1;
+    tmpEnemy.enemy = {
+        x,
+        y,
+        gameData.enemiesTemplateList[enemyType].enemy.x,
+        gameData.enemiesTemplateList[enemyType].enemy.y
+    };
+    tmpEnemy.enemyType = enemyType;
+    tmpEnemy.behaviour = BACKING;
+    tmpEnemy.hitPoint = gameData.enemiesTemplateList[enemyType].baseHealth;
+    tmpEnemy.healthBar = { x, y+HEALTHBAROFFSETY, (float)tmpEnemy.hitPoint, 5 };
+    
+    gameData.enemiesList->push_front(tmpEnemy);
+
+    return 0;
 }
 
-int SpawnEnemy(GameDataS *gameData, EnemyType enemyType)
+int SpawnEnemy(GameDataS &gameData, EnemyType enemyType)
 {
-    EnemyLL *aux1;
-    EnemyLL *aux2;
     float x, y;
 
+    EnemyL tmpEnemy;
 
-    aux1 = (EnemyLL*)malloc(sizeof(EnemyLL));
-    // if memory is allocated correctly
-    if(aux1)
-    {
-        aux1->enemyType = enemyType;
-        do{
-            x = rand()%(WALLTHICKNESS*MAPX)-WALLTHICKNESS+WALLTHICKNESS;
-            y = rand()%(WALLTHICKNESS*MAPY)-WALLTHICKNESS+WALLTHICKNESS;
-            aux1->enemy = {
-                x,
-                y,
-                gameData->enemiesList[enemyType].enemy.x,
-                gameData->enemiesList[enemyType].enemy.y
-            };
-        }while(CheckHitboxMap(gameData->level->bitmap, aux1->enemy));
+    do{
+        x = rand()%(WALLTHICKNESS*MAPX)-WALLTHICKNESS+WALLTHICKNESS;
+        y = rand()%(WALLTHICKNESS*MAPY)-WALLTHICKNESS+WALLTHICKNESS;
+        tmpEnemy.enemy = {
+            x,
+            y,
+            gameData.enemiesTemplateList[enemyType].enemy.x,
+            gameData.enemiesTemplateList[enemyType].enemy.y
+        };
+    }while(CheckHitboxMap(gameData.level->bitmap, tmpEnemy.enemy));
 
-        aux1->behaviour = BACKING;
-        aux1->hitPoint = gameData->enemiesList[enemyType].baseHealth;
-        aux1->healthBar = { x, y+HEALTHBAROFFSETY, (float)aux1->hitPoint, 5 };
-        aux2 = gameData->enemiesHead->next;
-        gameData->enemiesHead->next = aux1;
-        gameData->enemiesHead->next->next = aux2;
-        return 0;
-    }
-    return -1;
+    tmpEnemy.enemyType = enemyType;
+    tmpEnemy.behaviour = BACKING;
+    tmpEnemy.hitPoint = gameData.enemiesTemplateList[enemyType].baseHealth;
+    tmpEnemy.healthBar = { x, y+HEALTHBAROFFSETY, (float)tmpEnemy.hitPoint, 5 };
+    
+    gameData.enemiesList->push_front(tmpEnemy);
+
+    return 0;
 }
 
-void EnemiesShooting(EnemyLL *enemiesHead, ProjectileLL *projectileHead, EnemiesS enemiesList[], Rectangle *player)
+void EnemiesShooting(std::list<EnemyL> &enemiesList, std::list<ProjectileL> &projectileList, EnemiesS enemiesTemplateList[], Rectangle *player)
 {
     float Dx, Dy, tmp;
-    ProjectileLL *aux1;
-    ProjectileLL *aux2;
-    EnemyLL *currentEnemy = enemiesHead;
+    ProjectileL tmpProjectile;
 
-    while(currentEnemy->next != NULL)
+    std::list<EnemyL>::iterator currentEnemy = enemiesList.begin();
+    while(enemiesList.end() != currentEnemy)
     {
-        currentEnemy = currentEnemy->next;
         // tiro a caso se il nemico spara o no
-        if(rand()%1000 < enemiesList[currentEnemy->enemyType].weapon.shotsDeelay)
+        if(rand()%1000 < enemiesTemplateList[currentEnemy->enemyType].weapon.shotsDeelay)
         {
-            aux1 = (ProjectileLL*)malloc(sizeof(ProjectileLL));
-            if(aux1)
-            {
-                aux1->projectile = 
-                {   currentEnemy->enemy.x,
-                    currentEnemy->enemy.y,
-                    enemiesList[currentEnemy->enemyType].weapon.projectileSize,
-                    enemiesList[currentEnemy->enemyType].weapon.projectileSize
-                };
-                
-                aux1->damage = enemiesList[currentEnemy->enemyType].weapon.damage;
+            tmpProjectile = 
+            {   currentEnemy->enemy.x,
+                currentEnemy->enemy.y,
+                enemiesTemplateList[currentEnemy->enemyType].weapon.projectileSize,
+                enemiesTemplateList[currentEnemy->enemyType].weapon.projectileSize
+            };
+            
+            tmpProjectile.damage = enemiesTemplateList[currentEnemy->enemyType].weapon.damage;
 
-                aux1->texture = &enemiesList[currentEnemy->enemyType].weapon.projectileTexture;
+            tmpProjectile.texture = &enemiesTemplateList[currentEnemy->enemyType].weapon.projectileTexture;
 
-                Dx = aux1->projectile.x - player->x;
-                Dy = aux1->projectile.y - player->y;
+            Dx = tmpProjectile.projectile.x - player->x;
+            Dy = tmpProjectile.projectile.y - player->y;
 
-                tmp = abs(Dx) + abs(Dy);
+            tmp = abs(Dx) + abs(Dy);
 
-                aux1->vX = enemiesList[currentEnemy->enemyType].weapon.projectileSpeed * (Dx / tmp);
-                aux1->vY = enemiesList[currentEnemy->enemyType].weapon.projectileSpeed * (Dy / tmp);
+            tmpProjectile.vX = enemiesTemplateList[currentEnemy->enemyType].weapon.projectileSpeed * (Dx / tmp);
+            tmpProjectile.vY = enemiesTemplateList[currentEnemy->enemyType].weapon.projectileSpeed * (Dy / tmp);
 
-                aux1->owner = ENEMY;
+            tmpProjectile.owner = ENEMY;
 
-                aux2 = projectileHead->next;
-                projectileHead->next = aux1;
-                projectileHead->next->next = aux2;
-            }   
+            projectileList.push_front(tmpProjectile);
+            
         }
+        currentEnemy++;
     }
 }
 
-void UpdateEnemies(EnemyLL *enemiesHead, Rectangle *player, int level[MAPY][MAPX])
+void UpdateEnemies(std::list<EnemyL> &enemiesList, Rectangle *player, int level[MAPY][MAPX])
 {
     float Dx, Dy, tmp;
-    EnemyLL *previousEnemy;
-    EnemyLL *currentEnemy = enemiesHead;
 
-    while(currentEnemy->next){
-
-        previousEnemy = currentEnemy;
-        currentEnemy = currentEnemy->next;
+    std::list<EnemyL>::iterator currentEnemy = enemiesList.begin();
+    while(enemiesList.end() != currentEnemy){
 
         if(0 >= currentEnemy->hitPoint)
         {
-            EnemyPop(previousEnemy, &currentEnemy);
+            currentEnemy = enemiesList.erase(currentEnemy);
             continue;
         }
         if(STILL == currentEnemy->behaviour)
         {
             if(rand()%1000 < 970)
+            {
+                currentEnemy++;
                 continue;
+            }
             else
                 currentEnemy->behaviour = BACKING;
         }
@@ -211,17 +180,7 @@ void UpdateEnemies(EnemyLL *enemiesHead, Rectangle *player, int level[MAPY][MAPX
 
         currentEnemy->healthBar.x = currentEnemy->enemy.x;
         currentEnemy->healthBar.y = currentEnemy->enemy.y+HEALTHBAROFFSETY;
-    }
-}
 
-void CompletelyDeleteAllEnemies(EnemyLL *head)
-{
-    EnemyLL *tmp;
-    while(head->next != NULL)
-    {
-        tmp = head;
-        head = head->next;
-        free(tmp);
+        currentEnemy++;
     }
-    free(head);
 }

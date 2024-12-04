@@ -11,41 +11,34 @@
 #include "headers/player.h"
 #include "headers/utility.h"
 
-void PlayerShooting(PlayerS *player, WeaponS weaponsList[], ProjectileLL *projectileHead, Vector2 *mousePosition)
+void PlayerShooting(PlayerS *player, WeaponS weaponsList[], std::list<ProjectileL> &projectileList, Vector2 *mousePosition)
 {
     float dX, dY, tmp;
-    ProjectileLL *aux1;
-    ProjectileLL *aux2;
-
-    aux1 = (ProjectileLL*)malloc(sizeof(ProjectileLL));
-    if(aux1)
+    ProjectileL tmpProjectile;
+    
+    tmpProjectile.projectile =
     {
-        aux1->projectile =
-        {
-            player->player.x,
-            player->player.y,
-            weaponsList[player->activeWeaponId].projectileSize,
-            weaponsList[player->activeWeaponId].projectileSize
-        };
-        
-        aux1->damage = weaponsList[player->activeWeaponId].damage;
+        player->player.x,
+        player->player.y,
+        weaponsList[player->activeWeaponId].projectileSize,
+        weaponsList[player->activeWeaponId].projectileSize
+    };
+    
+    tmpProjectile.damage = weaponsList[player->activeWeaponId].damage;
 
-        aux1->texture = &weaponsList[player->activeWeaponId].projectileTexture;
+    tmpProjectile.texture = &weaponsList[player->activeWeaponId].projectileTexture;
 
-        dX = aux1->projectile.x - mousePosition->x;
-        dY = aux1->projectile.y - mousePosition->y;
+    dX = tmpProjectile.projectile.x - mousePosition->x;
+    dY = tmpProjectile.projectile.y - mousePosition->y;
 
-        tmp = abs(dX) + abs(dY);
+    tmp = abs(dX) + abs(dY);
 
-        aux1->vX = weaponsList[player->activeWeaponId].projectileSpeed * (dX / tmp);
-        aux1->vY = weaponsList[player->activeWeaponId].projectileSpeed * (dY / tmp);
-        
-        aux1->owner = PLAYER;
+    tmpProjectile.vX = weaponsList[player->activeWeaponId].projectileSpeed * (dX / tmp);
+    tmpProjectile.vY = weaponsList[player->activeWeaponId].projectileSpeed * (dY / tmp);
+    
+    tmpProjectile.owner = PLAYER;
 
-        aux2 = projectileHead->next;
-        projectileHead->next = aux1;
-        projectileHead->next->next = aux2;
-    }
+    projectileList.push_front(tmpProjectile);
 }
 
 void UpdatePlayer(PlayerS *player, int level[MAPY][MAPX], uint currentFrame)

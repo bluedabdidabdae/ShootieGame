@@ -3,6 +3,8 @@
 #ifndef GLOBAL_TYPES_H
 #define GLOBAL_TYPES_H
 
+#include <list>
+
 #include "raylib.h"
 
 #define WIDTH 1335
@@ -70,7 +72,7 @@ typedef struct Enemy_Linked_List{
     Rectangle healthBar;
     int hitPoint;
     Enemy_Linked_List *next;
-}EnemyLL;
+}EnemyL;
 //////////////////////////////////////////////////////////
 typedef enum projectile_owner_model{
     ENEMY,
@@ -84,8 +86,7 @@ typedef struct Projectile_linked_List{
     float vY;
     int damage;
     ProjectileOwner owner;
-    Projectile_linked_List *next;
-}ProjectileLL;
+}ProjectileL;
 //////////////////////////////////////////////////////////
 typedef struct player_model{
     Rectangle player;
@@ -155,10 +156,10 @@ typedef struct game_data_model{
     Vector2 *mousePosition;
     Camera2D *camera;
     PlayerS *player;
-    EnemyLL *enemiesHead;
-    ProjectileLL *projectileHead;
+    std::list<EnemyL> *enemiesList;
+    std::list<ProjectileL> *projectileList;
     WeaponS *weaponsList;
-    EnemiesS *enemiesList;
+    EnemiesS *enemiesTemplateList;
     Texture2D *mapTextures;
     LevelS *level;
     uint score;

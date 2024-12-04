@@ -2,7 +2,8 @@
 // full notice in main.cpp
 #include <math.h>
 #include <stdlib.h>
-#include <stdbool.h>
+#include <iterator>
+#include <list>
 
 #include "raylib.h"
 #include "headers/global_types.h"
@@ -10,86 +11,51 @@
 #include "headers/projectiles.h"
 #include "headers/utility.h"
 
-// local functions
-void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop);
-
-void CheckProjEntityDamage(GameDataS *gameData)
+void CheckProjEntityDamage(GameDataS &gameData)
 {
-    ProjectileLL *currentProjectile = gameData->projectileHead;
-    ProjectileLL *previousProjectile;
-    EnemyLL *currentEnemy;
-
-    while(currentProjectile->next)
+    std::list<ProjectileL>::iterator currentProjectile = gameData.projectileList->begin();
+    while(gameData.projectileList->end() != currentProjectile)
     {
-        previousProjectile = currentProjectile;
-        currentProjectile = currentProjectile->next;
-
         switch(currentProjectile->owner)
         {
             case ENEMY:
-                if(gameData->player->flags.isInvulnerable)
-                    continue;
-                if(CheckHitboxRec(currentProjectile->projectile, gameData->player->player))
+                if(!gameData.player->flags.isInvulnerable && CheckHitboxRec(currentProjectile->projectile, gameData.player->player))
                 {
-                    gameData->player->lives -= currentProjectile->damage;
-                    ProjectilePop(previousProjectile, &currentProjectile);
+                    gameData.player->lives -= currentProjectile->damage;
+                    currentProjectile = gameData.projectileList->erase(currentProjectile);
+                    currentProjectile--;
                 }
             break;
             case PLAYER:
-                currentEnemy = gameData->enemiesHead;
-                while(currentEnemy->next)
+                std::list<EnemyL>::iterator currentEnemy = gameData.enemiesList->begin();
+                while(gameData.enemiesList->end() != currentEnemy)
                 {
-                    currentEnemy = currentEnemy->next;
                     if(CheckHitboxRec(currentProjectile->projectile, currentEnemy->enemy))
                     {
                         currentEnemy->hitPoint -= currentProjectile->damage;
-                        ProjectilePop(previousProjectile, &currentProjectile);
+                        currentProjectile = gameData.projectileList->erase(currentProjectile);
+                        currentProjectile--;
                         break;
                         // this break IS NECESSARY
                     }
+                    currentEnemy++;
                 }
             break;
         }
+        currentProjectile++;
     }
 }
 
-void UpdateProjectiles(ProjectileLL *projectileHead, int level[MAPY][MAPX])
+void UpdateProjectiles(std::list<ProjectileL> &projectileList, int level[MAPY][MAPX])
 {
-    ProjectileLL *currentProjectile = projectileHead;
-    ProjectileLL *previousProjectile;
-
-    while(currentProjectile->next){
-        // passo al prossimo proiettile
-        previousProjectile = currentProjectile;
-        currentProjectile = currentProjectile->next;
-
+    std::list<ProjectileL>::iterator currentProjectile = projectileList.begin();
+    while(currentProjectile != projectileList.end())
+    {
         currentProjectile->projectile.x -= currentProjectile->vX;
         currentProjectile->projectile.y -= currentProjectile->vY;
-
-        // if it collides with the map i explode it
         if(CheckHitboxMap(level, currentProjectile->projectile))
-        {
-            ProjectilePop(previousProjectile, &currentProjectile);
-            
-        }
+            currentProjectile = projectileList.erase(currentProjectile);
+        else
+            currentProjectile++;
     }
-}
-
-void ProjectilePop(ProjectileLL *prePop, ProjectileLL **toPop)
-{
-    prePop->next = (*toPop)->next;
-    free(*toPop);
-    *toPop = prePop;
-}
-
-void CompletelyDeleteAllProjectiles(ProjectileLL *head)
-{
-    ProjectileLL *tmp;
-    while(head->next != NULL)
-    {
-        tmp = head;
-        head = head->next;
-        free(tmp);
-    }
-    free(head);
 }
