@@ -3,6 +3,6 @@
 #ifndef GRAPHIC_H
 #define GRAPHIC_H
 
-void *HandleGraphics(void* data);
+void *HandleGraphics(void *data);
 
 #endif

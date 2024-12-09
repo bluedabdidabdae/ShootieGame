@@ -10,6 +10,6 @@ typedef enum settings_status{
     SETTINGS_NONE
 }SettingsStatus;
 
-SettingsStatus SettingsHandler(ToDraw *toDraw, SettingsFlags *settingsFlags);
+SettingsStatus SettingsHandler(ToDraw &toDraw, SettingsFlags &settingsFlags);
 
 #endif

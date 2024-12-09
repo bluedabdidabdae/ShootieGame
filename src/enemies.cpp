@@ -18,7 +18,7 @@
 #define ENEMYMINPDISTANCE 250
 #define HEALTHBAROFFSETY -10
 
-int SpawnEnemies(int number, EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, int level[MAPY][MAPX])
+int SpawnEnemies(int number, EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, LevelS &level)
 {
     int i;
     int ret = 0;
@@ -44,7 +44,7 @@ int SpawnEnemiesPos(int number, EnemyType enemyType, float x, float y, std::list
     return ret;
 }
 
-int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, int level[MAPY][MAPX])
+int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, LevelS &level)
 {
     float x, y;
 
@@ -59,7 +59,7 @@ int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *en
             enemiesTemplateList[enemyType].enemy.x,
             enemiesTemplateList[enemyType].enemy.y
         };
-    }while(CheckHitboxMap(level, tmpEnemy.enemy));
+    }while(CheckHitboxMap(tmpEnemy.enemy, level.bitmap, level.sizeX, level.sizeY));
 
     tmpEnemy.enemyType = enemyType;
     tmpEnemy.behaviour = BACKING;
@@ -91,109 +91,109 @@ int SpawnEnemyPos(EnemyType enemyType, float x, float y, std::list<EnemyL> &enem
     return 0;
 }
 
-void EnemiesShooting(std::list<EnemyL> &enemiesList, std::list<ProjectileL> &projectileList, EnemiesS enemiesTemplateList[], Rectangle *player)
+void EnemiesShooting(std::list<EnemyL> &enemiesList, std::list<ProjectileL> &projectileList, EnemiesS enemiesTemplateList[], Rectangle &player)
 {
     float Dx, Dy, tmp;
     ProjectileL tmpProjectile;
 
-    std::list<EnemyL>::iterator currentEnemy = enemiesList.begin();
-    while(enemiesList.end() != currentEnemy)
+    std::list<EnemyL>::iterator enemyIter = enemiesList.begin();
+    while(enemiesList.end() != enemyIter)
     {
         // tiro a caso se il nemico spara o no
-        if(rand()%1000 < enemiesTemplateList[currentEnemy->enemyType].weapon.shotsDeelay)
+        if(rand()%1000 < enemiesTemplateList[enemyIter->enemyType].weapon.shotsDeelay)
         {
             tmpProjectile = 
-            {   currentEnemy->enemy.x,
-                currentEnemy->enemy.y,
-                enemiesTemplateList[currentEnemy->enemyType].weapon.projectileSize,
-                enemiesTemplateList[currentEnemy->enemyType].weapon.projectileSize
+            {   enemyIter->enemy.x,
+                enemyIter->enemy.y,
+                enemiesTemplateList[enemyIter->enemyType].weapon.projectileSize,
+                enemiesTemplateList[enemyIter->enemyType].weapon.projectileSize
             };
             
-            tmpProjectile.damage = enemiesTemplateList[currentEnemy->enemyType].weapon.damage;
+            tmpProjectile.damage = enemiesTemplateList[enemyIter->enemyType].weapon.damage;
 
-            tmpProjectile.texture = &enemiesTemplateList[currentEnemy->enemyType].weapon.projectileTexture;
+            tmpProjectile.texture = &enemiesTemplateList[enemyIter->enemyType].weapon.projectileTexture;
 
-            Dx = tmpProjectile.projectile.x - player->x;
-            Dy = tmpProjectile.projectile.y - player->y;
+            Dx = tmpProjectile.projectile.x - player.x;
+            Dy = tmpProjectile.projectile.y - player.y;
 
             tmp = abs(Dx) + abs(Dy);
 
-            tmpProjectile.vX = enemiesTemplateList[currentEnemy->enemyType].weapon.projectileSpeed * (Dx / tmp);
-            tmpProjectile.vY = enemiesTemplateList[currentEnemy->enemyType].weapon.projectileSpeed * (Dy / tmp);
+            tmpProjectile.vX = enemiesTemplateList[enemyIter->enemyType].weapon.projectileSpeed * (Dx / tmp);
+            tmpProjectile.vY = enemiesTemplateList[enemyIter->enemyType].weapon.projectileSpeed * (Dy / tmp);
 
             tmpProjectile.owner = ENEMY;
 
             projectileList.push_front(tmpProjectile);
             
         }
-        currentEnemy++;
+        enemyIter++;
     }
 }
 
-void UpdateEnemies(std::list<EnemyL> &enemiesList, Rectangle *player, int level[MAPY][MAPX])
+void UpdateEnemies(std::list<EnemyL> &enemiesList, Rectangle &player, LevelS &level)
 {
     float Dx, Dy, tmp;
 
-    std::list<EnemyL>::iterator currentEnemy = enemiesList.begin();
-    while(enemiesList.end() != currentEnemy){
+    std::list<EnemyL>::iterator enemyIter = enemiesList.begin();
+    while(enemiesList.end() != enemyIter){
 
-        if(0 >= currentEnemy->hitPoint)
+        if(0 >= enemyIter->hitPoint)
         {
-            currentEnemy = enemiesList.erase(currentEnemy);
+            enemyIter = enemiesList.erase(enemyIter);
             continue;
         }
-        if(STILL == currentEnemy->behaviour)
+        if(STILL == enemyIter->behaviour)
         {
             if(rand()%1000 < 970)
             {
-                currentEnemy++;
+                enemyIter++;
                 continue;
             }
             else
-                currentEnemy->behaviour = BACKING;
+                enemyIter->behaviour = BACKING;
         }
         else if(rand()%1000 < 5)
         {
-            currentEnemy->behaviour = STILL;
+            enemyIter->behaviour = STILL;
             continue;
         }
         
-        Dx = currentEnemy->enemy.x - player->x;
-        Dy = currentEnemy->enemy.y - player->y;
+        Dx = enemyIter->enemy.x - player.x;
+        Dy = enemyIter->enemy.y - player.y;
         
         tmp = abs(Dx) + abs(Dy);
         
         if(abs(Dx)+abs(Dy) > ENEMYMAXPDISTANCE)
-            currentEnemy->behaviour = APPROACHING;
+            enemyIter->behaviour = APPROACHING;
         else if(abs(Dx)+abs(Dy) < ENEMYMINPDISTANCE)
-            currentEnemy->behaviour = BACKING;
+            enemyIter->behaviour = BACKING;
 
         Dx = ENEMYSPEED * (Dx / tmp);
         Dy = ENEMYSPEED * (Dy / tmp);
 
-        switch(currentEnemy->behaviour)
+        switch(enemyIter->behaviour)
         {
             case BACKING:
-                currentEnemy->enemy.x += Dx;
-                if (CheckHitboxMap(level, currentEnemy->enemy))
-                    currentEnemy->enemy.x -= Dx;
-                currentEnemy->enemy.y += Dy;
-                if (CheckHitboxMap(level, currentEnemy->enemy))
-                    currentEnemy->enemy.y -= Dy;
+                enemyIter->enemy.x += Dx;
+                if (CheckHitboxMap(enemyIter->enemy, level.bitmap, level.sizeX, level.sizeY))
+                    enemyIter->enemy.x -= Dx;
+                enemyIter->enemy.y += Dy;
+                if (CheckHitboxMap(enemyIter->enemy, level.bitmap, level.sizeX, level.sizeY))
+                    enemyIter->enemy.y -= Dy;
             break;
             case APPROACHING:
-                currentEnemy->enemy.x -= Dx;
-                if (CheckHitboxMap(level, currentEnemy->enemy))
-                    currentEnemy->enemy.x += Dx;
-                currentEnemy->enemy.y -= Dy;
-                if (CheckHitboxMap(level, currentEnemy->enemy))
-                    currentEnemy->enemy.y += Dy;
+                enemyIter->enemy.x -= Dx;
+                if (CheckHitboxMap(enemyIter->enemy, level.bitmap, level.sizeX, level.sizeY))
+                    enemyIter->enemy.x += Dx;
+                enemyIter->enemy.y -= Dy;
+                if (CheckHitboxMap(enemyIter->enemy, level.bitmap, level.sizeX, level.sizeY))
+                    enemyIter->enemy.y += Dy;
             break;
         }
 
-        currentEnemy->healthBar.x = currentEnemy->enemy.x;
-        currentEnemy->healthBar.y = currentEnemy->enemy.y+HEALTHBAROFFSETY;
+        enemyIter->healthBar.x = enemyIter->enemy.x;
+        enemyIter->healthBar.y = enemyIter->enemy.y+HEALTHBAROFFSETY;
 
-        currentEnemy++;
+        enemyIter++;
     }
 }

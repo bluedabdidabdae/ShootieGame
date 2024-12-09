@@ -30,12 +30,11 @@ extern pthread_mutex_t frameCounterLock;
 extern pthread_mutex_t mapLock;
 extern pthread_mutex_t weaponDataLock;
 
-void UpdateCameraMousePosition(GameDataS *gameData);
-void CloseGame(GameDataS *gameData);
-int InitGameData(GameDataS *gameData);
-void SpawnWave(WaveLL *wave);
+void UpdateCameraMousePosition(Camera2D &camera, Vector2 &mousePosition, PlayerS &player);
+void CloseGame(GameDataS &ameData);
+int InitGameData(GameDataS &gameData);
 
-int GameHandler(GameDataS *gameData)
+int GameHandler(AppDataS &appData)
 {
     int err;
 
@@ -43,42 +42,46 @@ int GameHandler(GameDataS *gameData)
 
     GameStates gameStatus;
 
+    appData.gameData = (GameDataS*)malloc(sizeof(GameDataS));
+    GameDataS &gameMemory = *appData.gameData;
+
     // loading weapon, player
     // and enemies models from file
-    err = GatherData(gameData);
+    err = GatherData(gameMemory);
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error gathering game data - ABORTING");
-        CloseGame(gameData);
+        CloseGame(gameMemory);
         return err;
     }
 
     // loading level bitmap and waves from files
-    err = LoadLevel(&(gameData->level), 0);
+    err = LoadLevel(gameMemory.level, 0);
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error loading map - ABORTING");
-        CloseGame(gameData);
+        CloseGame(gameMemory);
         return err;
     }
 
     // initializing the rest of the data
-    err = InitGameData(gameData);
+    err = InitGameData(gameMemory);
     if(err != 0)
     {
         TraceLog(LOG_ERROR, "Error allocating game memory - ABORTING");
-        CloseGame(gameData);
+        CloseGame(gameMemory);
         return err;
     }
 
     pthread_mutex_lock(&gameUpdateLock);
-    *gameData->toDraw = DRAW_LOAD_TEXTURES;
+    appData.toDraw = DRAW_LOAD_TEXTURES;
 
-    SpawnEnemies(5, MINION, gameData->enemiesList, gameData->enemiesTemplateList, gameData->level->bitmap);
-    SpawnEnemies(5, SNIPER, gameData->enemiesList, gameData->enemiesTemplateList, gameData->level->bitmap);
+    //SpawnEnemies(5, MINION, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level);
+    //SpawnEnemies(5, SNIPER, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level);
+    //TraceLog(LOG_DEBUG, "Spawned test enemies");
 
     pthread_mutex_lock(&gameUpdateLock);
-    *gameData->toDraw = DRAWGAME;
+    appData.toDraw = DRAWGAME;
     gameStatus = GAME_PLAY;
 
     while(GAME_EXIT != gameStatus)
@@ -88,20 +91,20 @@ int GameHandler(GameDataS *gameData)
         // handling the menu while inside the game
         if(IsKeyPressed(KEY_M))
         {
-            switch(SettingsHandler(gameData->toDraw, &gameData->settingsFlags))
+            switch(SettingsHandler(appData.toDraw, appData.settingsFlags))
             {
                 case SETTINGS_QUIT:
                     gameStatus = GAME_EXIT;
                 break;
                 case SETTINGS_BACK:
-                    *gameData->toDraw = DRAWGAME;
+                    appData.toDraw = DRAWGAME;
                 break;
             }
             continue;
         }
 
         // if the player is dead quit the game
-        if(gameData->player->lives <= 0)
+        if(gameMemory.player.lives <= 0)
         {
             gameStatus = GAME_EXIT;
             continue;
@@ -114,17 +117,17 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&frameCounterLock);
 
         TraceLog(LOG_DEBUG, "Updating player");
-        UpdatePlayer(gameData->player, gameData->level->bitmap, gameData->frameCounter);
+        UpdatePlayer(gameMemory.player, gameMemory.level, gameMemory.frameCounter);
 
         TraceLog(LOG_DEBUG, "Updating camera and mouse");
-        UpdateCameraMousePosition(gameData);
+        UpdateCameraMousePosition(gameMemory.camera, gameMemory.mousePosition, gameMemory.player);
         pthread_mutex_unlock(&cameraLock);
         pthread_mutex_unlock(&playerLock);
         pthread_mutex_unlock(&frameCounterLock);
 
         pthread_mutex_lock(&enemiesListLock);
         TraceLog(LOG_DEBUG, "Updating enemies");
-        UpdateEnemies(gameData->enemiesList, &gameData->player->player, gameData->level->bitmap);
+        UpdateEnemies(gameMemory.enemiesList, gameMemory.player.player, gameMemory.level);
         pthread_mutex_unlock(&mapLock);
         pthread_mutex_unlock(&enemiesListLock);
 
@@ -133,14 +136,14 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&weaponDataLock);
         
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)
-            && gameData->frameCounter >=
-            lastFrameId + gameData->weaponsList[gameData->player->activeWeaponId].shotsDeelay)
+            && gameMemory.frameCounter >=
+            lastFrameId + gameMemory.weaponsList[gameMemory.player.activeWeaponId].shotsDeelay)
         {
-            lastFrameId = gameData->frameCounter;
+            lastFrameId = gameMemory.frameCounter;
             TraceLog(LOG_DEBUG, "Player shoots");
             pthread_mutex_lock(&projectileListLock);
-            if(!gameData->player->flags.isStunned)
-                PlayerShooting(gameData->player, gameData->weaponsList, gameData->projectileList, gameData->mousePosition);
+            if(!gameMemory.player.flags.isStunned)
+                PlayerShooting(gameMemory.player, gameMemory.weaponsList, gameMemory.projectileList, gameMemory.mousePosition);
             pthread_mutex_unlock(&projectileListLock);
         }
         pthread_mutex_unlock(&frameCounterLock);
@@ -149,10 +152,10 @@ int GameHandler(GameDataS *gameData)
         
         TraceLog(LOG_DEBUG, "Enemies shooting");
         EnemiesShooting(
-            gameData->enemiesList,
-            gameData->projectileList,
-            gameData->enemiesTemplateList,
-            &gameData->player->player);
+            gameMemory.enemiesList,
+            gameMemory.projectileList,
+            gameMemory.enemiesTemplateList,
+            gameMemory.player.player);
 
         pthread_mutex_unlock(&projectileListLock);
         pthread_mutex_unlock(&playerLock);
@@ -162,7 +165,7 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&projectileListLock);
 
         TraceLog(LOG_DEBUG, "Updating projectiles");
-        UpdateProjectiles(gameData->projectileList, gameData->level->bitmap);
+        UpdateProjectiles(gameMemory.projectileList, gameMemory.level);
 
         pthread_mutex_unlock(&mapLock);
 
@@ -170,110 +173,86 @@ int GameHandler(GameDataS *gameData)
         pthread_mutex_lock(&playerLock);
 
         TraceLog(LOG_DEBUG, "Checking projectiles damage");
-        CheckProjEntityDamage(*gameData);
+        CheckProjEntityDamage(gameMemory.projectileList, gameMemory.enemiesList, gameMemory.player);
 
         pthread_mutex_unlock(&projectileListLock);
         pthread_mutex_unlock(&enemiesListLock);
         pthread_mutex_unlock(&playerLock);
     }
 
-    *gameData->toDraw = DRAW_UNLOAD_TEXTURES;
+    appData.toDraw = DRAW_UNLOAD_TEXTURES;
     pthread_mutex_lock(&gameUpdateLock);
-    CloseGame(gameData);
+    CloseGame(gameMemory);
     return 0;
 }
 
-int InitGameData(GameDataS *gameData)
+int InitGameData(GameDataS &gameMemory)
 {
-    gameData->score = 104;
+    gameMemory.score = 104;
 
     // Init player position and flags (other par inited from json file)
-    gameData->player->player.x = 170;
-    gameData->player->player.y = 170;
-    gameData->player->flags.isDodging = false;
-    gameData->player->flags.isWalking = false;
-    gameData->player->flags.canDodge = true;
-    gameData->player->flags.isInvulnerable = false;
-    gameData->player->flags.isStunned = false;
+    gameMemory.player.player.x = 170;
+    gameMemory.player.player.y = 170;
+    gameMemory.player.flags.isDodging = false;
+    gameMemory.player.flags.isWalking = false;
+    gameMemory.player.flags.canDodge = true;
+    gameMemory.player.flags.isInvulnerable = false;
+    gameMemory.player.flags.isStunned = false;
 
     // Setting up camera to 2d mode and centering it to the player
-    gameData->camera = (Camera2D*)malloc(sizeof(Camera2D));
-    if(gameData->camera == NULL) return MALLOC_ERROR;
-    TraceLog(LOG_DEBUG, "Allocated camera memory");
-    *gameData->camera = { 0 };
-    gameData->camera->target = (Vector2){ gameData->player->player.x + gameData->player->player.width,
-                                            gameData->player->player.y + gameData->player->player.height };
-    gameData->camera->offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
-    gameData->camera->zoom = 1.7f;
+    TraceLog(LOG_DEBUG, "Initializing camera");
+    gameMemory.camera = { 0 };
+    TraceLog(LOG_DEBUG, "Camera initialized to 0");
+    gameMemory.camera.target = (Vector2){ gameMemory.player.player.x + gameMemory.player.player.width,
+                                          gameMemory.player.player.y + gameMemory.player.player.height };
+    TraceLog(LOG_DEBUG, "Camera initial target defined");
+    gameMemory.camera.offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
+    TraceLog(LOG_DEBUG, "Camera offset defined");
+    gameMemory.camera.zoom = 1.7f;
+    TraceLog(LOG_DEBUG, "Camera zoom defined");
 
     return 0;
 }
 
-void UpdateCameraMousePosition(GameDataS *gameData)
+void UpdateCameraMousePosition(Camera2D &camera, Vector2 &mousePosition, PlayerS &player)
 {
     // update camera position to track player and get mouse pos relative to player
-    gameData->camera->target = (Vector2){ gameData->player->player.x + gameData->player->player.width,
-                                            gameData->player->player.y + gameData->player->player.height };
-    *gameData->mousePosition = GetMousePosition();
+    camera.target = (Vector2){ player.player.x + player.player.width,
+                                          player.player.y + player.player.height };
+    mousePosition = GetMousePosition();
     // normalize mouse coordinates to new camera position
-    gameData->mousePosition->x += gameData->player->player.x + gameData->player->player.width - gameData->camera->offset.x;
-    gameData->mousePosition->y += gameData->player->player.y + gameData->player->player.height - gameData->camera->offset.y;
+    mousePosition.x += player.player.x + player.player.width - camera.offset.x;
+    mousePosition.y += player.player.y + player.player.height - camera.offset.y;
 }
 
-void CloseGame(GameDataS *gameData)
+void CloseGame(GameDataS &gameData)
 {
-/////////////////////////////////////////////////////////////////////////////////
-    if(gameData->player != NULL)
-    {
-        // delete player
-        free(gameData->player);
-        gameData->player= NULL;
-        TraceLog(LOG_DEBUG, "Deallocated player memory");
-    }
-    else TraceLog(LOG_DEBUG, "Player was not allocated");
-/////////////////////////////////////////////////////////////////////////////////
-    if(gameData->camera != NULL)
-    {
-        // delete camera
-        free(gameData->camera);
-        gameData->camera = NULL;
-        TraceLog(LOG_DEBUG, "Deallocated camera memory");
-    }
-    else TraceLog(LOG_DEBUG, "Camera was not allocated");
-/////////////////////////////////////////////////////////////////////////////////
-    if(gameData->weaponsList != NULL)
+    if(gameData.weaponsList != NULL)
     {
         // delete weaponList
-        free(gameData->weaponsList);
-        gameData->weaponsList = NULL;
+        free(gameData.weaponsList);
+        gameData.weaponsList = NULL;
         TraceLog(LOG_DEBUG, "Deallocated weaponList memory");
     }
     else TraceLog(LOG_DEBUG, "WeaponList was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
-    if(gameData->enemiesTemplateList != NULL)
+    if(gameData.enemiesTemplateList != NULL)
     {
-        // delete enemiesList
-        free(gameData->enemiesTemplateList);
-        gameData->enemiesTemplateList = NULL;
+        // delete enemiesTemplateList
+        free(gameData.enemiesTemplateList);
+        gameData.enemiesTemplateList = NULL;
         TraceLog(LOG_DEBUG, "Deallocated enemiesTemplateList memory");
     }
     else TraceLog(LOG_DEBUG, "EnemiesTemplateList was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
-    if(gameData->mapTextures != NULL)
+    if(gameData.mapTextures != NULL)
     {
         // delete mapTextures
-        free(gameData->mapTextures);
-        gameData->mapTextures = NULL;
+        free(gameData.mapTextures);
+        gameData.mapTextures = NULL;
         TraceLog(LOG_DEBUG, "Deallocated mapTextures memory");
     }
     else TraceLog(LOG_DEBUG, "MapTextures was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
-    if(gameData->level != NULL)
-    {
-        // delete level
-        free(gameData->level);
-        gameData->level = NULL;
-        TraceLog(LOG_DEBUG, "Deallocated level memory");
-    }
-    else TraceLog(LOG_DEBUG, "level was not allocated");
+    free(&gameData);
 }

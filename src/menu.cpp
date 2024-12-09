@@ -15,28 +15,28 @@
 extern pthread_mutex_t gameUpdateLock;
 
 // local functions
-States CheckMenuCollisions(Vector2* mousePosition);
+States CheckMenuCollisions(Vector2 &mousePosition);
 
-void MainMenuHandler(States *gameStatus, ToDraw *toDraw)
+void MainMenuHandler(States &gameStatus, ToDraw &toDraw)
 {
     Vector2 mousePosition;
-    *toDraw = DRAWMAINMENU;
+    toDraw = DRAWMAINMENU;
 
     do{
         pthread_mutex_lock(&gameUpdateLock);
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             mousePosition = GetMousePosition();
-            *gameStatus = CheckMenuCollisions(&mousePosition);
+            gameStatus = CheckMenuCollisions(mousePosition);
             return;
         }
-    }while(MENU == *gameStatus);
+    }while(MENU == gameStatus);
 }
 
-States CheckMenuCollisions(Vector2 *mousePosition)
+States CheckMenuCollisions(Vector2 &mousePosition)
 {
-    int mouseX = mousePosition->x;
-    int mouseY = mousePosition->y;
+    int mouseX = mousePosition.x;
+    int mouseY = mousePosition.y;
     
     if(mouseX > MAINMENUBUTTONX && mouseY > MAINMENUBUTTONY && mouseX < MAINMENUBUTTONX+MAINMENUBUTTONWIDTH && mouseY < MAINMENUBUTTONY+MAINMENUBUTTONHEIGT)
         return PLAY;

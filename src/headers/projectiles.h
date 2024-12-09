@@ -6,7 +6,7 @@
 #include "raylib.h"
 #include "global_types.h"
 
-void CheckProjEntityDamage(GameDataS &gameData);
-void UpdateProjectiles(std::list<ProjectileL> &projectileList, int level[MAPY][MAPX]);
+void CheckProjEntityDamage(std::list<ProjectileL> &projectileList, std::list<EnemyL> &enemiesList, PlayerS &player);
+void UpdateProjectiles(std::list<ProjectileL> &projectileList, LevelS &level);
 
 #endif

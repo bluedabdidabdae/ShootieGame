@@ -5,6 +5,6 @@
 
 #include "global_types.h"
 
-int GameHandler(GameDataS *gameData);
+int GameHandler(AppDataS &appData);
 
 #endif

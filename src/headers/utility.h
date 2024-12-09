@@ -7,6 +7,6 @@
 #include "global_types.h"
 
 int CheckHitboxRec(Rectangle rect1, Rectangle rect2);
-int CheckHitboxMap(int level[MAPY][MAPX], Rectangle entity);
+int CheckHitboxMap(Rectangle entity, int **level, int sizeX, int sizeY);
 
 #endif

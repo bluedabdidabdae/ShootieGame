@@ -11,37 +11,37 @@
 #include "headers/player.h"
 #include "headers/utility.h"
 
-void PlayerShooting(PlayerS *player, WeaponS weaponsList[], std::list<ProjectileL> &projectileList, Vector2 *mousePosition)
+void PlayerShooting(PlayerS &player, WeaponS weaponsList[], std::list<ProjectileL> &projectileList, Vector2 &mousePosition)
 {
     float dX, dY, tmp;
     ProjectileL tmpProjectile;
     
     tmpProjectile.projectile =
     {
-        player->player.x,
-        player->player.y,
-        weaponsList[player->activeWeaponId].projectileSize,
-        weaponsList[player->activeWeaponId].projectileSize
+        player.player.x,
+        player.player.y,
+        weaponsList[player.activeWeaponId].projectileSize,
+        weaponsList[player.activeWeaponId].projectileSize
     };
     
-    tmpProjectile.damage = weaponsList[player->activeWeaponId].damage;
+    tmpProjectile.damage = weaponsList[player.activeWeaponId].damage;
 
-    tmpProjectile.texture = &weaponsList[player->activeWeaponId].projectileTexture;
+    tmpProjectile.texture = &weaponsList[player.activeWeaponId].projectileTexture;
 
-    dX = tmpProjectile.projectile.x - mousePosition->x;
-    dY = tmpProjectile.projectile.y - mousePosition->y;
+    dX = tmpProjectile.projectile.x - mousePosition.x;
+    dY = tmpProjectile.projectile.y - mousePosition.y;
 
     tmp = abs(dX) + abs(dY);
 
-    tmpProjectile.vX = weaponsList[player->activeWeaponId].projectileSpeed * (dX / tmp);
-    tmpProjectile.vY = weaponsList[player->activeWeaponId].projectileSpeed * (dY / tmp);
+    tmpProjectile.vX = weaponsList[player.activeWeaponId].projectileSpeed * (dX / tmp);
+    tmpProjectile.vY = weaponsList[player.activeWeaponId].projectileSpeed * (dY / tmp);
     
     tmpProjectile.owner = PLAYER;
 
     projectileList.push_front(tmpProjectile);
 }
 
-void UpdatePlayer(PlayerS *player, int level[MAPY][MAPX], uint currentFrame)
+void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame)
 {
     float tmp;
     float dX = 0;
@@ -49,79 +49,83 @@ void UpdatePlayer(PlayerS *player, int level[MAPY][MAPX], uint currentFrame)
     int vX;
     int vY;
 
-    if(player->flags.isStunned)
+    if(player.flags.isStunned)
         return;
 
-    if(currentFrame >= player->nextDodgeFrame && IsKeyDown(KEY_SPACE))
+    if(currentFrame >= player.nextDodgeFrame && IsKeyDown(KEY_SPACE))
     {
-        player->flags.isDodging = true;
+        player.flags.isDodging = true;
         
-        if(player->flags.dodgeInvulnFrame)
-            player->flags.isInvulnerable = true;
+        if(player.flags.dodgeInvulnFrame)
+            player.flags.isInvulnerable = true;
 
-        player->nextDodgeFrame = currentFrame + player->dodgeDeelayFrames;
-        player->dodgeEndFrame = currentFrame + player->dodgeDurationFrames;
+        player.nextDodgeFrame = currentFrame + player.dodgeDeelayFrames;
+        player.dodgeEndFrame = currentFrame + player.dodgeDurationFrames;
     }
-    if(player->flags.isDodging && (player->flags.isStunned || currentFrame >= player->dodgeEndFrame))
+    if(player.flags.isDodging && (player.flags.isStunned || currentFrame >= player.dodgeEndFrame))
     {
-        player->flags.isDodging = false;
-        player->flags.isInvulnerable = false;
+        player.flags.isDodging = false;
+        player.flags.isInvulnerable = false;
     }
 
     if (IsKeyDown(KEY_W))
     {
-        if(player->flags.isDodging)
-            dY -= player->dodgeSpeed;
+        if(player.flags.isDodging)
+            dY -= player.dodgeSpeed;
         else
-            dY -= player->speed;
-        if (CheckHitboxMap(level, {player->player.x, player->player.y+dY,
-                                    player->player.width, player->player.height}))
+            dY -= player.speed;
+        if (CheckHitboxMap({player.player.x+dX, player.player.y,
+                            player.player.width, player.player.height},
+                            level.bitmap, level.sizeX, level.sizeY))
         {
-            player->player.y = WALLTHICKNESS*(int)(player->player.y/WALLTHICKNESS);
+            player.player.y = WALLTHICKNESS*(int)(player.player.y/WALLTHICKNESS);
             dY = 0;
         }
     }
 
     if (IsKeyDown(KEY_A))
     {
-        if(player->flags.isDodging)
-            dX -= player->dodgeSpeed;
+        if(player.flags.isDodging)
+            dX -= player.dodgeSpeed;
         else
-            dX -= player->speed;
-        if (CheckHitboxMap(level, {player->player.x+dX, player->player.y,
-                                    player->player.width, player->player.height}))
+            dX -= player.speed;
+        if (CheckHitboxMap({player.player.x+dX, player.player.y,
+                            player.player.width, player.player.height},
+                            level.bitmap, level.sizeX, level.sizeY))
         {
-            player->player.x = WALLTHICKNESS*(int)(player->player.x/WALLTHICKNESS);
+            player.player.x = WALLTHICKNESS*(int)(player.player.x/WALLTHICKNESS);
             dX = 0;
         }
     }
 
     if (IsKeyDown(KEY_S))
     {
-        if(player->flags.isDodging)
-            dY += player->dodgeSpeed;
+        if(player.flags.isDodging)
+            dY += player.dodgeSpeed;
         else
-            dY += player->speed;
-        if (CheckHitboxMap(level, {player->player.x, player->player.y+dY,
-                                    player->player.width, player->player.height}))
+            dY += player.speed;
+        if (CheckHitboxMap({player.player.x+dX, player.player.y,
+                            player.player.width, player.player.height},
+                            level.bitmap, level.sizeX, level.sizeY))
         {
-            player->player.y = WALLTHICKNESS*(int)(player->player.y/WALLTHICKNESS);
-            player->player.y += WALLTHICKNESS-player->player.height-1;
+            player.player.y = WALLTHICKNESS*(int)(player.player.y/WALLTHICKNESS);
+            player.player.y += WALLTHICKNESS-player.player.height-1;
             dY = 0;
         }
     }
 
     if (IsKeyDown(KEY_D))
     {
-        if(player->flags.isDodging)
-            dX += player->dodgeSpeed;
+        if(player.flags.isDodging)
+            dX += player.dodgeSpeed;
         else
-            dX += player->speed;
-        if (CheckHitboxMap(level, {player->player.x+dX, player->player.y,
-                                    player->player.width, player->player.height}))
+            dX += player.speed;
+        if (CheckHitboxMap({player.player.x+dX, player.player.y,
+                            player.player.width, player.player.height},
+                            level.bitmap, level.sizeX, level.sizeY))
         {
-            player->player.x = WALLTHICKNESS*(int)(player->player.x/WALLTHICKNESS);
-            player->player.x += WALLTHICKNESS-player->player.width-1;
+            player.player.x = WALLTHICKNESS*(int)(player.player.x/WALLTHICKNESS);
+            player.player.x += WALLTHICKNESS-player.player.width-1;
             dX = 0;
         }
     }
@@ -133,6 +137,6 @@ void UpdatePlayer(PlayerS *player, int level[MAPY][MAPX], uint currentFrame)
         dY /= 1.3;
     }
 
-    player->player.x += dX;
-    player->player.y += dY;
+    player.player.x += dX;
+    player.player.y += dY;
 }

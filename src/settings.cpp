@@ -15,13 +15,13 @@
 extern pthread_mutex_t gameUpdateLock;
 
 // local functions
-SettingsStatus CheckSettingsCollisions(Vector2* mousePosition);
+SettingsStatus CheckSettingsCollisions(Vector2 &mousePosition);
 
-SettingsStatus SettingsHandler(ToDraw *toDraw, SettingsFlags *settingsFlags)
+SettingsStatus SettingsHandler(ToDraw &toDraw, SettingsFlags &settingsFlags)
 {
     Vector2 mousePosition;
     SettingsStatus settingsStatus;
-    *toDraw = DRAWSETTINGS;
+    toDraw = DRAWSETTINGS;
 
     do{
         pthread_mutex_lock(&gameUpdateLock);
@@ -29,11 +29,11 @@ SettingsStatus SettingsHandler(ToDraw *toDraw, SettingsFlags *settingsFlags)
         {
             mousePosition = GetMousePosition();
             
-            settingsStatus = CheckSettingsCollisions(&mousePosition);
+            settingsStatus = CheckSettingsCollisions(mousePosition);
             switch(settingsStatus)
             {
                 case SETTINGS_TOGGLEFULLSCREEN:
-                    settingsFlags->toggleFullscreen = true;
+                    settingsFlags.toggleFullscreen = true;
                 break;
             }
         }
@@ -42,10 +42,10 @@ SettingsStatus SettingsHandler(ToDraw *toDraw, SettingsFlags *settingsFlags)
     return settingsStatus;
 }
 
-SettingsStatus CheckSettingsCollisions(Vector2 *mousePosition)
+SettingsStatus CheckSettingsCollisions(Vector2 &mousePosition)
 {
-    int mouseX = mousePosition->x;
-    int mouseY = mousePosition->y;
+    int mouseX = mousePosition.x;
+    int mouseY = mousePosition.y;
     
     if(mouseX > MAINMENUBUTTONX && mouseY > MAINMENUBUTTONY && mouseX < MAINMENUBUTTONX+MAINMENUBUTTONWIDTH && mouseY < MAINMENUBUTTONY+MAINMENUBUTTONHEIGT)
         return SETTINGS_TOGGLEFULLSCREEN;

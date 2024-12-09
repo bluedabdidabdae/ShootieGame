@@ -16,18 +16,6 @@
 
 */
 
-/*
- * Raylib log levels:
- * LOG_ALL: 0
- * LOG_TRACE: 1
- * LOG_DEBUG: 2
- * LOG_INFO: 3
- * LOG_WARNING: 4
- * LOG_ERROR: 5
- * LOG_FATAL: 6
- * LOG_NONE: 7
-*/
-
 #include <ctime>
 #include <stdlib.h>
 #include <pthread.h>
@@ -39,8 +27,6 @@
 #include "headers/game.h"
 #include "headers/settings.h"
 
-
-
 pthread_mutex_t enemiesListLock;
 pthread_mutex_t projectileListLock;
 pthread_mutex_t playerLock;
@@ -50,17 +36,26 @@ pthread_mutex_t frameCounterLock;
 pthread_mutex_t mapLock;
 pthread_mutex_t weaponDataLock;
 
-int InitData(GameDataS &gameData);
-int DeleteData(GameDataS &gameData);
+int InitData(AppDataS &appData);
 int ForceThreadKill(pthread_t *thread);
-
 
 int main(int argc, char *argv[])
 {
     int error;
-    GameDataS gameData;
+    AppDataS appData;
     States gameStatus = MENU;
 
+    /*
+    * Raylib log levels:
+    * LOG_ALL: 0
+    * LOG_TRACE: 1
+    * LOG_DEBUG: 2
+    * LOG_INFO: 3
+    * LOG_WARNING: 4
+    * LOG_ERROR: 5
+    * LOG_FATAL: 6
+    * LOG_NONE: 7
+    */
     SetTraceLogLevel(LOG_ALL);
 
     srand(time(NULL));
@@ -68,43 +63,42 @@ int main(int argc, char *argv[])
     pthread_t drawingThreadId = { 0 };
 
     // initializing game data
-    error = InitData(gameData);
-    if(error != 0)
+    error = InitData(appData);
+    if(error)
     {
         TraceLog(LOG_ERROR, "Error allocating game data");
-        DeleteData(gameData);
         return 0;
     }
 
     // initializing drawing thread
-    error = pthread_create(&drawingThreadId, NULL, HandleGraphics, &gameData); 
-    if (error != 0)
+    error = pthread_create(&drawingThreadId, NULL, HandleGraphics, &appData); 
+    if (error)
     {
         TraceLog(LOG_ERROR, "Error creating thread");
-        DeleteData(gameData);
         return 0;
     }
+    appData.toDraw = DRAWMAINMENU;
 
     // waiting clear to update from drawing thread
     pthread_mutex_lock(&gameUpdateLock);
 
     // starting game loop
-    while(gameStatus != EXITGAME){
+    while(EXITGAME != gameStatus){
         switch(gameStatus)
         {
             case MENU:
-                MainMenuHandler(&gameStatus, gameData.toDraw);
+                MainMenuHandler(gameStatus, appData.toDraw);
             break;
             case SETTINGS:
-                SettingsHandler(gameData.toDraw, &gameData.settingsFlags);
+                SettingsHandler(appData.toDraw, appData.settingsFlags);
                 gameStatus = MENU;
             break;
             case PLAY:
-                error = GameHandler(&gameData);
+                error = GameHandler(appData);
                 if (error != 0)
                 {
                     TraceLog(LOG_ERROR, "Game error, see prev. errors");
-                    *gameData.toDraw = DRAWCLOSEGAME;
+                    appData.toDraw = DRAWCLOSEGAME;
                     gameStatus = EXITGAME;
                 }
                 else gameStatus = MENU;
@@ -112,29 +106,23 @@ int main(int argc, char *argv[])
         }
     }
 
-    *gameData.toDraw = DRAWCLOSEGAME;
+    appData.toDraw = DRAWCLOSEGAME;
     error = pthread_join(drawingThreadId, NULL);
-    if (error != 0)
+    if (error)
     {
         // per ora la gestione del thread rimarrà così, mi basta sapere
         // se c'è stato un problema o no
         TraceLog(LOG_ERROR, "Error merging threads, trying to force kill it");
         error = ForceThreadKill(&drawingThreadId);
-        if(error != 0)
+        if(error)
         {
             TraceLog(LOG_ERROR, "Situation is shit, couldn't kill thread, hope the OS works it out");
             TraceLog(LOG_ERROR, "<< ABORTING >>");
-            TraceLog(LOG_ERROR, "Trying to make drawing thread to close the window");
-            CloseWindow();
-            DeleteData(gameData);
-            TraceLog(LOG_DEBUG, "Deleted game data");
-            *gameData.toDraw = DRAWABORT;
             abort();
         }
     }
     
     // normal game exit
-    DeleteData(gameData);
     TraceLog(LOG_INFO, "Game terminated succesfully");
     return 0;
 }
@@ -148,26 +136,7 @@ int ForceThreadKill(pthread_t *thread)
     return 0;
 }
 
-int DeleteData(GameDataS &gameData)
-{
-    if(gameData.toDraw != NULL)
-    {
-        free(gameData.toDraw);
-        TraceLog(LOG_DEBUG, "Deallocated toDraw memory");
-    }
-    else TraceLog(LOG_DEBUG, "ToDraw memory was not allocated");
-
-    if(gameData.mousePosition != NULL)
-    {
-        free(gameData.mousePosition);
-        TraceLog(LOG_DEBUG, "Deallocated mousePosition memory");
-    }
-    else TraceLog(LOG_DEBUG, "To mouseposition memory was not allocated");
-
-    return 0;
-}
-
-int InitData(GameDataS &gameData)
+int InitData(AppDataS &appData)
 {
     pthread_mutex_init(&enemiesListLock, NULL);
     pthread_mutex_init(&projectileListLock, NULL);
@@ -179,20 +148,11 @@ int InitData(GameDataS &gameData)
     pthread_mutex_init(&mapLock, NULL);
     pthread_mutex_init(&weaponDataLock, NULL);
 
-    gameData.toDraw = (ToDraw*)malloc(sizeof(ToDraw));
-    if(gameData.toDraw == NULL) return MALLOC_ERROR;
-    
-    gameData.mousePosition = (Vector2*)malloc(sizeof(Vector2));
-    if(gameData.mousePosition == NULL) return MALLOC_ERROR;
-    *gameData.mousePosition = GetMousePosition();
-
-    gameData.frameCounter = 0;
-    gameData.camera = NULL;
-    gameData.player = NULL;
-    gameData.mapTextures = NULL;
-    gameData.enemiesTemplateList = NULL;
-    gameData.weaponsList = NULL;
-    gameData.level = NULL;
+    // the second thread isn't running yet
+    // no need to use any mutex
+    appData.settingsFlags.toggleFullscreen = false;
+    appData.toDraw = DRAW_WAIT;
+    appData.gameData = NULL;
 
     return 0;
 }

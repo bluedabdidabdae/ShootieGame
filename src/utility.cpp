@@ -4,7 +4,7 @@
 #include "headers/global_types.h"
 #include "headers/utility.h"
 
-int CheckHitboxMap(int level[MAPY][MAPX], Rectangle entity)
+int CheckHitboxMap(Rectangle entity, int **level, int sizeX, int sizeY)
 {
     int i, ii;
     int x, y;
@@ -16,9 +16,9 @@ int CheckHitboxMap(int level[MAPY][MAPX], Rectangle entity)
     if(entity.x/WALLTHICKNESS < 0|| entity.y/WALLTHICKNESS < 0)
         ret = 1;
 
-    for(i = y; i < y+2 && i < MAPY && !ret; i++)
+    for(i = y; i < y+2 && i < sizeX && !ret; i++)
     {
-        for(ii = x; ii < x+2 && ii < MAPX && !ret; ii++)
+        for(ii = x; ii < x+2 && ii < sizeY && !ret; ii++)
         {
             if(level[i][ii] > 1 || 0 == level[i][ii])
             {

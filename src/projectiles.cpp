@@ -11,30 +11,30 @@
 #include "headers/projectiles.h"
 #include "headers/utility.h"
 
-void CheckProjEntityDamage(GameDataS &gameData)
+void CheckProjEntityDamage(std::list<ProjectileL> &projectileList, std::list<EnemyL> &enemiesList, PlayerS &player)
 {
-    std::list<ProjectileL>::iterator currentProjectile = gameData.projectileList.begin();
-    while(gameData.projectileList.end() != currentProjectile)
+    std::list<ProjectileL>::iterator projectileIter = (projectileList.begin());
+    while(projectileList.end() != projectileIter)
     {
-        switch(currentProjectile->owner)
+        switch(projectileIter->owner)
         {
             case ENEMY:
-                if(!gameData.player->flags.isInvulnerable && CheckHitboxRec(currentProjectile->projectile, gameData.player->player))
+                if(!player.flags.isInvulnerable && CheckHitboxRec(projectileIter->projectile, player.player))
                 {
-                    gameData.player->lives -= currentProjectile->damage;
-                    currentProjectile = gameData.projectileList.erase(currentProjectile);
-                    currentProjectile--;
+                    player.lives -= projectileIter->damage;
+                    projectileIter = projectileList.erase(projectileIter);
+                    projectileIter--;
                 }
             break;
             case PLAYER:
-                std::list<EnemyL>::iterator currentEnemy = gameData.enemiesList.begin();
-                while(gameData.enemiesList.end() != currentEnemy)
+                std::list<EnemyL>::iterator currentEnemy = enemiesList.begin();
+                while(enemiesList.end() != currentEnemy)
                 {
-                    if(CheckHitboxRec(currentProjectile->projectile, currentEnemy->enemy))
+                    if(CheckHitboxRec(projectileIter->projectile, currentEnemy->enemy))
                     {
-                        currentEnemy->hitPoint -= currentProjectile->damage;
-                        currentProjectile = gameData.projectileList.erase(currentProjectile);
-                        currentProjectile--;
+                        currentEnemy->hitPoint -= projectileIter->damage;
+                        projectileIter = projectileList.erase(projectileIter);
+                        projectileIter--;
                         break;
                         // this break IS NECESSARY
                     }
@@ -42,20 +42,20 @@ void CheckProjEntityDamage(GameDataS &gameData)
                 }
             break;
         }
-        currentProjectile++;
+        projectileIter++;
     }
 }
 
-void UpdateProjectiles(std::list<ProjectileL> &projectileList, int level[MAPY][MAPX])
+void UpdateProjectiles(std::list<ProjectileL> &projectileList, LevelS &level)
 {
-    std::list<ProjectileL>::iterator currentProjectile = projectileList.begin();
-    while(currentProjectile != projectileList.end())
+    std::list<ProjectileL>::iterator projectileIter = projectileList.begin();
+    while(projectileIter != projectileList.end())
     {
-        currentProjectile->projectile.x -= currentProjectile->vX;
-        currentProjectile->projectile.y -= currentProjectile->vY;
-        if(CheckHitboxMap(level, currentProjectile->projectile))
-            currentProjectile = projectileList.erase(currentProjectile);
+        projectileIter->projectile.x -= projectileIter->vX;
+        projectileIter->projectile.y -= projectileIter->vY;
+        if(CheckHitboxMap(projectileIter->projectile, level.bitmap, level.sizeX, level.sizeY))
+            projectileIter = projectileList.erase(projectileIter);
         else
-            currentProjectile++;
+            projectileIter++;
     }
 }

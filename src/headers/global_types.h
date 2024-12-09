@@ -126,23 +126,25 @@ typedef struct settigns_flags_model{
 }SettingsFlags;
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
-// LEVEL HANDLING DATA
+// WAVE DATA
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 typedef struct wave_enemies_model{
     EnemyType enemyType;
     int nOfEnemies;
-    wave_enemies_model *next;
-}WaveEnemiesLL;
+}WaveEnemiesL;
 //////////////////////////////////////////////////////////
 typedef struct wave_data_model{
-    WaveEnemiesLL *enemies;
-    wave_data_model *next;
-}WaveLL;
+    std::list<WaveEnemiesL> enemyList;
+}WaveL;
 //////////////////////////////////////////////////////////
 typedef struct level_data_model{
-    int bitmap[MAPY][MAPX];
-    WaveLL *currentWave;
+    bool isLevelLoaded;
+    int sizeX;
+    int sizeY;
+    int levelId;
+    std::list<WaveL> waveList;
+    int **bitmap; // its a matrix
 }LevelS;
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -150,20 +152,26 @@ typedef struct level_data_model{
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 typedef struct game_data_model{
-    ToDraw *toDraw;
+    // data relative to the actual game
     uint frameCounter;
-    Vector2 *mousePosition;
-    Camera2D *camera;
-    PlayerS *player;
+    uint score;
+    Camera2D camera;
+    PlayerS player;
     std::list<EnemyL> enemiesList;
     std::list<ProjectileL> projectileList;
-    WeaponS *weaponsList;
-    EnemiesS *enemiesTemplateList;
-    Texture2D *mapTextures;
-    LevelS *level;
-    uint score;
-    SettingsFlags settingsFlags;
+    WeaponS *weaponsList; // its an array
+    EnemiesS *enemiesTemplateList; // its an array
+    Texture2D *mapTextures; // its an array
+    Vector2 mousePosition;
+    LevelS level;
 }GameDataS;
+//////////////////////////////////////////////////////////
+typedef struct app_data_model{
+    // data relative to the whole program
+    ToDraw toDraw;
+    SettingsFlags settingsFlags;
+    GameDataS *gameData;
+}AppDataS;
 //////////////////////////////////////////////////////////
 
 #endif
