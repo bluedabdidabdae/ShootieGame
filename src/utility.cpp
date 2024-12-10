@@ -4,7 +4,7 @@
 #include "headers/global_types.h"
 #include "headers/utility.h"
 
-int CheckHitboxMap(Rectangle entity, int **level, int sizeX, int sizeY)
+int CheckHitboxMap(Rectangle entity, MapS &map)
 {
     int i, ii;
     int x, y;
@@ -13,20 +13,20 @@ int CheckHitboxMap(Rectangle entity, int **level, int sizeX, int sizeY)
     x = entity.x/WALLTHICKNESS;
     y = entity.y/WALLTHICKNESS;
 
-    if(entity.x/WALLTHICKNESS < 0|| entity.y/WALLTHICKNESS < 0)
+    if(entity.x/WALLTHICKNESS < 0 || entity.y/WALLTHICKNESS < 0)
         ret = 1;
 
-    for(i = y; i < y+2 && i < sizeX && !ret; i++)
+    for(i = y; i < y+2 && i < map.sizeX && !ret; i++)
     {
-        for(ii = x; ii < x+2 && ii < sizeY && !ret; ii++)
+        for(ii = x; ii < x+2 && ii < map.sizeY && !ret; ii++)
         {
-            if(level[i][ii] > 1 || 0 == level[i][ii])
+            if(1 != map.bitmap[i][ii])
             {
                 if(
-                    entity.x <= WALLTHICKNESS*ii+WALLTHICKNESS &&
-                    entity.y <= WALLTHICKNESS*i+WALLTHICKNESS &&
-                    entity.x >= WALLTHICKNESS*ii-entity.width &&
-                    entity.y >= WALLTHICKNESS*i-entity.height
+                    entity.x < WALLTHICKNESS*ii+WALLTHICKNESS &&
+                    entity.y < WALLTHICKNESS*i+WALLTHICKNESS &&
+                    entity.x > WALLTHICKNESS*ii-entity.width &&
+                    entity.y > WALLTHICKNESS*i-entity.height
                 )
                 {
                     ret = 1;
@@ -39,8 +39,8 @@ int CheckHitboxMap(Rectangle entity, int **level, int sizeX, int sizeY)
 
 int CheckHitboxRec(Rectangle rect1, Rectangle rect2)
 {
-    return (rect1.x <= rect2.x + rect2.width &&
-            rect1.y <= rect2.y + rect2.height &&
-            rect1.x >= rect2.x - rect2.width &&
-            rect1.y >= rect2.y - rect2.height);
+    return (rect1.x < rect2.x + rect2.width &&
+            rect1.y < rect2.y + rect2.height &&
+            rect1.x > rect2.x - rect2.width &&
+            rect1.y > rect2.y - rect2.height);
 }

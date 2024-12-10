@@ -42,8 +42,8 @@ int GameHandler(AppDataS &appData)
 
     GameStates gameStatus;
 
-    appData.gameData = (GameDataS*)malloc(sizeof(GameDataS));
-    GameDataS &gameMemory = *appData.gameData;
+    appData.gameData = new GameDataS;
+    GameDataS &gameMemory = *(appData.gameData);
 
     // loading weapon, player
     // and enemies models from file
@@ -54,15 +54,17 @@ int GameHandler(AppDataS &appData)
         CloseGame(gameMemory);
         return err;
     }
+    TraceLog(LOG_ERROR, "Loaded data from files");
 
     // loading level bitmap and waves from files
     err = LoadLevel(gameMemory.level, 0);
     if(err != 0)
     {
-        TraceLog(LOG_ERROR, "Error loading map - ABORTING");
+        TraceLog(LOG_ERROR, "Error loading level - ABORTING");
         CloseGame(gameMemory);
         return err;
     }
+    TraceLog(LOG_ERROR, "Loaded level");
 
     // initializing the rest of the data
     err = InitGameData(gameMemory);
@@ -76,9 +78,9 @@ int GameHandler(AppDataS &appData)
     pthread_mutex_lock(&gameUpdateLock);
     appData.toDraw = DRAW_LOAD_TEXTURES;
 
-    //SpawnEnemies(5, MINION, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level);
-    //SpawnEnemies(5, SNIPER, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level);
-    //TraceLog(LOG_DEBUG, "Spawned test enemies");
+    SpawnEnemies(5, MINION, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level);
+    SpawnEnemies(5, SNIPER, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level);
+    TraceLog(LOG_DEBUG, "Spawned test enemies");
 
     pthread_mutex_lock(&gameUpdateLock);
     appData.toDraw = DRAWGAME;
@@ -127,7 +129,7 @@ int GameHandler(AppDataS &appData)
 
         pthread_mutex_lock(&enemiesListLock);
         TraceLog(LOG_DEBUG, "Updating enemies");
-        UpdateEnemies(gameMemory.enemiesList, gameMemory.player.player, gameMemory.level);
+        UpdateEnemies(gameMemory.enemiesList, gameMemory.player.player, gameMemory.level.map);
         pthread_mutex_unlock(&mapLock);
         pthread_mutex_unlock(&enemiesListLock);
 

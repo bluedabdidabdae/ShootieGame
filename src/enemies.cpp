@@ -59,7 +59,7 @@ int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *en
             enemiesTemplateList[enemyType].enemy.x,
             enemiesTemplateList[enemyType].enemy.y
         };
-    }while(CheckHitboxMap(tmpEnemy.enemy, level.bitmap, level.sizeX, level.sizeY));
+    }while(CheckHitboxMap(tmpEnemy.enemy, level.map));
 
     tmpEnemy.enemyType = enemyType;
     tmpEnemy.behaviour = BACKING;
@@ -130,7 +130,7 @@ void EnemiesShooting(std::list<EnemyL> &enemiesList, std::list<ProjectileL> &pro
     }
 }
 
-void UpdateEnemies(std::list<EnemyL> &enemiesList, Rectangle &player, LevelS &level)
+void UpdateEnemies(std::list<EnemyL> &enemiesList, Rectangle &player, MapS &map)
 {
     float Dx, Dy, tmp;
 
@@ -175,18 +175,18 @@ void UpdateEnemies(std::list<EnemyL> &enemiesList, Rectangle &player, LevelS &le
         {
             case BACKING:
                 enemyIter->enemy.x += Dx;
-                if (CheckHitboxMap(enemyIter->enemy, level.bitmap, level.sizeX, level.sizeY))
+                if (CheckHitboxMap(enemyIter->enemy, map))
                     enemyIter->enemy.x -= Dx;
                 enemyIter->enemy.y += Dy;
-                if (CheckHitboxMap(enemyIter->enemy, level.bitmap, level.sizeX, level.sizeY))
+                if (CheckHitboxMap(enemyIter->enemy, map))
                     enemyIter->enemy.y -= Dy;
             break;
             case APPROACHING:
                 enemyIter->enemy.x -= Dx;
-                if (CheckHitboxMap(enemyIter->enemy, level.bitmap, level.sizeX, level.sizeY))
+                if (CheckHitboxMap(enemyIter->enemy, map))
                     enemyIter->enemy.x += Dx;
                 enemyIter->enemy.y -= Dy;
-                if (CheckHitboxMap(enemyIter->enemy, level.bitmap, level.sizeX, level.sizeY))
+                if (CheckHitboxMap(enemyIter->enemy, map))
                     enemyIter->enemy.y += Dy;
             break;
         }

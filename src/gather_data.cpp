@@ -19,9 +19,9 @@
 
 int GatherWeaponData(WeaponS **weaponsList);
 int GatherPlayerData(PlayerS &player);
-int GatherEnemiesData(EnemiesS *enemiesTemplateList);
-int LoadMap(LevelS &level, cJSON *levelData);
-int LoadWaves(std::list<WaveL> waveList, cJSON *levelData);
+int GatherEnemiesData(EnemiesS **enemiesTemplateList);
+int LoadMap(MapS &map, cJSON *levelData);
+int LoadWaves(std::list<WaveL> &waveList, cJSON *levelData);
 int LoadWaveEnemies(std::list<WaveEnemiesL> &waveNemeyList, cJSON *currentWaveData);
 
 extern pthread_mutex_t enemiesListLock;
@@ -50,14 +50,14 @@ int GatherData(GameDataS &gameData)
     pthread_mutex_unlock(&playerLock);
 
     pthread_mutex_lock(&enemiesListLock);
-    ret = GatherEnemiesData(gameData.enemiesTemplateList);
+    ret = GatherEnemiesData(&gameData.enemiesTemplateList);
     if(0 != ret) return ret;
     pthread_mutex_unlock(&enemiesListLock);
 
     return ret;
 }
 
-int LoadWeaponsTextures(GameDataS *gameData)
+int LoadWeaponsTextures(WeaponS *weaponsList)
 {
     Image tmp;
     int ret = 0;
@@ -66,12 +66,12 @@ int LoadWeaponsTextures(GameDataS *gameData)
 
     for(i = 0; i < 8; i++)
     {
-        if(!gameData->weaponsList[i].isTexture)
+        if(!weaponsList[i].isTexture)
         {
-            tmp = gameData->weaponsList[i].projectileImage;
-            ImageResize(&tmp, gameData->weaponsList[i].projectileSize, gameData->weaponsList[i].projectileSize);
-            gameData->weaponsList[i].projectileTexture = LoadTextureFromImage(tmp);
-            gameData->weaponsList[i].isTexture = true;
+            tmp = weaponsList[i].projectileImage;
+            ImageResize(&tmp, weaponsList[i].projectileSize, weaponsList[i].projectileSize);
+            weaponsList[i].projectileTexture = LoadTextureFromImage(tmp);
+            weaponsList[i].isTexture = true;
         }
     }
 
@@ -84,11 +84,15 @@ int LoadWeaponsTextures(GameDataS *gameData)
 int LoadEnemiesTextures(EnemiesS *enemiesTemplateList)
 {
     Image tmp;
-    int i = 0;
     int ret = 0;
-    char buffer[MAPRAWBUFFERSIZE];
 
-    for(i = 0; i < 2; i++)
+    if(!enemiesTemplateList)
+    {
+        TraceLog(LOG_FATAL, "Enemies template list is NULL - FATAL");
+        return MALLOC_ERROR;
+    }
+
+    for(int i = 0; i < 2; i++)
     {
         if(!enemiesTemplateList[i].isTexture)
         {
@@ -106,11 +110,10 @@ int LoadEnemiesTextures(EnemiesS *enemiesTemplateList)
             UnloadImage(tmp);
             enemiesTemplateList[i].weapon.isTexture = true;
         }
+        TraceLog(LOG_DEBUG, TextFormat("Loaded enemy template texture n.%d", i));
     }
 
     cleanup:
-        if(ret)
-            TraceLog(LOG_ERROR, buffer);
         return ret;
 }
 
@@ -127,7 +130,9 @@ int LoadMapTextures(Texture2D **mapTextures)
     int ret = 0;
     char buffer[MAPRAWBUFFERSIZE];
 
-    *mapTextures = (Texture2D*)malloc(sizeof(Texture2D)*5);
+    TraceLog(LOG_DEBUG, "Entered LoadMapTextures func");
+
+    *mapTextures = new Texture2D[5];
     if(!*mapTextures)
     {
         strcpy(buffer, "Error allocating mapTextures memory - ABORTING");
@@ -174,6 +179,8 @@ int LoadLevel(LevelS &level, int levelId)
     char buffer[MAPRAWBUFFERSIZE];
     char levelIdCh = levelId + '0';
 
+    TraceLog(LOG_DEBUG, "Entered LoadLevel func");
+
     level.levelId = levelId;
 
     strcpy(levelFile, MAPDIR);
@@ -208,16 +215,16 @@ int LoadLevel(LevelS &level, int levelId)
     }
     TraceLog(LOG_DEBUG, "Parsed levels.json");
     
-    ret = LoadMap(level, levelData);
+    ret = LoadMap(level.map, levelData);
     if(ret)
     {
         strcpy(buffer, "Error loading map");
         ret = FILE_ERROR;
         goto cleanup;
     }
-    TraceLog(LOG_DEBUG, "E");
+    
     // TODO: CHECK IF IT FAILS
-    //LoadWaves(level.waveList, levelData);
+    LoadWaves(level.waveList, levelData);
 
     cleanup:
         if(ret)
@@ -225,7 +232,7 @@ int LoadLevel(LevelS &level, int levelId)
         return ret;
 }
 
-int LoadWaves(std::list<WaveL> waveList, cJSON *levelData)
+int LoadWaves(std::list<WaveL> &waveList, cJSON *levelData)
 {
     cJSON *aux1;
     cJSON *aux2;
@@ -294,7 +301,7 @@ int LoadWaveEnemies(std::list<WaveEnemiesL> &waveEnemyList, cJSON *currentWaveDa
     return ret;
 }
 
-int LoadMap(LevelS &level, cJSON *levelData)
+int LoadMap(MapS &map, cJSON *levelData)
 {
     cJSON *aux1;
     cJSON *aux2;
@@ -310,102 +317,73 @@ int LoadMap(LevelS &level, cJSON *levelData)
     aux2 = cJSON_GetObjectItemCaseSensitive(levelData, "map");
     if(!aux2)
     {
-        strcpy(buffer, "Error loading level matrix - ABORTING");
+        strcpy(buffer, "Error loading map matrix - ABORTING");
         ret = FILE_ERROR;
         goto cleanup;
     }
-    TraceLog(LOG_DEBUG, "Loaded level matrix");
+    TraceLog(LOG_DEBUG, "Loaded map matrix");
 
     // fetching level y 0
     aux3 = cJSON_GetArrayItem(aux2, 0);
     if(!aux3)
     {
-        strcpy(buffer, TextFormat("Error loading level y: %d - ABORTING", 0));
+        strcpy(buffer, TextFormat("Error loading map y: %d - ABORTING", 0));
         ret = FILE_ERROR;
         goto cleanup;
     }
-    level.sizeY = cJSON_GetArraySize(aux2);
-    TraceLog(LOG_DEBUG, TextFormat("Loaded level y: %d", 0));
+    map.sizeY = cJSON_GetArraySize(aux2);
+    TraceLog(LOG_DEBUG, "Loaded map y: 0");
 
     // fetching level x 0
     aux4 = cJSON_GetArrayItem(aux3, 0);
     if(!aux3)
     {
-        strcpy(buffer, TextFormat("Error loading level x: %d - ABORTING", 0));
+        strcpy(buffer, TextFormat("Error loading map x: %d - ABORTING", 0));
         ret = FILE_ERROR;
         goto cleanup;
     }
-    level.sizeX = cJSON_GetArraySize(aux3);
-    TraceLog(LOG_DEBUG, "Loaded level x: %d", 0);
-    
-    level.sizeX = MAPX;
-    level.sizeY = MAPY;
+    map.sizeX = cJSON_GetArraySize(aux3);
+    TraceLog(LOG_DEBUG, "Loaded map x: 0");
 
-    level.bitmap = new int*[level.sizeY];
-    for(int i = 0; i < level.sizeY; i++)
+    map.bitmap = new int*[map.sizeY];
+    for(int i = 0; i < map.sizeY; i++)
+        map.bitmap[i] = new int[map.sizeX];
+
+    TraceLog(LOG_DEBUG, "Created map matrix");
+
+    for(int i = 0; aux3; i++)
     {
-        level.bitmap[i] = new int[level.sizeX];
-        TraceLog(LOG_DEBUG, "i: %d", i);
-        TraceLog(LOG_DEBUG, "x: %d", level.sizeX);
-    }
-
-    TraceLog(LOG_DEBUG, "Mapsize Y: %d", level.sizeY);
-    TraceLog(LOG_DEBUG, "Mapsize X: %d", level.sizeX);
-
-    for (int i = 0; i < level.sizeY; i++) {
-            TraceLog(LOG_DEBUG, "A");
-        for (int ii = 0; ii < level.sizeX; ii++) {
-            TraceLog(LOG_DEBUG, "i: %d", i);
-            TraceLog(LOG_DEBUG, "ii: %d", ii);
-            TraceLog(LOG_DEBUG, "B");
-            level.bitmap[i][ii] = 1;
-            TraceLog(LOG_DEBUG, "C");
-        }
-    }
-    TraceLog(LOG_DEBUG, "D");
-    return 0;
-
-
-
-
-
-
-
-
-    for(int i = 0; i < level.sizeY; i++)
-    {
-        TraceLog(LOG_DEBUG, "A");
-        aux4 = cJSON_GetArrayItem(aux3, i);
+        aux4 = cJSON_GetArrayItem(aux3, 0);
         if(!aux4)
         {
             strcpy(buffer, cJSON_GetErrorPtr());
             ret = FILE_ERROR;
             goto cleanup;
         }
-        TraceLog(LOG_DEBUG, "B");
-        for(int ii = 0; ii < level.sizeX-i; ii++)
+        
+        for(int ii = 0; aux4; ii++)
         {
-            TraceLog(LOG_DEBUG, "D");
-            TraceLog(LOG_DEBUG, TextFormat("i: %d - ii: %d", i, ii));
-            level.bitmap[i][ii] = aux4->valueint;
-            TraceLog(LOG_DEBUG, "C");
+            map.bitmap[i][ii] = aux4->valueint;
             aux4 = aux4->next;
         }
         aux3 = aux3->next;
     }
 
+    TraceLog(LOG_DEBUG, TextFormat("Mapsize Y: %d", map.sizeY));
+    TraceLog(LOG_DEBUG, TextFormat("Mapsize X: %d", map.sizeX));
+
     cleanup:
         if(ret)
         {
             TraceLog(LOG_ERROR, buffer);
-            if(level.bitmap)
-                free(level.bitmap);
+            if(map.bitmap)
+                free(map.bitmap);
         }
         
         return ret;
 }
 
-int GatherEnemiesData(EnemiesS *enemiesTemplateList)
+int GatherEnemiesData(EnemiesS **enemiesTemplateList)
 {
     FILE *rawFile;
     cJSON *enemiesData;
@@ -454,8 +432,8 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
 
     arrSize = cJSON_GetArraySize(aux1);
 
-    // allocating weapons memory
-    enemiesTemplateList = (EnemiesS*)malloc(sizeof(EnemiesS)*arrSize);
+    // allocating enemies memory
+    *enemiesTemplateList = new EnemiesS[arrSize];
     if(!enemiesTemplateList)
     {
         strcpy(buffer, "Error allocating initial enemiesList memory - ABORTING");
@@ -496,7 +474,7 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        enemiesTemplateList[i].enemy.x = (float)aux4->valueint;
+        (*enemiesTemplateList)[i].enemy.x = (float)aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy size x");
         
         aux4 = cJSON_GetObjectItemCaseSensitive(aux3, "y");
@@ -506,7 +484,7 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        enemiesTemplateList[i].enemy.y = (float)aux4->valueint;
+        (*enemiesTemplateList)[i].enemy.y = (float)aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy size y");
 
         // gathering enemy baseHealth
@@ -517,7 +495,7 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        enemiesTemplateList[i].baseHealth = aux3->valueint;
+        (*enemiesTemplateList)[i].baseHealth = aux3->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy baseHealth");
         
         // gathering enemy image
@@ -528,8 +506,8 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        enemiesTemplateList[i].enemyImage = LoadImage(aux3->valuestring);
-        enemiesTemplateList[i].isTexture = false;
+        (*enemiesTemplateList)[i].enemyImage = LoadImage(aux3->valuestring);
+        (*enemiesTemplateList)[i].isTexture = false;
         TraceLog(LOG_DEBUG, "Loaded enemyImage");
 
         // fetching enemy weapon data
@@ -550,7 +528,7 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
             ret = FILE_ERROR;
             goto cleanup;
         }
-        enemiesTemplateList[i].weapon.damage = aux4->valueint;
+        (*enemiesTemplateList)[i].weapon.damage = aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/damage");
 
         // gathering enemy weapon shotsDeelay
@@ -562,7 +540,7 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
             goto cleanup;
         }
 
-        enemiesTemplateList[i].weapon.shotsDeelay = aux4->valueint;
+        (*enemiesTemplateList)[i].weapon.shotsDeelay = aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/shotsDeelay");
         
         // gathering enemy weapon projectileSize
@@ -574,7 +552,7 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
             goto cleanup;
         }
 
-        enemiesTemplateList[i].weapon.projectileSize = aux4->valueint;
+        (*enemiesTemplateList)[i].weapon.projectileSize = aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/projectileSize");
 
         // gathering enemy weapon projectileSpeed
@@ -586,7 +564,7 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
             goto cleanup;
         }
 
-        enemiesTemplateList[i].weapon.projectileSpeed = aux4->valueint;
+        (*enemiesTemplateList)[i].weapon.projectileSpeed = aux4->valueint;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/projectileSpeed");
 
         // gathering enemy projectileImage
@@ -598,8 +576,8 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
             goto cleanup;
         }
 
-        enemiesTemplateList[i].weapon.projectileImage = LoadImage(aux4->valuestring);
-        enemiesTemplateList[i].weapon.isTexture = false;
+        (*enemiesTemplateList)[i].weapon.projectileImage = LoadImage(aux4->valuestring);
+        (*enemiesTemplateList)[i].weapon.isTexture = false;
         TraceLog(LOG_DEBUG, "Loaded enemy weapon/projectileImage\n");
 
         i++;
@@ -608,10 +586,15 @@ int GatherEnemiesData(EnemiesS *enemiesTemplateList)
     cleanup:
 
         if(ret)
+        {
             TraceLog(LOG_ERROR, buffer);
+            if(*enemiesTemplateList)
+                free(*enemiesTemplateList);
+        }
 
         if(enemiesData)
             cJSON_Delete(enemiesData);
+
 
         TraceLog(LOG_DEBUG, "Closed json files");
 
@@ -669,7 +652,7 @@ int GatherWeaponData(WeaponS **weaponsList)
     arrSize = cJSON_GetArraySize(aux1);
 
     // allocating weapons memory
-    *weaponsList = (WeaponS*)malloc(sizeof(WeaponS)*arrSize);
+    *weaponsList = new WeaponS[arrSize];
     if(!*weaponsList)
     {
         strcpy(buffer, "Error allocating initial weaponsList memory - ABORTING");

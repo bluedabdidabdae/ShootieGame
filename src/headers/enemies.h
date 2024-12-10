@@ -11,6 +11,6 @@ int SpawnEnemiesPos(int number, EnemyType enemyType, float x, float y, std::list
 int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, LevelS &level);
 int SpawnEnemyPos(EnemyType enemyType, float x, float y, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList);
 void EnemiesShooting(std::list<EnemyL> &enemiesList, std::list<ProjectileL> &projectileList, EnemiesS enemiesTemplateList[], Rectangle &player);
-void UpdateEnemies(std::list<EnemyL> &enemiesHead, Rectangle &player, LevelS &level);
+void UpdateEnemies(std::list<EnemyL> &enemiesHead, Rectangle &player, MapS &map);
 
 #endif

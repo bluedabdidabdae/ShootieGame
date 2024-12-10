@@ -9,6 +9,6 @@ int GatherData(GameDataS &gameData);
 int LoadLevel(LevelS &level, int levelId);
 int LoadMapTextures(Texture2D **mapTextures);
 int LoadEnemiesTextures(EnemiesS *enemiesTemplateList);
-int LoadWeaponsTextures(GameDataS *gameData);
+int LoadWeaponsTextures(WeaponS *weaponsList);
 
 #endif

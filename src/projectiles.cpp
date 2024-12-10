@@ -53,7 +53,7 @@ void UpdateProjectiles(std::list<ProjectileL> &projectileList, LevelS &level)
     {
         projectileIter->projectile.x -= projectileIter->vX;
         projectileIter->projectile.y -= projectileIter->vY;
-        if(CheckHitboxMap(projectileIter->projectile, level.bitmap, level.sizeX, level.sizeY))
+        if(CheckHitboxMap(projectileIter->projectile, level.map))
             projectileIter = projectileList.erase(projectileIter);
         else
             projectileIter++;

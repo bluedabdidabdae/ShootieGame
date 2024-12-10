@@ -6,7 +6,13 @@
 #include "raylib.h"
 #include "global_types.h"
 
+#define CHECK_HITBOX_REC(rect1, rect2) \
+    rect1.x < rect2.x + rect2.width && \
+    rect1.y < rect2.y + rect2.height && \
+    rect1.x > rect2.x - rect2.width && \
+    rect1.y > rect2.y - rect2.height
+
 int CheckHitboxRec(Rectangle rect1, Rectangle rect2);
-int CheckHitboxMap(Rectangle entity, int **level, int sizeX, int sizeY);
+int CheckHitboxMap(Rectangle entity, MapS &map);
 
 #endif

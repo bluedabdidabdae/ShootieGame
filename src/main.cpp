@@ -36,8 +36,7 @@ pthread_mutex_t frameCounterLock;
 pthread_mutex_t mapLock;
 pthread_mutex_t weaponDataLock;
 
-int InitData(AppDataS &appData);
-int ForceThreadKill(pthread_t *thread);
+void InitData(AppDataS &appData);
 
 int main(int argc, char *argv[])
 {
@@ -62,13 +61,8 @@ int main(int argc, char *argv[])
 
     pthread_t drawingThreadId = { 0 };
 
-    // initializing game data
-    error = InitData(appData);
-    if(error)
-    {
-        TraceLog(LOG_ERROR, "Error allocating game data");
-        return 0;
-    }
+    // initializing appata
+    InitData(appData);
 
     // initializing drawing thread
     error = pthread_create(&drawingThreadId, NULL, HandleGraphics, &appData); 
@@ -113,10 +107,10 @@ int main(int argc, char *argv[])
         // per ora la gestione del thread rimarrà così, mi basta sapere
         // se c'è stato un problema o no
         TraceLog(LOG_ERROR, "Error merging threads, trying to force kill it");
-        error = ForceThreadKill(&drawingThreadId);
+        error = pthread_cancel(drawingThreadId);
         if(error)
         {
-            TraceLog(LOG_ERROR, "Situation is shit, couldn't kill thread, hope the OS works it out");
+            TraceLog(LOG_ERROR, "Couldn't kill thread, hope the OS works it out");
             TraceLog(LOG_ERROR, "<< ABORTING >>");
             abort();
         }
@@ -127,16 +121,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-int ForceThreadKill(pthread_t *thread)
-{
-    int error;
-    error = pthread_cancel(*thread);
-    if(error != 0)
-        return THREAD_ERROR;
-    return 0;
-}
-
-int InitData(AppDataS &appData)
+void InitData(AppDataS &appData)
 {
     pthread_mutex_init(&enemiesListLock, NULL);
     pthread_mutex_init(&projectileListLock, NULL);
@@ -153,6 +138,4 @@ int InitData(AppDataS &appData)
     appData.settingsFlags.toggleFullscreen = false;
     appData.toDraw = DRAW_WAIT;
     appData.gameData = NULL;
-
-    return 0;
 }

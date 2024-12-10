@@ -74,9 +74,9 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame)
             dY -= player.dodgeSpeed;
         else
             dY -= player.speed;
-        if (CheckHitboxMap({player.player.x+dX, player.player.y,
+        if (CheckHitboxMap({player.player.x, player.player.y+dY,
                             player.player.width, player.player.height},
-                            level.bitmap, level.sizeX, level.sizeY))
+                            level.map))
         {
             player.player.y = WALLTHICKNESS*(int)(player.player.y/WALLTHICKNESS);
             dY = 0;
@@ -91,7 +91,7 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame)
             dX -= player.speed;
         if (CheckHitboxMap({player.player.x+dX, player.player.y,
                             player.player.width, player.player.height},
-                            level.bitmap, level.sizeX, level.sizeY))
+                            level.map))
         {
             player.player.x = WALLTHICKNESS*(int)(player.player.x/WALLTHICKNESS);
             dX = 0;
@@ -104,12 +104,12 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame)
             dY += player.dodgeSpeed;
         else
             dY += player.speed;
-        if (CheckHitboxMap({player.player.x+dX, player.player.y,
+        if (CheckHitboxMap({player.player.x, player.player.y+dY,
                             player.player.width, player.player.height},
-                            level.bitmap, level.sizeX, level.sizeY))
+                            level.map))
         {
             player.player.y = WALLTHICKNESS*(int)(player.player.y/WALLTHICKNESS);
-            player.player.y += WALLTHICKNESS-player.player.height-1;
+            player.player.y += WALLTHICKNESS-player.player.height;
             dY = 0;
         }
     }
@@ -122,10 +122,10 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame)
             dX += player.speed;
         if (CheckHitboxMap({player.player.x+dX, player.player.y,
                             player.player.width, player.player.height},
-                            level.bitmap, level.sizeX, level.sizeY))
+                            level.map))
         {
             player.player.x = WALLTHICKNESS*(int)(player.player.x/WALLTHICKNESS);
-            player.player.x += WALLTHICKNESS-player.player.width-1;
+            player.player.x += WALLTHICKNESS-player.player.width;
             dX = 0;
         }
     }

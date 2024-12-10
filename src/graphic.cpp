@@ -164,7 +164,7 @@ void LoadGameTextures(GameDataS &gameData)
     pthread_mutex_unlock(&enemiesListLock);
 
     pthread_mutex_lock(&weaponDataLock);
-    ret = LoadWeaponsTextures(&gameData);
+    ret = LoadWeaponsTextures(gameData.weaponsList);
     if(ret) TraceLog(LOG_INFO, "WeaponsTextures not loaded");
     else TraceLog(LOG_DEBUG, "WeaponsTextures loaded");
     pthread_mutex_unlock(&weaponDataLock);
@@ -184,21 +184,21 @@ void DrawGame(GameDataS &gameData)
             // drawing map borders
             TraceLog(LOG_DEBUG, "Drawing map");
             pthread_mutex_lock(&mapLock);
-            for(int i = 0; i < MAPY; i++)
+            for(int i = 0; i < gameData.level.map.sizeY; i++)
             {
-                for(int ii = MAPX-1; ii >= 0; ii--)
+                for(int ii = gameData.level.map.sizeX-1; ii >= 0; ii--)
                 {
                     // separating walls from floor tiles
-                    if(gameData.level.bitmap[i][ii] > 1)
+                    if(gameData.level.map.bitmap[i][ii] > 1)
                         DrawTexture(
-                            gameData.mapTextures[gameData.level.bitmap[i][ii]],
+                            gameData.mapTextures[gameData.level.map.bitmap[i][ii]],
                             WALLTHICKNESS*ii,
                             WALLTHICKNESS*i,
                             WHITE
                             );
                     else
                         DrawTexture(
-                            gameData.mapTextures[gameData.level.bitmap[i][ii]],
+                            gameData.mapTextures[gameData.level.map.bitmap[i][ii]],
                             WALLTHICKNESS*ii,
                             WALLTHICKNESS*i+12,
                             WHITE

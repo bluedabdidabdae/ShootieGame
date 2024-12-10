@@ -138,13 +138,17 @@ typedef struct wave_data_model{
     std::list<WaveEnemiesL> enemyList;
 }WaveL;
 //////////////////////////////////////////////////////////
-typedef struct level_data_model{
-    bool isLevelLoaded;
+typedef struct map_model{
     int sizeX;
     int sizeY;
+    int **bitmap; // its a matrix
+}MapS;
+//////////////////////////////////////////////////////////
+typedef struct level_data_model{
+    bool isLevelLoaded;
     int levelId;
     std::list<WaveL> waveList;
-    int **bitmap; // its a matrix
+    MapS map;
 }LevelS;
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
