@@ -16,11 +16,11 @@ int CheckHitboxMap(Rectangle entity, MapS &map)
     if(entity.x/WALLTHICKNESS < 0 || entity.y/WALLTHICKNESS < 0)
         ret = 1;
 
-    for(i = y; i < y+2 && i < map.sizeX && !ret; i++)
+    for(i = y; i < y+2 && i < map.sizeY && !ret; i++)
     {
-        for(ii = x; ii < x+2 && ii < map.sizeY && !ret; ii++)
+        for(ii = x; ii < x+2 && ii < map.sizeX && !ret; ii++)
         {
-            if(1 != map.bitmap[i][ii])
+            if(map.bitmap[i][ii] != 1)
             {
                 if(
                     entity.x < WALLTHICKNESS*ii+WALLTHICKNESS &&
