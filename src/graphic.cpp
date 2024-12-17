@@ -269,7 +269,7 @@ void DrawGame(GameDataS &gameData)
 
         pthread_mutex_unlock(&playerLock);
 
-        DrawRectangle(1130, 590, 200, 50, Fade(WHITE, FADEVALUE));
+        DrawRectangle(30, IsWindowFullscreen() ? 640 : 590, 250, 45, Fade(WHITE, FADEVALUE));
 
         pthread_mutex_lock(&playerLock);
         pthread_mutex_lock(&weaponDataLock);
@@ -278,7 +278,7 @@ void DrawGame(GameDataS &gameData)
         DrawText(
             TextFormat("%d %s", gameData.player.activeWeaponId == gameData.player.weapons[0] ? 1 : 2,
             gameData.weaponsList[gameData.player.activeWeaponId].weaponName), 
-            1170, 600, 30, WHITE);
+            40, IsWindowFullscreen() ? 650 : 600, 30, WHITE);
             
         pthread_mutex_unlock(&playerLock);
         pthread_mutex_unlock(&weaponDataLock);

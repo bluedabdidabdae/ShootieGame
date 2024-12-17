@@ -19,6 +19,7 @@
 #include <ctime>
 #include <stdlib.h>
 #include <pthread.h>
+#include <cstring>
 
 #include "raylib.h"
 #include "headers/global_types.h"
@@ -44,6 +45,19 @@ int main(int argc, char *argv[])
     AppDataS appData;
     States gameStatus = MENU;
 
+    // idk man it doesn't work
+    /*
+    if(argc)
+    {
+        if(strcmp(argv[0], "--debug\0"))
+            SetTraceLogLevel(LOG_ALL);
+        else
+            SetTraceLogLevel(LOG_NONE);
+    }
+    else
+        SetTraceLogLevel(LOG_NONE);
+    */
+
     /*
     * Raylib log levels:
     * LOG_ALL: 0
@@ -55,7 +69,6 @@ int main(int argc, char *argv[])
     * LOG_FATAL: 6
     * LOG_NONE: 7
     */
-    SetTraceLogLevel(LOG_ALL);
 
     srand(time(NULL));
 
