@@ -45,6 +45,9 @@ int main(int argc, char *argv[])
     AppDataS appData;
     States gameStatus = MENU;
 
+    //SetTraceLogLevel(LOG_NONE);
+    SetTraceLogLevel(LOG_ALL);
+
     // idk man it doesn't work
     /*
     if(argc)

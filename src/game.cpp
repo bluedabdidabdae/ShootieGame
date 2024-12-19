@@ -54,7 +54,7 @@ int GameHandler(AppDataS &appData)
         CloseGame(gameMemory);
         return err;
     }
-    TraceLog(LOG_ERROR, "Loaded data from files");
+    TraceLog(LOG_DEBUG, "Loaded data from files");
 
     // loading level bitmap and waves from files
     err = LoadLevel(gameMemory.level, 0);
@@ -64,7 +64,7 @@ int GameHandler(AppDataS &appData)
         CloseGame(gameMemory);
         return err;
     }
-    TraceLog(LOG_ERROR, "Loaded level");
+    TraceLog(LOG_DEBUG, "Loaded level");
 
     // initializing the rest of the data
     err = InitGameData(gameMemory);
