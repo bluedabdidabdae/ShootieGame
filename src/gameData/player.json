@@ -1,5 +1,5 @@
 {
-    "baseHealth": 6000,
+    "baseHealth": 60,
     "speed": 3.5,
     "defaultWeaponId": 1,
     "size":{

@@ -46,20 +46,32 @@ int main(int argc, char *argv[])
     States gameStatus = MENU;
 
     //SetTraceLogLevel(LOG_NONE);
-    SetTraceLogLevel(LOG_ALL);
+    //SetTraceLogLevel(LOG_ALL);
 
     // idk man it doesn't work
-    /*
-    if(argc)
+    
+    for(int i = 1; i < argc; i++)
     {
-        if(strcmp(argv[0], "--debug\0"))
-            SetTraceLogLevel(LOG_ALL);
+        if(argv[i][0] == '-')
+        {
+            switch(argv[i][1])
+            {
+                case 'd':
+                    SetTraceLogLevel(LOG_ALL);
+                break;
+                case 'i':
+                    SetTraceLogLevel(LOG_INFO);
+                break;
+                default:
+                    SetTraceLogLevel(LOG_NONE);
+                break;
+            }
+        }
         else
             SetTraceLogLevel(LOG_NONE);
     }
-    else
+    if(argc < 2)
         SetTraceLogLevel(LOG_NONE);
-    */
 
     /*
     * Raylib log levels:

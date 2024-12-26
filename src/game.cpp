@@ -180,6 +180,12 @@ int GameHandler(AppDataS &appData)
         pthread_mutex_unlock(&projectileListLock);
         pthread_mutex_unlock(&enemiesListLock);
         pthread_mutex_unlock(&playerLock);
+        
+        if(!gameMemory.enemiesList)
+        {
+            SpawnWave(gameMemory.level.waveList.begin().enemyList, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level.map);
+        }
+        
     }
 
     appData.toDraw = DRAW_UNLOAD_TEXTURES;
