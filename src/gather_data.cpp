@@ -197,15 +197,15 @@ int LoadLevel(LevelS &level, int levelId)
         ret = FILE_ERROR;
         goto cleanup;
     }
-    TraceLog(LOG_DEBUG, "Opened levels.json");
+    TraceLog(LOG_DEBUG, "Opened levelx.json");
     if(fread(buffer, 1, sizeof(buffer), rawFile) < 0)
     {
-        strcpy(buffer, "Error reading levels file");
+        strcpy(buffer, "Error reading levelx.json");
         ret = FILE_ERROR;
         goto cleanup;
     }
     fclose(rawFile);
-    TraceLog(LOG_DEBUG, "Read levels.json");
+    TraceLog(LOG_DEBUG, "Read levelx.json");
     levelData = cJSON_Parse(buffer);
     if(!levelData)
     {
@@ -213,7 +213,7 @@ int LoadLevel(LevelS &level, int levelId)
         ret = FILE_ERROR;
         goto cleanup;
     }
-    TraceLog(LOG_DEBUG, "Parsed levels.json");
+    TraceLog(LOG_DEBUG, "Parsed levelx.json");
     
     ret = LoadMap(level.map, levelData);
     if(ret)
@@ -240,7 +240,6 @@ int LoadWaves(std::list<WaveL> &waveList, cJSON *levelData)
     char buffer[RAWBUFFERSIZE];
     int i;
     int ret = 0;
-    WaveL tmpWave;
 
     TraceLog(LOG_DEBUG, "Entered LoadWaves func");
 
@@ -248,16 +247,15 @@ int LoadWaves(std::list<WaveL> &waveList, cJSON *levelData)
     aux1 = cJSON_GetObjectItemCaseSensitive(levelData, "waves");
     if(!aux1)
     {
-        strcpy(buffer, "Error loading level waves - ABORTING");
+        strcpy(buffer, "Error fetching level waves - ABORTING");
         ret = FILE_ERROR;
         goto cleanup;
     }
-    TraceLog(LOG_DEBUG, "Loaded level waves");
+    TraceLog(LOG_DEBUG, "Fetched level waves");
 
     // load enemies
     i = 0;
-    while(aux2)
-    {
+    do{
         aux2 = cJSON_GetArrayItem(aux1, i);
         if(!aux2)
         {
@@ -266,10 +264,12 @@ int LoadWaves(std::list<WaveL> &waveList, cJSON *levelData)
         }
         i++;
         
-        LoadWaveEnemies(tmpWave.enemyList, aux1);        
-
+        WaveL tmpWave;
+        LoadWaveEnemies(tmpWave.enemyList, aux2);        
         waveList.push_back(tmpWave);
-    }
+        
+        TraceLog(LOG_DEBUG, TextFormat("Loaded wave n.%d", i));
+    }while(aux2);
     
     cleanup:
     if(ret)
@@ -288,14 +288,14 @@ int LoadWaveEnemies(std::list<WaveEnemiesL> &waveEnemyList, cJSON *currentWaveDa
     {
         tmpWaveEnemy.enemyType = MINION;
         tmpWaveEnemy.nOfEnemies = aux1->valueint;
-        waveEnemyList.push_front(tmpWaveEnemy);
+        waveEnemyList.push_back(tmpWaveEnemy);
     }
     aux1 = cJSON_GetObjectItemCaseSensitive(currentWaveData, "sniper");
     if(aux1 && cJSON_IsNumber(aux1))
     {
         tmpWaveEnemy.enemyType = SNIPER;
         tmpWaveEnemy.nOfEnemies = aux1->valueint;
-        waveEnemyList.push_front(tmpWaveEnemy);
+        waveEnemyList.push_back(tmpWaveEnemy);
     }
 
     return ret;

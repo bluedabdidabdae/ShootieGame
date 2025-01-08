@@ -78,9 +78,9 @@ int GameHandler(AppDataS &appData)
     pthread_mutex_lock(&gameUpdateLock);
     appData.toDraw = DRAW_LOAD_TEXTURES;
 
-    SpawnEnemies(5, MINION, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level);
-    SpawnEnemies(5, SNIPER, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level);
-    TraceLog(LOG_DEBUG, "Spawned test enemies");
+    //SpawnEnemies(5, MINION, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level.map);
+    //SpawnEnemies(5, SNIPER, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level.map);
+    //TraceLog(LOG_DEBUG, "Spawned test enemies");
 
     pthread_mutex_lock(&gameUpdateLock);
     appData.toDraw = DRAWGAME;
@@ -181,9 +181,11 @@ int GameHandler(AppDataS &appData)
         pthread_mutex_unlock(&enemiesListLock);
         pthread_mutex_unlock(&playerLock);
         
-        if(!gameMemory.enemiesList)
+        if(gameMemory.enemiesList.empty() && !gameMemory.level.waveList.empty())
         {
-            SpawnWave(gameMemory.level.waveList.begin().enemyList, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level.map);
+            TraceLog(LOG_DEBUG, "Spawning new wave");
+            SpawnWave(gameMemory.level.waveList.begin()->enemyList, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level.map);
+            gameMemory.level.waveList.pop_front();
         }
         
     }
@@ -261,6 +263,13 @@ void CloseGame(GameDataS &gameData)
         TraceLog(LOG_DEBUG, "Deallocated mapTextures memory");
     }
     else TraceLog(LOG_DEBUG, "MapTextures was not allocated");
+/////////////////////////////////////////////////////////////////////////////////
+    while(!gameData.level.waveList.empty())
+    {
+        if(!gameData.level.waveList.begin()->enemyList.empty())
+            gameData.level.waveList.begin()->enemyList.clear();
+        gameData.level.waveList.pop_front();
+    }
 /////////////////////////////////////////////////////////////////////////////////
     free(&gameData);
 }

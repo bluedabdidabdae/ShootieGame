@@ -18,27 +18,22 @@
 #define ENEMYMINPDISTANCE 250
 #define HEALTHBAROFFSETY -10
 
-int SpawnWave(std::list<WaveEnemiesL> &enemyList, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, int **map)
+int SpawnWave(std::list<WaveEnemiesL> &enemyList, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, MapS &map)
 {
     int i;
     int ret = 0;
 
-    std::list<WaveEnemiesL>
-
-    std::list<WaveEnemiesL>::iterator waveIterator = enemyList.begin();
-    while(waveList.end() != waveIterator)
+    while(!enemyList.empty())
     {
-        SpawnEnemies(waveIterator.nOfEnemies, waveIterator.enemyType, enemiesList, enemiesTemplateList, map);
-
-        waveIterator++;
+        TraceLog(LOG_DEBUG, "Spawning enemy type");
+        SpawnEnemies(enemyList.begin()->nOfEnemies, enemyList.begin()->enemyType, enemiesList, enemiesTemplateList, map);
+        enemyList.pop_front();
     }
-
-    level.waveList.erase(waveList.begin());
 
     return ret;
 }
 
-int SpawnEnemies(int number, EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, int **map)
+int SpawnEnemies(int number, EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, MapS &map)
 {
     int i;
     int ret = 0;
@@ -64,7 +59,7 @@ int SpawnEnemiesPos(int number, EnemyType enemyType, float x, float y, std::list
     return ret;
 }
 
-int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, int **map)
+int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, MapS &map)
 {
     float x, y;
 
