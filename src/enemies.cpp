@@ -18,7 +18,7 @@
 #define ENEMYMINPDISTANCE 250
 #define HEALTHBAROFFSETY -10
 
-int SpawnWave(std::list<WaveEnemiesL> &enemyList, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, MapS &map)
+int SpawnWave(std::list<WaveEnemiesL> &enemyList, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, MapS &map, std::vector<CustomTexture2D> &blockList)
 {
     int i;
     int ret = 0;
@@ -26,21 +26,21 @@ int SpawnWave(std::list<WaveEnemiesL> &enemyList, std::list<EnemyL> &enemiesList
     while(!enemyList.empty())
     {
         TraceLog(LOG_DEBUG, "Spawning enemy type");
-        SpawnEnemies(enemyList.begin()->nOfEnemies, enemyList.begin()->enemyType, enemiesList, enemiesTemplateList, map);
+        SpawnEnemies(enemyList.begin()->nOfEnemies, enemyList.begin()->enemyType, enemiesList, enemiesTemplateList, map, blockList);
         enemyList.pop_front();
     }
 
     return ret;
 }
 
-int SpawnEnemies(int number, EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, MapS &map)
+int SpawnEnemies(int number, EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, MapS &map, std::vector<CustomTexture2D> &blockList)
 {
     int i;
     int ret = 0;
 
     for(i = 0; i < number; i++)
     {
-        ret = SpawnEnemy(enemyType, enemiesList, enemiesTemplateList, map);
+        ret = SpawnEnemy(enemyType, enemiesList, enemiesTemplateList, map, blockList);
         if(ret) return ret;
     }
     return ret;
@@ -59,7 +59,7 @@ int SpawnEnemiesPos(int number, EnemyType enemyType, float x, float y, std::list
     return ret;
 }
 
-int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, MapS &map)
+int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, MapS &map, std::vector<CustomTexture2D> &blockList)
 {
     float x, y;
 
@@ -74,7 +74,7 @@ int SpawnEnemy(EnemyType enemyType, std::list<EnemyL> &enemiesList, EnemiesS *en
             enemiesTemplateList[enemyType].enemy.x,
             enemiesTemplateList[enemyType].enemy.y
         };
-    }while(CheckHitboxMap(tmpEnemy.enemy, map));
+    }while(CheckHitboxMap(tmpEnemy.enemy, map, blockList));
 
     tmpEnemy.enemyType = enemyType;
     tmpEnemy.behaviour = BACKING;
@@ -145,7 +145,7 @@ void EnemiesShooting(std::list<EnemyL> &enemiesList, std::list<ProjectileL> &pro
     }
 }
 
-void UpdateEnemies(std::list<EnemyL> &enemiesList, Rectangle &player, MapS &map)
+void UpdateEnemies(std::list<EnemyL> &enemiesList, Rectangle &player, MapS &map, std::vector<CustomTexture2D> &blockList)
 {
     float Dx, Dy, tmp;
 
@@ -190,18 +190,18 @@ void UpdateEnemies(std::list<EnemyL> &enemiesList, Rectangle &player, MapS &map)
         {
             case BACKING:
                 enemyIter->enemy.x += Dx;
-                if (CheckHitboxMap(enemyIter->enemy, map))
+                if (CheckHitboxMap(enemyIter->enemy, map, blockList))
                     enemyIter->enemy.x -= Dx;
                 enemyIter->enemy.y += Dy;
-                if (CheckHitboxMap(enemyIter->enemy, map))
+                if (CheckHitboxMap(enemyIter->enemy, map, blockList))
                     enemyIter->enemy.y -= Dy;
             break;
             case APPROACHING:
                 enemyIter->enemy.x -= Dx;
-                if (CheckHitboxMap(enemyIter->enemy, map))
+                if (CheckHitboxMap(enemyIter->enemy, map, blockList))
                     enemyIter->enemy.x += Dx;
                 enemyIter->enemy.y -= Dy;
-                if (CheckHitboxMap(enemyIter->enemy, map))
+                if (CheckHitboxMap(enemyIter->enemy, map, blockList))
                     enemyIter->enemy.y += Dy;
             break;
         }

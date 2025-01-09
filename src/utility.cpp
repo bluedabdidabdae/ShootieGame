@@ -1,10 +1,12 @@
 // Copyright (C) 2024  blue_dabdidabdae
 // full notice in main.cpp
+#include <vector>
+
 #include "raylib.h"
 #include "headers/global_types.h"
 #include "headers/utility.h"
 
-int CheckHitboxMap(Rectangle entity, MapS &map)
+int CheckHitboxMap(Rectangle entity, MapS &map, std::vector<CustomTexture2D> &mapTextures)
 {
     int i, ii;
     int x, y;
@@ -20,7 +22,10 @@ int CheckHitboxMap(Rectangle entity, MapS &map)
     {
         for(ii = x; ii < x+2 && ii < map.sizeX && !ret; ii++)
         {
-            if(map.bitmap[i][ii] != 1)
+            if(mapTextures.size() <= map.bitmap[i][ii] || 0 > map.bitmap[i][ii])
+                ret = 1;
+            
+            else if(HITBOX_START < mapTextures[map.bitmap[i][ii]].blockType)
             {
                 if(
                     entity.x < WALLTHICKNESS*ii+WALLTHICKNESS &&

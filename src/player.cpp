@@ -4,7 +4,9 @@
 #include <math.h>
 #include <stdbool.h>
 #include <ctime> // FOR LINUX
-// #include <time.h> // FOR WINDOWS
+#include <iterator>
+#include <list>
+#include <vector>
 
 #include "raylib.h"
 #include "headers/global_types.h"
@@ -41,7 +43,7 @@ void PlayerShooting(PlayerS &player, WeaponS weaponsList[], std::list<Projectile
     projectileList.push_front(tmpProjectile);
 }
 
-void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame)
+void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector<CustomTexture2D> &blockList)
 {
     float tmp;
     float dX = 0;
@@ -76,7 +78,7 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame)
             dY -= player.speed;
         if (CheckHitboxMap({player.player.x, player.player.y+dY,
                             player.player.width, player.player.height},
-                            level.map))
+                            level.map, blockList))
         {
             player.player.y = WALLTHICKNESS*(int)(player.player.y/WALLTHICKNESS);
             dY = 0;
@@ -91,7 +93,7 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame)
             dX -= player.speed;
         if (CheckHitboxMap({player.player.x+dX, player.player.y,
                             player.player.width, player.player.height},
-                            level.map))
+                            level.map, blockList))
         {
             player.player.x = WALLTHICKNESS*(int)(player.player.x/WALLTHICKNESS);
             dX = 0;
@@ -106,7 +108,7 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame)
             dY += player.speed;
         if (CheckHitboxMap({player.player.x, player.player.y+dY,
                             player.player.width, player.player.height},
-                            level.map))
+                            level.map, blockList))
         {
             player.player.y = WALLTHICKNESS*(int)(player.player.y/WALLTHICKNESS);
             player.player.y += WALLTHICKNESS-player.player.height;
@@ -122,7 +124,7 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame)
             dX += player.speed;
         if (CheckHitboxMap({player.player.x+dX, player.player.y,
                             player.player.width, player.player.height},
-                            level.map))
+                            level.map, blockList))
         {
             player.player.x = WALLTHICKNESS*(int)(player.player.x/WALLTHICKNESS);
             player.player.x += WALLTHICKNESS-player.player.width;

@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <iterator>
+#include <list>
+#include <vector>
 
 #include "raylib.h"
 #include "headers/global_types.h"
@@ -141,7 +143,10 @@ void UnloadGameTextures(GameDataS &gameData)
     TraceLog(LOG_DEBUG, "Unloading tiles textures from map list");
     pthread_mutex_lock(&mapLock);
     for(i = 1; i < 5; i++)
-        UnloadTexture(gameData.mapTextures[i]);
+    {
+        UnloadTexture(gameData.mapTextures[i].texture);
+        gameData.mapTextures[i].blockType = NOT_LOADED;
+    }
     pthread_mutex_unlock(&mapLock);
 
     pthread_mutex_unlock(&gameUpdateLock);
@@ -152,7 +157,7 @@ void LoadGameTextures(GameDataS &gameData)
     int ret;
 
     pthread_mutex_lock(&mapLock);
-    ret = LoadMapTextures(&gameData.mapTextures);
+    ret = LoadMapTextures(gameData.mapTextures);
     if(ret) TraceLog(LOG_INFO, "MapTextures not loaded");
     else TraceLog(LOG_DEBUG, "MapTextures loaded");
     pthread_mutex_unlock(&mapLock);
@@ -188,21 +193,43 @@ void DrawGame(GameDataS &gameData)
             {
                 for(int ii = gameData.level.map.sizeX-1; ii >= 0; ii--)
                 {
+                    // if the index ain't valid we draw not_found.png
+                    if(gameData.level.map.bitmap[i][ii] >= gameData.mapTextures.size()
+                        || gameData.level.map.bitmap[i][ii] < 0)
+                    {
+                        DrawTexture(
+                                gameData.mapTextures[0].texture,
+                                WALLTHICKNESS*ii,
+                                WALLTHICKNESS*i,
+                                WHITE
+                                );
+                                continue;
+                    }
+
                     // separating walls from floor tiles
-                    if(gameData.level.map.bitmap[i][ii] > 1)
-                        DrawTexture(
-                            gameData.mapTextures[gameData.level.map.bitmap[i][ii]],
-                            WALLTHICKNESS*ii,
-                            WALLTHICKNESS*i,
-                            WHITE
-                            );
-                    else
-                        DrawTexture(
-                            gameData.mapTextures[gameData.level.map.bitmap[i][ii]],
-                            WALLTHICKNESS*ii,
-                            WALLTHICKNESS*i+12,
-                            WHITE
-                            );
+                    switch(gameData.mapTextures[gameData.level.map.bitmap[i][ii]].blockType)
+                    {
+                        case SPECIAL_NO_HITB:
+                        case SPECIAL_HITB:
+                        case FLOOR_NO_HITB:
+                        case FLOOR_HITB:
+                            DrawTexture(
+                                gameData.mapTextures[gameData.level.map.bitmap[i][ii]].texture,
+                                WALLTHICKNESS*ii,
+                                WALLTHICKNESS*i+12,
+                                WHITE
+                                );
+                        break;
+                        case WALL_NO_HITB:
+                        case WALL_HITB:
+                            DrawTexture(
+                                gameData.mapTextures[gameData.level.map.bitmap[i][ii]].texture,
+                                WALLTHICKNESS*ii,
+                                WALLTHICKNESS*i,
+                                WHITE
+                                );
+                        break;
+                    }
                 }
             }
             pthread_mutex_unlock(&mapLock);

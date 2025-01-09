@@ -119,7 +119,7 @@ int GameHandler(AppDataS &appData)
         pthread_mutex_lock(&frameCounterLock);
 
         TraceLog(LOG_DEBUG, "Updating player");
-        UpdatePlayer(gameMemory.player, gameMemory.level, gameMemory.frameCounter);
+        UpdatePlayer(gameMemory.player, gameMemory.level, gameMemory.frameCounter, gameMemory.mapTextures);
 
         TraceLog(LOG_DEBUG, "Updating camera and mouse");
         UpdateCameraMousePosition(gameMemory.camera, gameMemory.mousePosition, gameMemory.player);
@@ -129,7 +129,7 @@ int GameHandler(AppDataS &appData)
 
         pthread_mutex_lock(&enemiesListLock);
         TraceLog(LOG_DEBUG, "Updating enemies");
-        UpdateEnemies(gameMemory.enemiesList, gameMemory.player.player, gameMemory.level.map);
+        UpdateEnemies(gameMemory.enemiesList, gameMemory.player.player, gameMemory.level.map, gameMemory.mapTextures);
         pthread_mutex_unlock(&mapLock);
         pthread_mutex_unlock(&enemiesListLock);
 
@@ -167,7 +167,7 @@ int GameHandler(AppDataS &appData)
         pthread_mutex_lock(&projectileListLock);
 
         TraceLog(LOG_DEBUG, "Updating projectiles");
-        UpdateProjectiles(gameMemory.projectileList, gameMemory.level);
+        UpdateProjectiles(gameMemory.projectileList, gameMemory.level, gameMemory.mapTextures);
 
         pthread_mutex_unlock(&mapLock);
 
@@ -184,7 +184,7 @@ int GameHandler(AppDataS &appData)
         if(gameMemory.enemiesList.empty() && !gameMemory.level.waveList.empty())
         {
             TraceLog(LOG_DEBUG, "Spawning new wave");
-            SpawnWave(gameMemory.level.waveList.begin()->enemyList, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level.map);
+            SpawnWave(gameMemory.level.waveList.begin()->enemyList, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level.map, gameMemory.mapTextures);
             gameMemory.level.waveList.pop_front();
         }
         
@@ -255,21 +255,13 @@ void CloseGame(GameDataS &gameData)
     }
     else TraceLog(LOG_DEBUG, "EnemiesTemplateList was not allocated");
 /////////////////////////////////////////////////////////////////////////////////
-    if(gameData.mapTextures != NULL)
-    {
-        // delete mapTextures
-        free(gameData.mapTextures);
-        gameData.mapTextures = NULL;
-        TraceLog(LOG_DEBUG, "Deallocated mapTextures memory");
-    }
-    else TraceLog(LOG_DEBUG, "MapTextures was not allocated");
-/////////////////////////////////////////////////////////////////////////////////
     while(!gameData.level.waveList.empty())
     {
         if(!gameData.level.waveList.begin()->enemyList.empty())
             gameData.level.waveList.begin()->enemyList.clear();
         gameData.level.waveList.pop_front();
     }
+    TraceLog(LOG_DEBUG, "Waves cleared from memory");
 /////////////////////////////////////////////////////////////////////////////////
     free(&gameData);
 }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <iterator>
 #include <list>
+#include <vector>
 
 #include "raylib.h"
 #include "headers/global_types.h"
@@ -46,14 +47,14 @@ void CheckProjEntityDamage(std::list<ProjectileL> &projectileList, std::list<Ene
     }
 }
 
-void UpdateProjectiles(std::list<ProjectileL> &projectileList, LevelS &level)
+void UpdateProjectiles(std::list<ProjectileL> &projectileList, LevelS &level, std::vector<CustomTexture2D> &blockList)
 {
     std::list<ProjectileL>::iterator projectileIter = projectileList.begin();
     while(projectileIter != projectileList.end())
     {
         projectileIter->projectile.x -= projectileIter->vX;
         projectileIter->projectile.y -= projectileIter->vY;
-        if(CheckHitboxMap(projectileIter->projectile, level.map))
+        if(CheckHitboxMap(projectileIter->projectile, level.map, blockList))
             projectileIter = projectileList.erase(projectileIter);
         else
             projectileIter++;

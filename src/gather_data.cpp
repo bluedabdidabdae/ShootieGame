@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <iterator>
+#include <list>
+#include <vector>
 
 #include "raylib.h"
 #include "headers/cJSON.h"
@@ -117,52 +120,57 @@ int LoadEnemiesTextures(EnemiesS *enemiesTemplateList)
         return ret;
 }
 
-/*
- * REALLY IMPORTANT
- * The first element of the array MUST be ignored, 
- * since it also gets ignored in all the other functions
- * wich interact with the map. In fact the 0 block is
- * the void block.
-*/
-int LoadMapTextures(Texture2D **mapTextures)
+int LoadMapTextures(std::vector<CustomTexture2D> &mapTextures)
 {
     Image tmp;
     int ret = 0;
     char buffer[MAPRAWBUFFERSIZE];
+    CustomTexture2D tmpTexture2D;
 
     TraceLog(LOG_DEBUG, "Entered LoadMapTextures func");
 
-    *mapTextures = new Texture2D[5];
-    if(!*mapTextures)
-    {
-        strcpy(buffer, "Error allocating mapTextures memory - ABORTING");
-        ret = MALLOC_ERROR;
-        goto cleanup;
-    }
+    tmp = LoadImage("resources/not_found.png");
+    ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS);
+    tmpTexture2D.texture = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    // this block's hitbox is actually hardcoded to true in CheckHitboxMap(...) at utility.cpp
+    tmpTexture2D.blockType = SPECIAL_HITB;
+    mapTextures.push_back(tmpTexture2D);
 
-    // Ignore this line, read the comment at the func start
-    // (*mapTextures)[0]
+    tmp = LoadImage("resources/void_block.png");
+    ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS);
+    tmpTexture2D.texture = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    tmpTexture2D.blockType = SPECIAL_HITB;
+    mapTextures.push_back(tmpTexture2D);
 
     tmp = LoadImage("resources/floors/broken_stone_floor.png");
     ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS);
-    (*mapTextures)[1] = LoadTextureFromImage(tmp);
+    tmpTexture2D.texture = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
+    tmpTexture2D.blockType = FLOOR_NO_HITB;
+    mapTextures.push_back(tmpTexture2D);
 
     tmp = LoadImage("resources/walls/stone_wall.png");
     ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS+12);
-    (*mapTextures)[2] = LoadTextureFromImage(tmp);
+    tmpTexture2D.texture = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
+    tmpTexture2D.blockType = WALL_HITB;
+    mapTextures.push_back(tmpTexture2D);
 
     tmp = LoadImage("resources/walls/broken_stone_wall.png");
     ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS+12);
-    (*mapTextures)[3] = LoadTextureFromImage(tmp);
+    tmpTexture2D.texture = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
+    tmpTexture2D.blockType = WALL_HITB;
+    mapTextures.push_back(tmpTexture2D);
 
     tmp = LoadImage("resources/walls/broken_stone_wall_with_moss.png");
     ImageResize(&tmp, WALLTHICKNESS, WALLTHICKNESS+12);
-    (*mapTextures)[4] = LoadTextureFromImage(tmp);
+    tmpTexture2D.texture = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-
+    tmpTexture2D.blockType = WALL_HITB;
+    mapTextures.push_back(tmpTexture2D);
     
     cleanup:
         if(ret)

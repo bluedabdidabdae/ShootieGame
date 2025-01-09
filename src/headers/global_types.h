@@ -4,6 +4,7 @@
 #define GLOBAL_TYPES_H
 
 #include <list>
+#include <vector>
 
 #include "raylib.h"
 
@@ -91,7 +92,7 @@ typedef enum projectile_owner_model{
 //////////////////////////////////////////////////////////
 typedef struct Projectile_linked_List{
     Rectangle projectile;
-    Texture2D *texture;
+    Texture2D *texture; // will point to the loaded texture
     float vX;
     float vY;
     int damage;
@@ -151,6 +152,24 @@ typedef struct level_data_model{
     MapS map;
 }LevelS;
 //////////////////////////////////////////////////////////
+typedef enum block_type_model{
+    NOT_LOADED,
+    SPECIAL_NO_HITB,
+    WALL_NO_HITB,
+    FLOOR_NO_HITB,
+
+    HITBOX_START,
+
+    SPECIAL_HITB,
+    WALL_HITB,
+    FLOOR_HITB
+}BlockType;
+//////////////////////////////////////////////////////////
+typedef struct custom_texture_2d_model{
+    Texture2D texture;
+    BlockType blockType;
+}CustomTexture2D;
+//////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 // COMPLETE GAME DATA STRUCT
 //////////////////////////////////////////////////////////
@@ -163,9 +182,9 @@ typedef struct game_data_model{
     PlayerS player;
     std::list<EnemyL> enemiesList;
     std::list<ProjectileL> projectileList;
+    std::vector<CustomTexture2D> mapTextures;
     WeaponS *weaponsList; // its an array
     EnemiesS *enemiesTemplateList; // its an array
-    Texture2D *mapTextures; // its an array
     Vector2 mousePosition;
     LevelS level;
 }GameDataS;
@@ -174,7 +193,7 @@ typedef struct app_data_model{
     // data relative to the whole program
     ToDraw toDraw;
     SettingsFlags settingsFlags;
-    GameDataS *gameData;
+    GameDataS *gameData; // will be allocated once the game starts
 }AppDataS;
 //////////////////////////////////////////////////////////
 

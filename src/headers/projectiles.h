@@ -7,6 +7,6 @@
 #include "global_types.h"
 
 void CheckProjEntityDamage(std::list<ProjectileL> &projectileList, std::list<EnemyL> &enemiesList, PlayerS &player);
-void UpdateProjectiles(std::list<ProjectileL> &projectileList, LevelS &level);
+void UpdateProjectiles(std::list<ProjectileL> &projectileList, LevelS &level, std::vector<CustomTexture2D> &blockList);
 
 #endif

@@ -9,6 +9,6 @@
 #include "global_types.h"
 
 void PlayerShooting(PlayerS &player, WeaponS weaponsList[], std::list<ProjectileL> &projectileList, Vector2 &mousePosition);
-void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame);
+void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector<CustomTexture2D> &blockList);
 
 #endif
