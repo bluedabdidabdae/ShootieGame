@@ -30,8 +30,8 @@
     ],
     "waves":[
         {
-            "minion": 1,
-            "sniper": 1
+            "minion": 20,
+            "sniper": 20
         },
         {
             "minion": 20
