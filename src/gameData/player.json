@@ -1,7 +1,7 @@
 {
-    "baseHealth": 60000000,
+    "baseHealth": 100,
     "speed": 3.5,
-    "defaultWeaponId": 7,
+    "defaultWeaponId": 6,
     "size":{
         "x": 20,
         "y": 20
