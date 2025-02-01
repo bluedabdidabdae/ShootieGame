@@ -37,9 +37,6 @@ pthread_mutex_t frameCounterLock;
 pthread_mutex_t mapLock;
 pthread_mutex_t weaponDataLock;
 
-int WIDTH = 0;
-int HEIGHT = 0;
-
 void InitData(AppDataS &appData);
 
 int main(int argc, char *argv[])

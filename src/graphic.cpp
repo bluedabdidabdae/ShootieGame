@@ -29,6 +29,9 @@ extern pthread_mutex_t frameCounterLock;
 extern pthread_mutex_t mapLock;
 extern pthread_mutex_t weaponDataLock;
 
+int WIDTH = 0;
+int HEIGHT = 0;
+
 // local functions
 void LoadGameTextures(GameDataS &gameData);
 void UnloadGameTextures(GameDataS &gameData);

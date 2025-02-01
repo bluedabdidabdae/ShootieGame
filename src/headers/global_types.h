@@ -19,9 +19,6 @@
 #define FILE_ERROR 13
 #define ARRAY_ERROR 14
 
-extern int WIDTH;
-extern int HEIGHT;
-
 typedef unsigned int uint;
 //////////////////////////////////////////////////////////
 typedef enum StatesModel{

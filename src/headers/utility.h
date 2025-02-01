@@ -12,6 +12,9 @@
     rect1.x > rect2.x - rect2.width && \
     rect1.y > rect2.y - rect2.height
 
+extern int WIDTH;
+extern int HEIGHT;
+
 int CheckHitboxRec(Rectangle rect1, Rectangle rect2);
 int CheckHitboxMap(Rectangle entity, MapS &map, std::vector<CustomTexture2D> &mapTextures);
 

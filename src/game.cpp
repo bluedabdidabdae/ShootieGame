@@ -119,17 +119,25 @@ int GameHandler(AppDataS &appData)
         pthread_mutex_lock(&frameCounterLock);
 
         TraceLog(LOG_DEBUG, "Updating player");
-        UpdatePlayer(gameMemory.player, gameMemory.level, gameMemory.frameCounter, gameMemory.mapTextures);
+        UpdatePlayer(gameMemory.player,
+                        gameMemory.level,
+                        gameMemory.frameCounter,
+                        gameMemory.mapTextures);
 
         TraceLog(LOG_DEBUG, "Updating camera and mouse");
-        UpdateCameraMousePosition(gameMemory.camera, gameMemory.mousePosition, gameMemory.player);
+        UpdateCameraMousePosition(gameMemory.camera,
+                                    gameMemory.mousePosition,
+                                    gameMemory.player);
         pthread_mutex_unlock(&cameraLock);
         pthread_mutex_unlock(&playerLock);
         pthread_mutex_unlock(&frameCounterLock);
 
         pthread_mutex_lock(&enemiesListLock);
         TraceLog(LOG_DEBUG, "Updating enemies");
-        UpdateEnemies(gameMemory.enemiesList, gameMemory.player.player, gameMemory.level.map, gameMemory.mapTextures);
+        UpdateEnemies(gameMemory.enemiesList,
+                        gameMemory.player.player,
+                        gameMemory.level.map,
+                        gameMemory.mapTextures);
         pthread_mutex_unlock(&mapLock);
         pthread_mutex_unlock(&enemiesListLock);
 
@@ -145,7 +153,10 @@ int GameHandler(AppDataS &appData)
             TraceLog(LOG_DEBUG, "Player shoots");
             pthread_mutex_lock(&projectileListLock);
             if(!gameMemory.player.flags.isStunned)
-                PlayerShooting(gameMemory.player, gameMemory.weaponsList, gameMemory.projectileList, gameMemory.mousePosition);
+                PlayerShooting(gameMemory.player,
+                                gameMemory.weaponsList,
+                                gameMemory.projectileList,
+                                gameMemory.mousePosition);
             pthread_mutex_unlock(&projectileListLock);
         }
         pthread_mutex_unlock(&frameCounterLock);
@@ -167,7 +178,9 @@ int GameHandler(AppDataS &appData)
         pthread_mutex_lock(&projectileListLock);
 
         TraceLog(LOG_DEBUG, "Updating projectiles");
-        UpdateProjectiles(gameMemory.projectileList, gameMemory.level, gameMemory.mapTextures);
+        UpdateProjectiles(gameMemory.projectileList,
+                            gameMemory.level,
+                            gameMemory.mapTextures);
 
         pthread_mutex_unlock(&mapLock);
 
@@ -175,7 +188,9 @@ int GameHandler(AppDataS &appData)
         pthread_mutex_lock(&playerLock);
 
         TraceLog(LOG_DEBUG, "Checking projectiles damage");
-        CheckProjEntityDamage(gameMemory.projectileList, gameMemory.enemiesList, gameMemory.player);
+        CheckProjEntityDamage(gameMemory.projectileList,
+                                gameMemory.enemiesList,
+                                gameMemory.player);
 
         pthread_mutex_unlock(&projectileListLock);
         pthread_mutex_unlock(&enemiesListLock);
@@ -184,7 +199,11 @@ int GameHandler(AppDataS &appData)
         if(gameMemory.enemiesList.empty() && !gameMemory.level.waveList.empty())
         {
             TraceLog(LOG_DEBUG, "Spawning new wave");
-            SpawnWave(gameMemory.level.waveList.begin()->enemyList, gameMemory.enemiesList, gameMemory.enemiesTemplateList, gameMemory.level.map, gameMemory.mapTextures);
+            SpawnWave(gameMemory.level.waveList.begin()->enemyList,
+                        gameMemory.enemiesList,
+                        gameMemory.enemiesTemplateList,
+                        gameMemory.level.map,
+                        gameMemory.mapTextures);
             gameMemory.level.waveList.pop_front();
         }
         
