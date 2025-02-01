@@ -216,7 +216,7 @@ int InitGameData(GameDataS &gameMemory)
     gameMemory.camera.target = (Vector2){ gameMemory.player.player.x + gameMemory.player.player.width,
                                           gameMemory.player.player.y + gameMemory.player.player.height };
     TraceLog(LOG_DEBUG, "Camera initial target defined");
-    gameMemory.camera.offset = (Vector2){ WIDTH/2.0f, HEIGT/2.0f };
+    gameMemory.camera.offset = (Vector2){ WIDTH/2.0f, HEIGHT/2.0f };
     TraceLog(LOG_DEBUG, "Camera offset defined");
     gameMemory.camera.zoom = 1.7f;
     TraceLog(LOG_DEBUG, "Camera zoom defined");

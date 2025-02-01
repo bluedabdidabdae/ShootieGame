@@ -44,8 +44,13 @@ void *HandleGraphics(void *data)
     int ret = 0;
     AppDataS &appData = *(AppDataS*)data;
 
-    InitWindow(WIDTH, HEIGT, WINDOWNAME);
+    InitWindow(WIDTH, HEIGHT, WINDOWNAME);
     SetTargetFPS(TARGETFPS);
+
+    WIDTH = (int)((float)GetMonitorWidth(GetCurrentMonitor()) * 0.95);
+    HEIGHT = (int)((float)GetMonitorHeight(GetCurrentMonitor()) * 0.95);
+
+    SetWindowSize(WIDTH, HEIGHT);
 
     // sending clear to update to main
     pthread_mutex_unlock(&gameUpdateLock);
