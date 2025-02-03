@@ -85,9 +85,11 @@ int main(int argc, char *argv[])
     * LOG_NONE: 7
     */
 
-    srand(time(NULL));
-
     pthread_t drawingThreadId = { 0 };
+
+    TraceLog(LOG_INFO, "Game started");
+
+    srand(time(NULL));
 
     // initializing appata
     InitData(appData);
@@ -96,7 +98,7 @@ int main(int argc, char *argv[])
     error = pthread_create(&drawingThreadId, NULL, HandleGraphics, &appData); 
     if (error)
     {
-        TraceLog(LOG_ERROR, "Error creating thread");
+        TraceLog(LOG_FATAL, "Error creating thread");
         return 0;
     }
     appData.toDraw = DRAWMAINMENU;
@@ -134,12 +136,12 @@ int main(int argc, char *argv[])
     {
         // per ora la gestione del thread rimarrà così, mi basta sapere
         // se c'è stato un problema o no
-        TraceLog(LOG_ERROR, "Error merging threads, trying to force kill it");
+        TraceLog(LOG_WARNING, "Error merging threads, trying to force kill it");
         error = pthread_cancel(drawingThreadId);
         if(error)
         {
-            TraceLog(LOG_ERROR, "Couldn't kill thread, hope the OS works it out");
-            TraceLog(LOG_ERROR, "<< ABORTING >>");
+            TraceLog(LOG_FATAL, "Couldn't kill thread, hope the OS works it out");
+            TraceLog(LOG_FATAL, "<< ABORTING >>");
             abort();
         }
     }
