@@ -37,7 +37,7 @@ void LoadGameTextures(GameDataS &gameData);
 void UnloadGameTextures(GameDataS &gameData);
 void DrawMenuLoop(ToDraw &toDraw);
 void DrawMenu();
-void DrawSettingsLoop(ToDraw &toDraw, SettingsFlags &settingsFlags);
+void DrawResolveSettingsLoop(ToDraw &toDraw, SettingsFlags &settingsFlags);
 void DrawSettings();
 void DrawGameLoop(AppDataS &appData);
 void DrawGame(GameDataS &gameData);
@@ -67,7 +67,7 @@ void *HandleGraphics(void *data)
                 DrawMenuLoop(appData.toDraw);
             break;
             case DRAWSETTINGS:
-                DrawSettingsLoop(appData.toDraw, appData.settingsFlags);
+                DrawResolveSettingsLoop(appData.toDraw, appData.settingsFlags);
             break;
             case DRAW_LOAD_TEXTURES:
                 LoadGameTextures(*appData.gameData);
@@ -100,7 +100,7 @@ void DrawMenuLoop(ToDraw &toDraw)
     }while(DRAWMAINMENU == toDraw);
 }
 
-void DrawSettingsLoop(ToDraw &toDraw, SettingsFlags &settingsFlags)
+void DrawResolveSettingsLoop(ToDraw &toDraw, SettingsFlags &settingsFlags)
 {
     do{
         pthread_mutex_unlock(&gameUpdateLock);
@@ -109,6 +109,8 @@ void DrawSettingsLoop(ToDraw &toDraw, SettingsFlags &settingsFlags)
         if(settingsFlags.toggleFullscreen)
         {
             ToggleFullscreen();
+            WIDTH = GetScreenWidth();
+            HEIGHT = GetScreenHeight();
             settingsFlags.toggleFullscreen = false;
         }
     }while(DRAWSETTINGS == toDraw);
@@ -287,11 +289,12 @@ void DrawGame(GameDataS &gameData)
 
             //DrawRectangle(gameData->mousePosition->x, gameData->mousePosition->y, 5, 5, RED);
         EndMode2D();
-        // drawing the ui
+
+        // drawing the ui (independent from camera position)
         TraceLog(LOG_DEBUG, "Drawing fps");
         pthread_mutex_lock(&frameCounterLock);
 
-        DrawFPS(5, 5);
+        DrawFPS(WIDTH*0.01, HEIGHT*0.01);
         
         //DrawRectangle(GetMouseX(), GetMouseY(), 5, 5, YELLOW);
         pthread_mutex_unlock(&frameCounterLock);
@@ -304,16 +307,23 @@ void DrawGame(GameDataS &gameData)
 
         pthread_mutex_unlock(&playerLock);
 
-        DrawRectangle(30, IsWindowFullscreen() ? 640 : 590, 250, 45, Fade(WHITE, FADEVALUE));
+        // weapon name background rectangle
+        // if you modify the x and y multipliers also
+        // modify the ones on the next DrawText(...);
+        DrawRectangle(WIDTH*0.03, HEIGHT*0.86, 250, 45, Fade(WHITE, FADEVALUE));
 
         pthread_mutex_lock(&playerLock);
         pthread_mutex_lock(&weaponDataLock);
 
+        // the x and y coordinates multipliers must be
+        // bigger by 0.01 than the ones on the background
+        // rectangle, its necessary to correctly align the
+        // the with the rectangle
         TraceLog(LOG_DEBUG, "Drawing weapon name");
         DrawText(
             TextFormat("%d %s", gameData.player.activeWeaponId == gameData.player.weapons[0] ? 1 : 2,
             gameData.weaponsList[gameData.player.activeWeaponId].weaponName), 
-            40, IsWindowFullscreen() ? 650 : 600, 30, WHITE);
+            WIDTH*0.04, HEIGHT*0.87, 35, WHITE);
             
         pthread_mutex_unlock(&playerLock);
         pthread_mutex_unlock(&weaponDataLock);
@@ -334,7 +344,7 @@ void DrawMenu()
 
         DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+200, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
         DrawText(TextFormat("Exit"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+205, 40, MAINMENUTEXTCOLOR);
-        DrawFPS(5, 5);
+        DrawFPS(WIDTH*0.01, HEIGHT*0.01);
     EndDrawing();
 }
 
@@ -352,6 +362,6 @@ void DrawSettings()
 
         DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+200, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
         DrawText(TextFormat("Quit game"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+205, 40, MAINMENUTEXTCOLOR);
-        DrawFPS(5, 5);
+        DrawFPS(WIDTH*0.01, HEIGHT*0.01);
     EndDrawing();
 }
