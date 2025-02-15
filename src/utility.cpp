@@ -25,6 +25,9 @@ int CheckHitboxMap(Rectangle entity, MapS &map, std::vector<CustomTexture2D> &ma
             if(mapTextures.size() <= map.bitmap[i][ii] || 0 > map.bitmap[i][ii])
                 ret = 1;
             
+            // HITBOX_START its halfway in the enum type that
+            // defines various types of blocks, it splits it
+            // in two halves (hitbox and no hitbox)
             else if(HITBOX_START < mapTextures[map.bitmap[i][ii]].blockType)
             {
                 if(

@@ -50,7 +50,7 @@
         },
         {
             "name": "SMG",
-            "damage": 3,
+            "damage": 4,
             "shotsDeelay": 10,
             "projectileSize": 5,
             "projectileSpeed": 8,

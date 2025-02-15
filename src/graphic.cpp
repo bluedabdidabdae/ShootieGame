@@ -189,6 +189,28 @@ void LoadGameTextures(GameDataS &gameData)
 
 void DrawGame(GameDataS &gameData)
 {
+    pthread_mutex_lock(&cameraLock);
+    pthread_mutex_lock(&mapLock);
+    int startYRender = (gameData.camera.target.y-gameData.camera.offset.y)/WALLTHICKNESS-1;
+    if(startYRender < 0){
+        startYRender = 0;
+    }
+    int endYRender = (gameData.camera.target.y+gameData.camera.offset.y)/WALLTHICKNESS;
+    if(endYRender > gameData.level.map.sizeY)
+        endYRender = gameData.level.map.sizeY;
+
+    int startXRender = (gameData.camera.target.x-gameData.camera.offset.x)/WALLTHICKNESS-1;
+    if(startXRender < 0){
+        startXRender = 0;
+    }
+    int endXRender = (gameData.camera.target.x+gameData.camera.offset.x)/WALLTHICKNESS;
+    if(endXRender > gameData.level.map.sizeX)
+        endXRender = gameData.level.map.sizeX;
+
+    pthread_mutex_unlock(&cameraLock);
+    pthread_mutex_unlock(&mapLock);
+
+    BeginDrawing();    
         ClearBackground(BLACK);
         pthread_mutex_lock(&cameraLock);
         // drawing the game
@@ -199,9 +221,11 @@ void DrawGame(GameDataS &gameData)
             // drawing map borders
             TraceLog(LOG_DEBUG, "Drawing map");
             pthread_mutex_lock(&mapLock);
-            for(int i = 0; i < gameData.level.map.sizeY; i++)
+            
+            
+            for(int i = startYRender; i < endYRender; i++)
             {
-                for(int ii = gameData.level.map.sizeX-1; ii >= 0; ii--)
+                for(int ii = endXRender-1; ii >= startXRender; ii--)
                 {
                     // if the index ain't valid we draw not_found.png
                     if(gameData.level.map.bitmap[i][ii] >= gameData.mapTextures.size()
