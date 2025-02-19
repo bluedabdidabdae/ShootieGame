@@ -172,6 +172,12 @@ void LoadGameTextures(GameDataS &gameData)
     else TraceLog(LOG_DEBUG, "MapTextures loaded");
     pthread_mutex_unlock(&mapLock);
 
+    pthread_mutex_lock(&playerLock);
+    ret = LoadPlayerTexture(&gameData.player);
+    if(ret) TraceLog(LOG_INFO, "PlayerTextures not loaded");
+    else TraceLog(LOG_DEBUG, "PlayerTextures loaded");
+    pthread_mutex_unlock(&playerLock);
+
     pthread_mutex_lock(&enemiesListLock);
     ret = LoadEnemiesTextures(gameData.enemiesTemplateList);
     if(ret) TraceLog(LOG_INFO, "EnemiesTextures not loaded");
@@ -271,7 +277,7 @@ void DrawGame(GameDataS &gameData)
             // drawing player
             TraceLog(LOG_DEBUG, "Drawing player");
             if(!gameData.player.flags.isDodging)
-                DrawRectangleRec(gameData.player.player, BLUE);
+                DrawTexture(gameData.player.playerTexture, gameData.player.player.x, gameData.player.player.y, WHITE);
             else
                 DrawRectangleRec(gameData.player.player, RED);
             pthread_mutex_unlock(&playerLock);

@@ -99,6 +99,11 @@ typedef struct Projectile_linked_List{
 //////////////////////////////////////////////////////////
 typedef struct player_model{
     Rectangle player;
+    bool isTexture;
+    union{
+        Texture2D playerTexture;
+        Image playerImage;
+    };
     int lives;
     float speed;
     // weapon variables

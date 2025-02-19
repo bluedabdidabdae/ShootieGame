@@ -30,6 +30,8 @@ int CheckHitboxMap(Rectangle entity, MapS &map, std::vector<CustomTexture2D> &ma
             // in two halves (hitbox and no hitbox)
             else if(HITBOX_START < mapTextures[map.bitmap[i][ii]].blockType)
             {
+                // keep it this way, if you use <= or >= player collisions
+                // start going kowabunga
                 if(
                     entity.x < WALLTHICKNESS*ii+WALLTHICKNESS &&
                     entity.y < WALLTHICKNESS*i+WALLTHICKNESS &&

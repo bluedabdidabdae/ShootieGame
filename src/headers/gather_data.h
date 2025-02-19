@@ -8,6 +8,7 @@
 int GatherData(GameDataS &gameData);
 int LoadLevel(LevelS &level, int levelId);
 int LoadMapTextures(std::vector<CustomTexture2D> &mapTextures);
+int LoadPlayerTexture(PlayerS *player);
 int LoadEnemiesTextures(EnemiesS *enemiesTemplateList);
 int LoadWeaponsTextures(WeaponS *weaponsList);
 

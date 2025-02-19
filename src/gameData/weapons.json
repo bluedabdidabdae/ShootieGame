@@ -46,7 +46,7 @@
             "shotsDeelay": 15,
             "projectileSize": 10,
             "projectileSpeed": 16,
-            "projectileImage": "resources/projectiles/base_bullet.png"
+            "projectileImage": "resources/projectiles/#_bullet.png"
         },
         {
             "name": "SMG",
@@ -62,7 +62,7 @@
             "shotsDeelay": 0,
             "projectileSize": 40,
             "projectileSpeed": 30,
-            "projectileImage": "resources/projectiles/base_bullet.png"
+            "projectileImage": "resources/projectiles/#_bullet.png"
         }
     ]
 }

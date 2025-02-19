@@ -60,12 +60,29 @@ int GatherData(GameDataS &gameData)
     return ret;
 }
 
+int LoadPlayerTexture(PlayerS *player)
+{
+    Image tmp;
+    int ret = 0;
+    char buffer[MAPRAWBUFFERSIZE] = { 0 };
+
+    tmp = player->playerImage;
+    ImageResize(&tmp, player->player.width, player->player.height);
+    player->playerTexture = LoadTextureFromImage(tmp);
+    player->isTexture = true;
+
+    cleanup:
+        if(ret)
+            TraceLog(LOG_ERROR, buffer);
+        return ret;
+}
+
 int LoadWeaponsTextures(WeaponS *weaponsList)
 {
     Image tmp;
     int ret = 0;
     int i;
-    char buffer[MAPRAWBUFFERSIZE];
+    char buffer[MAPRAWBUFFERSIZE] = { 0 };
 
     for(i = 0; i < 8; i++)
     {
@@ -124,7 +141,7 @@ int LoadMapTextures(std::vector<CustomTexture2D> &mapTextures)
 {
     Image tmp;
     int ret = 0;
-    char buffer[MAPRAWBUFFERSIZE];
+    char buffer[MAPRAWBUFFERSIZE] = { 0 };
     CustomTexture2D tmpTexture2D;
 
     TraceLog(LOG_DEBUG, "Entered LoadMapTextures func");
@@ -184,7 +201,7 @@ int LoadLevel(LevelS &level, int levelId)
     cJSON *levelData;
     int ret = 0;
     char levelFile[35];
-    char buffer[MAPRAWBUFFERSIZE];
+    char buffer[MAPRAWBUFFERSIZE] = { 0 };
     char levelIdCh = levelId + '0';
 
     TraceLog(LOG_DEBUG, "Entered LoadLevel func");
@@ -245,7 +262,7 @@ int LoadWaves(std::list<WaveL> &waveList, cJSON *levelData)
     cJSON *aux1;
     cJSON *aux2;
     cJSON *aux3;
-    char buffer[RAWBUFFERSIZE];
+    char buffer[RAWBUFFERSIZE] = { 0 };
     int i;
     int ret = 0;
 
@@ -316,7 +333,7 @@ int LoadMap(MapS &map, cJSON *levelData)
     cJSON *aux3;
     cJSON *aux4;
     int arrSize;
-    char buffer[RAWBUFFERSIZE];
+    char buffer[RAWBUFFERSIZE] = { 0 };
     int ret = 0;
 
     TraceLog(LOG_DEBUG, "Entered LoadMap func");
@@ -402,7 +419,7 @@ int GatherEnemiesData(EnemiesS **enemiesTemplateList)
     int arrSize;
     int ret = 0;
     int i;
-    char buffer[RAWBUFFERSIZE];
+    char buffer[RAWBUFFERSIZE] = { 0 };
 
     // opening and parsing weapons.json file
     rawFile = fopen(ENEMIESFILE, "r");
@@ -619,7 +636,7 @@ int GatherWeaponData(WeaponS **weaponsList)
     int i;
     int arrSize;
     int ret = 0;
-    char buffer[RAWBUFFERSIZE];
+    char buffer[RAWBUFFERSIZE] = { 0 };
 
     TraceLog(LOG_DEBUG, "Entered GatherWeaponData func");
 
@@ -785,7 +802,7 @@ int GatherPlayerData(PlayerS &player)
     cJSON *aux1;
     cJSON *aux2;
     cJSON *aux3;
-    char buffer[RAWBUFFERSIZE];
+    char buffer[RAWBUFFERSIZE] = { 0 };
     int ret = 0;
 
     TraceLog(LOG_DEBUG, "Entered GatherPlayerData func");
@@ -932,6 +949,18 @@ int GatherPlayerData(PlayerS &player)
     player.weapons[1] = -1;
     player.activeWeaponId = player.weapons[0];
     TraceLog(LOG_DEBUG, "Loaded player base weapon");
+
+    // loading player image
+    aux1 = cJSON_GetObjectItemCaseSensitive(playerData, "playerImage");
+    if(!cJSON_IsString(aux1))
+    {
+        strcpy(buffer, "Error loading player image - ABORTING");
+        ret = FILE_ERROR;
+        goto cleanup;
+    }
+    player.playerImage = LoadImage(aux1->valuestring);
+    player.isTexture = false;
+    TraceLog(LOG_DEBUG, "Loaded player image");
 
     cleanup:
         if(ret)

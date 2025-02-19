@@ -20,8 +20,8 @@ void PlayerShooting(PlayerS &player, WeaponS weaponsList[], std::list<Projectile
     
     tmpProjectile.projectile =
     {
-        player.player.x,
-        player.player.y,
+        player.player.x+player.player.width/2,
+        player.player.y+player.player.height/2,
         weaponsList[player.activeWeaponId].projectileSize,
         weaponsList[player.activeWeaponId].projectileSize
     };
@@ -111,7 +111,7 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector
                             level.map, blockList))
         {
             player.player.y = WALLTHICKNESS*(int)(player.player.y/WALLTHICKNESS);
-            player.player.y += WALLTHICKNESS-player.player.height;
+            player.player.y += abs(WALLTHICKNESS-player.player.height);
             dY = 0;
         }
     }
@@ -127,12 +127,16 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector
                             level.map, blockList))
         {
             player.player.x = WALLTHICKNESS*(int)(player.player.x/WALLTHICKNESS);
-            player.player.x += WALLTHICKNESS-player.player.width;
+            player.player.x += abs(WALLTHICKNESS-player.player.width);
             dX = 0;
         }
     }
 
     // VI : VItot = VR : VRtot
+    // normalizing the player speed if
+    // hes moving in 2 directions at the
+    // same time, the 1.3 comes from
+    // the pitagora theorem
     if(dX && dY)
     {
         dX /= 1.3;

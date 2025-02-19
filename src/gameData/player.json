@@ -1,11 +1,12 @@
 {
     "baseHealth": 100,
     "speed": 3.5,
-    "defaultWeaponId": 3,
+    "defaultWeaponId": 7,
     "size":{
         "x": 20,
-        "y": 20
+        "y": 29
     },
+    "playerImage": "resources/player/player.png",
     "dodge":{
         "dodgeSpeed": 4,
         "dodgeDeelayFrames": 90,
