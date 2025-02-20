@@ -220,8 +220,8 @@ int InitGameData(GameDataS &gameMemory)
     gameMemory.score = 104;
 
     // Init player position and flags (other par inited from json file)
-    gameMemory.player.player.x = 170;
-    gameMemory.player.player.y = 170;
+    gameMemory.player.player.x = 200;
+    gameMemory.player.player.y = 200;
     gameMemory.player.flags.isDodging = false;
     gameMemory.player.flags.isWalking = false;
     gameMemory.player.flags.canDodge = true;
@@ -235,7 +235,7 @@ int InitGameData(GameDataS &gameMemory)
     gameMemory.camera.target = (Vector2){ gameMemory.player.player.x + gameMemory.player.player.width,
                                           gameMemory.player.player.y + gameMemory.player.player.height };
     TraceLog(LOG_DEBUG, "Camera initial target defined");
-    gameMemory.camera.offset = (Vector2){ WIDTH/2.0f, HEIGHT/2.0f };
+    gameMemory.camera.offset = (Vector2){ GetScreenWidth()/2.0f, GetScreenHeight()/2.0f };
     TraceLog(LOG_DEBUG, "Camera offset defined");
     gameMemory.camera.zoom = 1.7f;
     TraceLog(LOG_DEBUG, "Camera zoom defined");

@@ -20,8 +20,8 @@ void PlayerShooting(PlayerS &player, WeaponS weaponsList[], std::list<Projectile
     
     tmpProjectile.projectile =
     {
-        player.player.x+player.player.width/2,
-        player.player.y+player.player.height/2,
+        (player.player.x+player.player.width/2)-weaponsList[player.activeWeaponId].projectileSize/2,
+        (player.player.y+player.player.height/2)-weaponsList[player.activeWeaponId].projectileSize/2,
         weaponsList[player.activeWeaponId].projectileSize,
         weaponsList[player.activeWeaponId].projectileSize
     };
@@ -51,9 +51,11 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector
     int vX;
     int vY;
 
+    // if the player is stunned it sucks rams
     if(player.flags.isStunned)
         return;
 
+    // handling the dodge trigger and duration
     if(currentFrame >= player.nextDodgeFrame && IsKeyDown(KEY_SPACE))
     {
         player.flags.isDodging = true;
@@ -70,19 +72,22 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector
         player.flags.isInvulnerable = false;
     }
 
+    // handling the other movements
     if (IsKeyDown(KEY_W))
     {
         if(player.flags.isDodging)
             dY -= player.dodgeSpeed;
         else
             dY -= player.speed;
+        
         if (CheckHitboxMap({player.player.x, player.player.y+dY,
-                            player.player.width, player.player.height},
-                            level.map, blockList))
+        player.player.width, player.player.height},
+        level.map, blockList))
         {
             player.player.y = WALLTHICKNESS*(int)(player.player.y/WALLTHICKNESS);
             dY = 0;
         }
+        
     }
 
     if (IsKeyDown(KEY_A))
@@ -91,13 +96,15 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector
             dX -= player.dodgeSpeed;
         else
             dX -= player.speed;
+        
         if (CheckHitboxMap({player.player.x+dX, player.player.y,
-                            player.player.width, player.player.height},
-                            level.map, blockList))
+        player.player.width, player.player.height},
+        level.map, blockList))
         {
             player.player.x = WALLTHICKNESS*(int)(player.player.x/WALLTHICKNESS);
             dX = 0;
         }
+        
     }
 
     if (IsKeyDown(KEY_S))
@@ -106,14 +113,16 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector
             dY += player.dodgeSpeed;
         else
             dY += player.speed;
+        
         if (CheckHitboxMap({player.player.x, player.player.y+dY,
-                            player.player.width, player.player.height},
-                            level.map, blockList))
+        player.player.width, player.player.height},
+        level.map, blockList))
         {
             player.player.y = WALLTHICKNESS*(int)(player.player.y/WALLTHICKNESS);
-            player.player.y += abs(WALLTHICKNESS-player.player.height);
+            player.player.y += WALLTHICKNESS-player.player.height;
             dY = 0;
         }
+        
     }
 
     if (IsKeyDown(KEY_D))
@@ -122,14 +131,16 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector
             dX += player.dodgeSpeed;
         else
             dX += player.speed;
+        
         if (CheckHitboxMap({player.player.x+dX, player.player.y,
-                            player.player.width, player.player.height},
-                            level.map, blockList))
+        player.player.width, player.player.height},
+        level.map, blockList))
         {
             player.player.x = WALLTHICKNESS*(int)(player.player.x/WALLTHICKNESS);
-            player.player.x += abs(WALLTHICKNESS-player.player.width);
+            player.player.x += WALLTHICKNESS-player.player.width;
             dX = 0;
         }
+        
     }
 
     // VI : VItot = VR : VRtot
@@ -142,7 +153,13 @@ void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector
         dX /= 1.3;
         dY /= 1.3;
     }
-
     player.player.x += dX;
     player.player.y += dY;
+/*
+if (CheckHitboxMap(player.player, level.map, blockList))
+player.player.x -= dX;
+
+if (CheckHitboxMap(player.player, level.map, blockList))
+player.player.y -= dY;
+*/
 }

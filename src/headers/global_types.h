@@ -8,7 +8,7 @@
 
 #include "raylib.h"
 
-#define WALLTHICKNESS 30
+#define WALLTHICKNESS 35
 
 #define WEAPONNAMEBUFFER 20
 #define MAPX 53

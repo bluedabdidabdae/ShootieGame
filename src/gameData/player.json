@@ -3,8 +3,8 @@
     "speed": 3.5,
     "defaultWeaponId": 7,
     "size":{
-        "x": 20,
-        "y": 29
+        "x": 25,
+        "y": 25
     },
     "playerImage": "resources/player/player.png",
     "dodge":{

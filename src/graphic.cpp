@@ -13,7 +13,7 @@
 
 #define WINDOWNAME "Shootie Shootie Game"
 #define TARGETFPS 60
-#define MAINMENUBUTTONWIDTH 760
+#define MAINMENUBUTTONGetScreenWidth() 760
 #define MAINMENUBUTTONHEIGT 50
 #define FADEVALUE 0.2
 #define MAINMENUBUTTONX 300
@@ -28,9 +28,6 @@ extern pthread_mutex_t cameraLock;
 extern pthread_mutex_t frameCounterLock;
 extern pthread_mutex_t mapLock;
 extern pthread_mutex_t weaponDataLock;
-
-int WIDTH = 0;
-int HEIGHT = 0;
 
 // local functions
 void LoadGameTextures(GameDataS &gameData);
@@ -47,13 +44,11 @@ void *HandleGraphics(void *data)
     int ret = 0;
     AppDataS &appData = *(AppDataS*)data;
 
-    InitWindow(WIDTH, HEIGHT, WINDOWNAME);
+    InitWindow(0, 0, WINDOWNAME);
     SetTargetFPS(TARGETFPS);
 
-    WIDTH = (int)((float)GetMonitorWidth(GetCurrentMonitor()) * 0.95);
-    HEIGHT = (int)((float)GetMonitorHeight(GetCurrentMonitor()) * 0.95);
-
-    SetWindowSize(WIDTH, HEIGHT);
+    SetWindowSize((int)((float)GetMonitorWidth(GetCurrentMonitor()) * 0.95),
+                    (int)((float)GetMonitorHeight(GetCurrentMonitor()) * 0.95));
 
     // sending clear to update to main
     pthread_mutex_unlock(&gameUpdateLock);
@@ -109,8 +104,6 @@ void DrawResolveSettingsLoop(ToDraw &toDraw, SettingsFlags &settingsFlags)
         if(settingsFlags.toggleFullscreen)
         {
             ToggleFullscreen();
-            WIDTH = GetScreenWidth();
-            HEIGHT = GetScreenHeight();
             settingsFlags.toggleFullscreen = false;
         }
     }while(DRAWSETTINGS == toDraw);
@@ -324,7 +317,7 @@ void DrawGame(GameDataS &gameData)
         TraceLog(LOG_DEBUG, "Drawing fps");
         pthread_mutex_lock(&frameCounterLock);
 
-        DrawFPS(WIDTH*0.01, HEIGHT*0.01);
+        DrawFPS(GetScreenWidth()*0.01, GetScreenHeight()*0.01);
         
         //DrawRectangle(GetMouseX(), GetMouseY(), 5, 5, YELLOW);
         pthread_mutex_unlock(&frameCounterLock);
@@ -340,7 +333,7 @@ void DrawGame(GameDataS &gameData)
         // weapon name background rectangle
         // if you modify the x and y multipliers also
         // modify the ones on the next DrawText(...);
-        DrawRectangle(WIDTH*0.03, HEIGHT*0.86, 250, 45, Fade(WHITE, FADEVALUE));
+        DrawRectangle(GetScreenWidth()*0.03, GetScreenHeight()*0.86, 250, 45, Fade(WHITE, FADEVALUE));
 
         pthread_mutex_lock(&playerLock);
         pthread_mutex_lock(&weaponDataLock);
@@ -353,7 +346,7 @@ void DrawGame(GameDataS &gameData)
         DrawText(
             TextFormat("%d %s", gameData.player.activeWeaponId == gameData.player.weapons[0] ? 1 : 2,
             gameData.weaponsList[gameData.player.activeWeaponId].weaponName), 
-            WIDTH*0.04, HEIGHT*0.87, 35, WHITE);
+            GetScreenWidth()*0.04, GetScreenHeight()*0.87, 35, WHITE);
             
         pthread_mutex_unlock(&playerLock);
         pthread_mutex_unlock(&weaponDataLock);
@@ -366,15 +359,15 @@ void DrawMenu()
         ClearBackground(BLACK);
         DrawText(TextFormat("Shootie Shootie Game"), MAINMENUBUTTONX, 100, 70, MAINMENUTEXTCOLOR);
     
-        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY, MAINMENUBUTTONGetScreenWidth(), MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
         DrawText(TextFormat("Play"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+5, 40, MAINMENUTEXTCOLOR);
 
-        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONGetScreenWidth(), MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
         DrawText(TextFormat("Settings"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
 
-        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+200, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+200, MAINMENUBUTTONGetScreenWidth(), MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
         DrawText(TextFormat("Exit"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+205, 40, MAINMENUTEXTCOLOR);
-        DrawFPS(WIDTH*0.01, HEIGHT*0.01);
+        DrawFPS(GetScreenWidth()*0.01, GetScreenHeight()*0.01);
     EndDrawing();
 }
 
@@ -384,14 +377,14 @@ void DrawSettings()
         ClearBackground(BLACK);
         DrawText(TextFormat("Settings"), MAINMENUBUTTONX, 100, 70, MAINMENUTEXTCOLOR);
     
-        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY, MAINMENUBUTTONGetScreenWidth(), MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
         DrawText(TextFormat("Toggle fullscreen"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+5, 40, MAINMENUTEXTCOLOR);
 
-        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+100, MAINMENUBUTTONGetScreenWidth(), MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
         DrawText(TextFormat("Back"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+105, 40, MAINMENUTEXTCOLOR);
 
-        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+200, MAINMENUBUTTONWIDTH, MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
+        DrawRectangle(MAINMENUBUTTONX, MAINMENUBUTTONY+200, MAINMENUBUTTONGetScreenWidth(), MAINMENUBUTTONHEIGT, Fade(MAINMENUTEXTCOLOR, FADEVALUE));
         DrawText(TextFormat("Quit game"), MAINMENUBUTTONX+330, MAINMENUBUTTONY+205, 40, MAINMENUTEXTCOLOR);
-        DrawFPS(WIDTH*0.01, HEIGHT*0.01);
+        DrawFPS(GetScreenWidth()*0.01, GetScreenHeight()*0.01);
     EndDrawing();
 }
