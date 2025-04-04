@@ -195,7 +195,7 @@ int GameHandler(AppDataS &appData)
         pthread_mutex_unlock(&projectileListLock);
         pthread_mutex_unlock(&enemiesListLock);
         pthread_mutex_unlock(&playerLock);
-        /*
+        
         if(gameMemory.enemiesList.empty() && !gameMemory.level.waveList.empty())
         {
             TraceLog(LOG_DEBUG, "Spawning new wave");
@@ -206,7 +206,7 @@ int GameHandler(AppDataS &appData)
                         gameMemory.mapTextures);
             gameMemory.level.waveList.pop_front();
         }
-        */
+        
     }
 
     appData.toDraw = DRAW_UNLOAD_TEXTURES;
