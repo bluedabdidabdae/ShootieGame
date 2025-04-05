@@ -20,7 +20,6 @@
 
 int SpawnWave(std::list<WaveEnemiesL> &enemyList, std::list<EnemyL> &enemiesList, EnemiesS *enemiesTemplateList, MapS &map, std::vector<CustomTexture2D> &blockList)
 {
-    int i;
     int ret = 0;
 
     while(!enemyList.empty())
@@ -203,6 +202,9 @@ void UpdateEnemies(std::list<EnemyL> &enemiesList, Rectangle &player, MapS &map,
                 enemyIter->enemy.y -= Dy;
                 if (CheckHitboxMap(enemyIter->enemy, map, blockList))
                     enemyIter->enemy.y += Dy;
+            break;
+            case STILL:
+                // no need to do nothing, handled previously
             break;
         }
 

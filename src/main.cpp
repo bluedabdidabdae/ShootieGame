@@ -1,5 +1,5 @@
 /*
-    2d game, still working on its identity
+    Shootie Game
     Copyright (C) 2024  blue_dabdidabdae
 
     This program is free software: you can redistribute it and/or modify

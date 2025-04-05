@@ -45,11 +45,8 @@ void PlayerShooting(PlayerS &player, WeaponS weaponsList[], std::list<Projectile
 
 void UpdatePlayer(PlayerS &player, LevelS &level, uint currentFrame, std::vector<CustomTexture2D> &blockList)
 {
-    float tmp;
     float dX = 0;
     float dY = 0;
-    int vX;
-    int vY;
 
     // if the player is stunned it sucks rams
     if(player.flags.isStunned)
