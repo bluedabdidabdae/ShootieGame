@@ -12,8 +12,6 @@
 #define MAINMENUBUTTONX 300
 #define MAINMENUBUTTONY 270
 
-extern pthread_mutex_t gameUpdateLock;
-
 // local functions
 SettingsStatus CheckSettingsCollisions(Vector2 &mousePosition);
 

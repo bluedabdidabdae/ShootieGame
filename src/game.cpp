@@ -21,15 +21,6 @@ typedef enum game_states{
     GAME_EXIT
 }GameStates;
 
-extern pthread_mutex_t enemiesListLock;
-extern pthread_mutex_t projectileListLock;
-extern pthread_mutex_t playerLock;
-extern pthread_mutex_t gameUpdateLock;
-extern pthread_mutex_t cameraLock;
-extern pthread_mutex_t frameCounterLock;
-extern pthread_mutex_t mapLock;
-extern pthread_mutex_t weaponDataLock;
-
 void UpdateCameraMousePosition(Camera2D &camera, Vector2 &mousePosition, PlayerS &player);
 void CloseGame(GameDataS &ameData);
 int InitGameData(GameDataS &gameData);

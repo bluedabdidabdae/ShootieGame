@@ -27,15 +27,6 @@ int LoadMap(MapS &map, cJSON *levelData);
 int LoadWaves(std::list<WaveL> &waveList, cJSON *levelData);
 int LoadWaveEnemies(std::list<WaveEnemiesL> &waveNemeyList, cJSON *currentWaveData);
 
-extern pthread_mutex_t enemiesListLock;
-extern pthread_mutex_t projectileListLock;
-extern pthread_mutex_t playerLock;
-extern pthread_mutex_t gameUpdateLock;
-extern pthread_mutex_t cameraLock;
-extern pthread_mutex_t frameCounterLock;
-extern pthread_mutex_t mapLock;
-extern pthread_mutex_t weaponDataLock;
-
 int GatherData(GameDataS &gameData)
 {
     int ret = 0;

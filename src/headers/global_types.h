@@ -5,6 +5,7 @@
 
 #include <list>
 #include <vector>
+#include <pthread.h>
 
 #include "raylib.h"
 
@@ -18,6 +19,15 @@
 #define THREAD_ERROR 12
 #define FILE_ERROR 13
 #define ARRAY_ERROR 14
+
+extern pthread_mutex_t enemiesListLock;
+extern pthread_mutex_t projectileListLock;
+extern pthread_mutex_t playerLock;
+extern pthread_mutex_t gameUpdateLock;
+extern pthread_mutex_t cameraLock;
+extern pthread_mutex_t frameCounterLock;
+extern pthread_mutex_t mapLock;
+extern pthread_mutex_t weaponDataLock;
 
 typedef unsigned int uint;
 //////////////////////////////////////////////////////////
