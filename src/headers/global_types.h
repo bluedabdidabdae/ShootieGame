@@ -14,11 +14,13 @@
 #define WEAPONNAMEBUFFER 20
 #define MAPX 53
 #define MAPY 27
-
 #define MALLOC_ERROR 11
+
 #define THREAD_ERROR 12
 #define FILE_ERROR 13
 #define ARRAY_ERROR 14
+
+#define unused [[maybe_unused]]
 
 extern pthread_mutex_t enemiesListLock;
 extern pthread_mutex_t projectileListLock;
@@ -121,10 +123,10 @@ typedef struct player_model{
     int activeWeaponId;
     // dodge variables
     float dodgeSpeed;
-    int nextDodgeFrame;
-    int dodgeDeelayFrames;
-    int dodgeEndFrame;
-    int dodgeDurationFrames;
+    uint nextDodgeFrame;
+    uint dodgeDeelayFrames;
+    uint dodgeEndFrame;
+    uint dodgeDurationFrames;
     struct{
         bool isWalking;
         bool canDodge;
@@ -153,9 +155,9 @@ typedef struct wave_data_model{
 }WaveL;
 //////////////////////////////////////////////////////////
 typedef struct map_model{
-    int sizeX;
-    int sizeY;
-    int **bitmap; // its a matrix
+    uint sizeX;
+    uint sizeY;
+    uint **bitmap; // its a matrix
 }MapS;
 //////////////////////////////////////////////////////////
 typedef struct level_data_model{
@@ -165,6 +167,8 @@ typedef struct level_data_model{
     MapS map;
 }LevelS;
 //////////////////////////////////////////////////////////
+// values greater than HITBOX_START have hitboxes, 
+// valuest minor than it do not have hitboxes
 typedef enum block_type_model{
     NOT_LOADED,
     SPECIAL_NO_HITB,

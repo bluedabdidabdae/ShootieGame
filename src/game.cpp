@@ -86,11 +86,15 @@ int GameHandler(AppDataS &appData)
         {
             switch(SettingsHandler(appData.toDraw, appData.settingsFlags))
             {
+                // we only need to handle theese cases, 
+                // other ones get handled by the drawing thread
                 case SETTINGS_QUIT:
                     gameStatus = GAME_EXIT;
                 break;
                 case SETTINGS_BACK:
                     appData.toDraw = DRAWGAME;
+                break;
+                default:
                 break;
             }
             continue;
@@ -223,11 +227,15 @@ int InitGameData(GameDataS &gameMemory)
     TraceLog(LOG_DEBUG, "Initializing camera");
     gameMemory.camera = { 0 };
     TraceLog(LOG_DEBUG, "Camera initialized to 0");
-    gameMemory.camera.target = (Vector2){ gameMemory.player.player.x + gameMemory.player.player.width,
-                                          gameMemory.player.player.y + gameMemory.player.player.height };
+
+    gameMemory.camera.target.x = gameMemory.player.player.x + gameMemory.player.player.width;
+    gameMemory.camera.target.y = gameMemory.player.player.y + gameMemory.player.player.height;
     TraceLog(LOG_DEBUG, "Camera initial target defined");
-    gameMemory.camera.offset = (Vector2){ GetScreenWidth()/2.0f, GetScreenHeight()/2.0f };
+    
+    gameMemory.camera.offset.x = GetScreenWidth()/2.0f;
+    gameMemory.camera.offset.y = GetScreenHeight()/2.0f;
     TraceLog(LOG_DEBUG, "Camera offset defined");
+    
     gameMemory.camera.zoom = 1.7f;
     TraceLog(LOG_DEBUG, "Camera zoom defined");
 
@@ -237,8 +245,8 @@ int InitGameData(GameDataS &gameMemory)
 void UpdateCameraMousePosition(Camera2D &camera, Vector2 &mousePosition, PlayerS &player)
 {
     // update camera position to track player and get mouse pos relative to player
-    camera.target = (Vector2){ player.player.x + player.player.width,
-                                          player.player.y + player.player.height };
+    camera.target.x = player.player.x + player.player.width;
+    camera.target.y = player.player.y + player.player.height;
     mousePosition = GetMousePosition();
     // normalize mouse coordinates to new camera position
     mousePosition.x += player.player.x + player.player.width - camera.offset.x;

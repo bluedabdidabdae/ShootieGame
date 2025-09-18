@@ -30,8 +30,13 @@ SettingsStatus SettingsHandler(ToDraw &toDraw, SettingsFlags &settingsFlags)
             settingsStatus = CheckSettingsCollisions(mousePosition);
             switch(settingsStatus)
             {
+                // SETTINGS_QUIT and SETTINGS_BACK get handled by the calling
+                // function since they require custom andling based on
+                // where we are inside the game
                 case SETTINGS_TOGGLEFULLSCREEN:
                     settingsFlags.toggleFullscreen = true;
+                break;
+                default:
                 break;
             }
         }

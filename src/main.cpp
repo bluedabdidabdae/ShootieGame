@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
     while(EXITGAME != gameStatus){
         switch(gameStatus)
         {
+            // EXITGAME is handled by the parent while
             case MENU:
                 MainMenuHandler(gameStatus, appData.toDraw);
             break;
@@ -126,6 +127,8 @@ int main(int argc, char *argv[])
                     gameStatus = EXITGAME;
                 }
                 else gameStatus = MENU;
+            break;
+            default:
             break;
         }
     }

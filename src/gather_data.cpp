@@ -61,8 +61,8 @@ int LoadPlayerTexture(PlayerS *player)
     ImageResize(&tmp, player->player.width, player->player.height);
     player->playerTexture = LoadTextureFromImage(tmp);
     player->isTexture = true;
-
-    cleanup:
+    
+    unused cleanup:
         if(ret)
             TraceLog(LOG_ERROR, buffer);
         return ret;
@@ -85,8 +85,8 @@ int LoadWeaponsTextures(WeaponS *weaponsList)
             weaponsList[i].isTexture = true;
         }
     }
-
-    cleanup:
+    
+    unused cleanup:
         if(ret)
             TraceLog(LOG_ERROR, buffer);
         return ret;
@@ -124,7 +124,7 @@ int LoadEnemiesTextures(EnemiesS *enemiesTemplateList)
         TraceLog(LOG_DEBUG, TextFormat("Loaded enemy template texture n.%d", i));
     }
 
-    cleanup:
+    unused cleanup:
         return ret;
 }
 
@@ -179,8 +179,8 @@ int LoadMapTextures(std::vector<CustomTexture2D> &mapTextures)
     UnloadImage(tmp);
     tmpTexture2D.blockType = WALL_HITB;
     mapTextures.push_back(tmpTexture2D);
-    
-    cleanup:
+
+    unused cleanup:
         if(ret)
             TraceLog(LOG_ERROR, buffer);
         return ret;
@@ -242,7 +242,7 @@ int LoadLevel(LevelS &level, int levelId)
     // TODO: CHECK IF IT FAILS
     LoadWaves(level.waveList, levelData);
 
-    cleanup:
+    unused cleanup:
         if(ret)
             TraceLog(LOG_ERROR, buffer);
         return ret;
@@ -252,7 +252,6 @@ int LoadWaves(std::list<WaveL> &waveList, cJSON *levelData)
 {
     cJSON *aux1;
     cJSON *aux2;
-    cJSON *aux3;
     char buffer[RAWBUFFERSIZE] = { 0 };
     int i;
     int ret = 0;
@@ -287,7 +286,7 @@ int LoadWaves(std::list<WaveL> &waveList, cJSON *levelData)
         TraceLog(LOG_DEBUG, TextFormat("Loaded wave n.%d", i));
     }while(aux2);
     
-    cleanup:
+    unused cleanup:
     if(ret)
         TraceLog(LOG_ERROR, buffer);
     return ret;
@@ -322,16 +321,14 @@ int LoadMap(MapS &map, cJSON *levelData)
     cJSON *aux1;
     cJSON *aux2;
     cJSON *aux3;
-    cJSON *aux4;
-    int arrSize;
     char buffer[RAWBUFFERSIZE] = { 0 };
     int ret = 0;
 
     TraceLog(LOG_DEBUG, "Entered LoadMap func");
 
     // fetching level matrix
-    aux2 = cJSON_GetObjectItemCaseSensitive(levelData, "map");
-    if(!aux2)
+    aux1 = cJSON_GetObjectItemCaseSensitive(levelData, "map");
+    if(!aux1)
     {
         strcpy(buffer, "Error loading map matrix - ABORTING");
         ret = FILE_ERROR;
@@ -340,55 +337,55 @@ int LoadMap(MapS &map, cJSON *levelData)
     TraceLog(LOG_DEBUG, "Loaded map matrix");
 
     // fetching level y 0
-    aux3 = cJSON_GetArrayItem(aux2, 0);
-    if(!aux3)
+    aux2 = cJSON_GetArrayItem(aux1, 0);
+    if(!aux2)
     {
         strcpy(buffer, TextFormat("Error loading map y: %d - ABORTING", 0));
         ret = FILE_ERROR;
         goto cleanup;
     }
-    map.sizeY = cJSON_GetArraySize(aux2);
+    map.sizeY = cJSON_GetArraySize(aux1);
     TraceLog(LOG_DEBUG, "Loaded map y: 0");
 
     // fetching level x 0
-    aux4 = cJSON_GetArrayItem(aux3, 0);
-    if(!aux3)
+    aux3 = cJSON_GetArrayItem(aux2, 0);
+    if(!aux2)
     {
         strcpy(buffer, TextFormat("Error loading map x: %d - ABORTING", 0));
         ret = FILE_ERROR;
         goto cleanup;
     }
-    map.sizeX = cJSON_GetArraySize(aux3);
+    map.sizeX = cJSON_GetArraySize(aux2);
     TraceLog(LOG_DEBUG, "Loaded map x: 0");
 
-    map.bitmap = new int*[map.sizeY];
-    for(int i = 0; i < map.sizeY; i++)
-        map.bitmap[i] = new int[map.sizeX];
+    map.bitmap = new uint*[map.sizeY];
+    for(uint i = 0; i < map.sizeY; i++)
+        map.bitmap[i] = new uint[map.sizeX];
 
     TraceLog(LOG_DEBUG, "Created map matrix");
 
-    for(int i = 0; aux3; i++)
+    for(int i = 0; aux2; i++)
     {
-        aux4 = cJSON_GetArrayItem(aux3, 0);
-        if(!aux4)
+        aux3 = cJSON_GetArrayItem(aux2, 0);
+        if(!aux3)
         {
             strcpy(buffer, cJSON_GetErrorPtr());
             ret = FILE_ERROR;
             goto cleanup;
         }
         
-        for(int ii = 0; aux4; ii++)
+        for(int ii = 0; aux3; ii++)
         {
-            map.bitmap[i][ii] = aux4->valueint;
-            aux4 = aux4->next;
+            map.bitmap[i][ii] = aux3->valueint;
+            aux3 = aux3->next;
         }
-        aux3 = aux3->next;
+        aux2 = aux2->next;
     }
 
     TraceLog(LOG_DEBUG, TextFormat("Mapsize Y: %d", map.sizeY));
     TraceLog(LOG_DEBUG, TextFormat("Mapsize X: %d", map.sizeX));
 
-    cleanup:
+    unused cleanup:
         if(ret)
         {
             TraceLog(LOG_ERROR, buffer);
@@ -599,7 +596,7 @@ int GatherEnemiesData(EnemiesS **enemiesTemplateList)
         i++;
     }
     
-    cleanup:
+    unused cleanup:
 
         if(ret)
         {
@@ -773,7 +770,7 @@ int GatherWeaponData(WeaponS **weaponsList)
         i++;
     }
     
-    cleanup:
+    unused cleanup:
 
         if(ret)
             TraceLog(LOG_ERROR, buffer);
@@ -792,7 +789,6 @@ int GatherPlayerData(PlayerS &player)
     cJSON *playerData;
     cJSON *aux1;
     cJSON *aux2;
-    cJSON *aux3;
     char buffer[RAWBUFFERSIZE] = { 0 };
     int ret = 0;
 
@@ -953,7 +949,7 @@ int GatherPlayerData(PlayerS &player)
     player.isTexture = false;
     TraceLog(LOG_DEBUG, "Loaded player image");
 
-    cleanup:
+    unused cleanup:
         if(ret)
             TraceLog(LOG_ERROR, buffer);
 

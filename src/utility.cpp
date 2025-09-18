@@ -8,8 +8,8 @@
 
 int CheckHitboxMap(Rectangle entity, MapS &map, std::vector<CustomTexture2D> &mapTextures)
 {
-    int i, ii;
-    int x, y;
+    uint i, ii;
+    uint x, y;
     int ret = 0;
 
     x = entity.x/WALLTHICKNESS;

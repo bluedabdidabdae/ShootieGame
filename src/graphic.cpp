@@ -32,7 +32,6 @@ void DrawGame(GameDataS &gameData);
 
 void *HandleGraphics(void *data)
 {
-    int ret = 0;
     AppDataS &appData = *(AppDataS*)data;
 
     InitWindow(0, 0, WINDOWNAME);
@@ -48,6 +47,7 @@ void *HandleGraphics(void *data)
     {
         switch(appData.toDraw)
         {
+            // DRAWCLOSEGAME gets handled by the parent while
             case DRAW_WAIT: break;
             case DRAWMAINMENU:
                 DrawMenuLoop(appData.toDraw);
@@ -69,6 +69,8 @@ void *HandleGraphics(void *data)
             case DRAWABORT:
                 TraceLog(LOG_DEBUG, "<< Aborting on drawing thread >>");
                 abort();
+            break;
+            default:
             break;
         }
     }
@@ -186,7 +188,7 @@ void DrawGame(GameDataS &gameData)
         startYRender = 0;
     }
     int endYRender = (gameData.camera.target.y+gameData.camera.offset.y)/WALLTHICKNESS;
-    if(endYRender > gameData.level.map.sizeY)
+    if(endYRender > (int)gameData.level.map.sizeY)
         endYRender = gameData.level.map.sizeY;
 
     int startXRender = (gameData.camera.target.x-gameData.camera.offset.x)/WALLTHICKNESS-1;
@@ -194,7 +196,7 @@ void DrawGame(GameDataS &gameData)
         startXRender = 0;
     }
     int endXRender = (gameData.camera.target.x+gameData.camera.offset.x)/WALLTHICKNESS;
-    if(endXRender > gameData.level.map.sizeX)
+    if(endXRender > (int)gameData.level.map.sizeX)
         endXRender = gameData.level.map.sizeX;
 
     pthread_mutex_unlock(&cameraLock);
@@ -252,6 +254,11 @@ void DrawGame(GameDataS &gameData)
                                 WALLTHICKNESS*i,
                                 WHITE
                                 );
+                        break;
+
+                        case NOT_LOADED:
+                        case HITBOX_START:
+                            TraceLog(LOG_DEBUG, "Found not valid block type (NOT_LOADED/HITBOX_START)");
                         break;
                     }
                 }
